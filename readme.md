@@ -9,18 +9,22 @@ go(v1.11 以降)
 #### Run
 
 ```sh
-go run src/main.go
+go run ./main.go
 ```
 
 #### Build
 
 ```sh
-go build -o dist/main
+go build -o dist/main ./src
 ```
 
 #### Release
 
 ```sh
+# 手動デプロイの場合
+gcloud app deploy
+
+# CIでデプロイする場合
 git tag 1.0.0
 git push origin --tags
 ```
