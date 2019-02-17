@@ -8,11 +8,13 @@ import (
 
 type (
 	home struct{}
+	// Home is HomeController
 	Home interface {
 		Get(c echo.Context) error
 	}
 )
 
+// NewHome is create instance.
 func NewHome() Home {
 	return &home{}
 }
