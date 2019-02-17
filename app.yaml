@@ -6,3 +6,5 @@ automatic_scaling:
   min_pending_latency: 3000ms
   max_pending_latency: automatic
 network: {}
+inbound_services:
+  - warmup
