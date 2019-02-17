@@ -1,0 +1,33 @@
+{
+  "files.autoSave": "onFocusChange",
+  "editor.formatOnSave": true,
+  "cSpell.words": [
+    "cmnlog",
+    "cmnweb",
+    "gommon",
+    "gomock",
+    "infs",
+    "mthd",
+    "tampopos",
+    "wakuwaku"
+  ],
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/dist": true
+  },
+  "cSpell.ignoreRegExpList": ["/.*ー/"],
+  "cSpell.ignorePaths": [
+    "**/package-lock.json",
+    "**/node_modules/**",
+    "**/vscode-extension/**",
+    "**/.git/**",
+    ".vscode",
+    "typings",
+    "go.mod",
+    "go.sum"
+  ]
+}
