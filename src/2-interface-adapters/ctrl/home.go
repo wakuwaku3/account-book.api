@@ -17,5 +17,5 @@ func NewHome() Home {
 	return &home{}
 }
 func (home *home) Get(c echo.Context) error {
-	return c.JSON(http.StatusOK, "Hello")
+	return c.JSON(http.StatusOK, "Hello world")
 }
