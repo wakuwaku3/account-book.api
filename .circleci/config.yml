@@ -71,21 +71,22 @@ workflows:
               ignore: /.*/
             tags:
               only: /^[0-9]+\.[0-9]+\.[0-9]+$/
-      - hold-canary:
-          context: account-book-gae-publish
-          type: approval
-          requires:
-            - deploy
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^[0-9]+\.[0-9]+\.[0-9]+$/
+      # - hold-canary:
+      #     context: account-book-gae-publish
+      #     type: approval
+      #     requires:
+      #       - deploy
+      #     filters:
+      #       branches:
+      #         ignore: /.*/
+      #       tags:
+      #         only: /^[0-9]+\.[0-9]+\.[0-9]+$/
       - set-traffic:
           context: account-book-gae-publish
           name: canary
           requires:
-            - hold-canary
+            - deploy
+            # - hold-canary
           before-traffic: "0.01"
           after-traffic: "0.95"
           filters:
@@ -93,20 +94,21 @@ workflows:
               ignore: /.*/
             tags:
               only: /^[0-9]+\.[0-9]+\.[0-9]+$/
-      - hold-promote:
-          context: account-book-gae-publish
-          type: approval
-          requires:
-            - canary
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^[0-9]+\.[0-9]+\.[0-9]+$/
+      # - hold-promote:
+      #     context: account-book-gae-publish
+      #     type: approval
+      #     requires:
+      #       - canary
+      #     filters:
+      #       branches:
+      #         ignore: /.*/
+      #       tags:
+      #         only: /^[0-9]+\.[0-9]+\.[0-9]+$/
       - promote:
           context: account-book-gae-publish
           requires:
-            - hold-promote
+            - canary
+            # - hold-promote
           filters:
             branches:
               ignore: /.*/

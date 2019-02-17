@@ -4,7 +4,10 @@
   "cSpell.words": [
     "cmnlog",
     "cmnweb",
+    "dylib",
     "gcloud",
+    "gcloudignore",
+    "gitignore",
     "gommon",
     "gomock",
     "infs",
