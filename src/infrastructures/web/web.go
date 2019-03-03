@@ -3,8 +3,8 @@ package web
 import (
 	"github.com/labstack/echo"
 	"github.com/tampopos/dijct"
-	entitieslog "github.com/wakuwaku3/account-book.api/src/0-enterprise-business-rules/entities/log"
-	"github.com/wakuwaku3/account-book.api/src/3-framework-and-drivers/di"
+	entitieslog "github.com/wakuwaku3/account-book.api/src/domains/entities/log"
+	"github.com/wakuwaku3/account-book.api/src/infrastructures/di"
 )
 
 type web struct {

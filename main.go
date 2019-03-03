@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	infweb "github.com/wakuwaku3/account-book.api/src/3-framework-and-drivers/web"
+	infweb "github.com/wakuwaku3/account-book.api/src/infrastructures/web"
 )
 
 func main() {

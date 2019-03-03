@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
-	"github.com/wakuwaku3/account-book.api/src/2-interface-adapters/ctrl"
+	"github.com/wakuwaku3/account-book.api/src/ctrls"
 )
 
 func (web *web) setRoute() *web {

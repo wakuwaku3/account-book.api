@@ -4,10 +4,10 @@ import (
 	"log"
 
 	"github.com/tampopos/dijct"
-	"github.com/wakuwaku3/account-book.api/src/1-application-business-rules/usecases"
-	"github.com/wakuwaku3/account-book.api/src/2-interface-adapters/ctrl"
-	"github.com/wakuwaku3/account-book.api/src/3-framework-and-drivers/env"
-	"github.com/wakuwaku3/account-book.api/src/3-framework-and-drivers/store"
+	"github.com/wakuwaku3/account-book.api/src/usecases"
+	"github.com/wakuwaku3/account-book.api/src/ctrls"
+	"github.com/wakuwaku3/account-book.api/src/infrastructures/env"
+	"github.com/wakuwaku3/account-book.api/src/infrastructures/store"
 )
 
 // CreateContainer はDIContainerを生成します

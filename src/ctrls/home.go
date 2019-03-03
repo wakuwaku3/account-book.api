@@ -3,7 +3,7 @@ package ctrl
 import (
 	"net/http"
 
-	"github.com/wakuwaku3/account-book.api/src/1-application-business-rules/usecases"
+	"github.com/wakuwaku3/account-book.api/src/usecases"
 
 	"github.com/labstack/echo"
 )

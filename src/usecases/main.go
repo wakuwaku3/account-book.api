@@ -1,7 +1,7 @@
 package usecases
 
 import (
-	"github.com/wakuwaku3/account-book.api/src/0-enterprise-business-rules/models"
+	"github.com/wakuwaku3/account-book.api/src/domains/models"
 )
 
 type (

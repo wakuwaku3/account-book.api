@@ -2,7 +2,7 @@ package log
 
 import (
 	"github.com/labstack/gommon/log"
-	entitieslog "github.com/wakuwaku3/account-book.api/src/0-enterprise-business-rules/entities/log"
+	entitieslog "github.com/wakuwaku3/account-book.api/src/domains/entities/log"
 )
 
 // CnvLvl はログレベルを変換します

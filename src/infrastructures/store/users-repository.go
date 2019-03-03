@@ -3,8 +3,8 @@ package store
 import (
 	"context"
 
-	"github.com/wakuwaku3/account-book.api/src/0-enterprise-business-rules/models"
-	"github.com/wakuwaku3/account-book.api/src/1-application-business-rules/usecases"
+	"github.com/wakuwaku3/account-book.api/src/domains/models"
+	"github.com/wakuwaku3/account-book.api/src/usecases"
 	"google.golang.org/api/iterator"
 )
 

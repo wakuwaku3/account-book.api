@@ -3,7 +3,7 @@ package env
 import (
 	"os"
 
-	"github.com/wakuwaku3/account-book.api/src/1-application-business-rules/usecases"
+	"github.com/wakuwaku3/account-book.api/src/usecases"
 
 	"github.com/joho/godotenv"
 )
