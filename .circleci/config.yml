@@ -31,7 +31,7 @@ jobs:
       - gcp-cli/initialize
       - run:
           name: add env
-          command: echo 'SECRET="${SECRET_TEST}"' >> .user.env
+          command: echo SECRET="${SECRET_TEST}" >> .user.env
       - run: gcloud app deploy --no-promote --version $CIRCLE_SHA1 --quiet
 
   set-traffic:
