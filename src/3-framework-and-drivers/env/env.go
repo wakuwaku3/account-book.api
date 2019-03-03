@@ -11,6 +11,7 @@ import (
 type (
 	env struct {
 		credentialsFilePath string
+		secret              string
 	}
 )
 
@@ -28,10 +29,14 @@ func (env *env) Initialize() error {
 	}
 	err := godotenv.Load(slice...)
 	env.credentialsFilePath = os.Getenv("CREDENTIALS_FILE_PATH")
+	env.secret = os.Getenv("SECRET")
 	return err
 }
 func (env *env) GetCredentialsFilePath() string {
 	return env.credentialsFilePath
+}
+func (env *env) GetSecret() string {
+	return env.secret
 }
 
 func exists(path string) bool {

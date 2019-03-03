@@ -9,6 +9,7 @@ type (
 	Env interface {
 		Initialize() error
 		GetCredentialsFilePath() string
+		GetSecret() string
 	}
 	// UsersRepository は新ユーザーのリポジトリです
 	UsersRepository interface {

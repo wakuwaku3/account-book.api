@@ -15,7 +15,7 @@ go run ./main.go
 #### Build
 
 ```sh
-go build -o dist/main ./src
+go build -o dist/main ./main.go
 ```
 
 #### Release
