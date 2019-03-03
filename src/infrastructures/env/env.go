@@ -3,21 +3,21 @@ package env
 import (
 	"os"
 
-	"github.com/wakuwaku3/account-book.api/src/usecases"
-
 	"github.com/joho/godotenv"
+	"github.com/wakuwaku3/account-book.api/src/domains"
 )
 
 type (
 	env struct {
-		credentialsFilePath string
-		secret              string
+		credentialsFilePath *string
+		jwtSecret           *[]byte
+		passwordHashedKey   *[]byte
 	}
 )
 
 // NewEnv は環境変数管理用のインスタンスを生成します
-func NewEnv() usecases.Env {
-	return &env{credentialsFilePath: ""}
+func NewEnv() domains.Env {
+	return &env{}
 }
 func (env *env) Initialize() error {
 	slice := make([]string, 0)
@@ -28,15 +28,22 @@ func (env *env) Initialize() error {
 		slice = append(slice, "./.env")
 	}
 	err := godotenv.Load(slice...)
-	env.credentialsFilePath = os.Getenv("CREDENTIALS_FILE_PATH")
-	env.secret = os.Getenv("SECRET")
+	credentialsFilePath := os.Getenv("CREDENTIALS_FILE_PATH")
+	env.credentialsFilePath = &credentialsFilePath
+	passwordHashedKey := []byte(os.Getenv("PASSWORD_HASHED_KEY"))
+	env.passwordHashedKey = &passwordHashedKey
+	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
+	env.jwtSecret = &jwtSecret
 	return err
 }
-func (env *env) GetCredentialsFilePath() string {
+func (env *env) GetCredentialsFilePath() *string {
 	return env.credentialsFilePath
 }
-func (env *env) GetSecret() string {
-	return env.secret
+func (env *env) GetPasswordHashedKey() *[]byte {
+	return env.passwordHashedKey
+}
+func (env *env) GetJwtSecret() *[]byte {
+	return env.jwtSecret
 }
 
 func exists(path string) bool {

@@ -30,8 +30,11 @@ jobs:
       - checkout
       - gcp-cli/initialize
       - run:
-          name: add env
-          command: echo SECRET="${SECRET_TEST}" >> .user.env
+          name: add env password secret
+          command: echo PASSWORD_HASHED_KEY="${PASSWORD_HASHED_KEY}" >> .user.env
+      - run:
+          name: add env jwt secret
+          command: echo JWT_SECRET="${JWT_SECRET}" >> .user.env
       - run: gcloud app deploy --no-promote --version $CIRCLE_SHA1 --quiet
 
   set-traffic:

@@ -1,16 +1,13 @@
-package ctrl
+package ctrls
 
 import (
 	"net/http"
-
-	"github.com/wakuwaku3/account-book.api/src/usecases"
 
 	"github.com/labstack/echo"
 )
 
 type (
 	home struct {
-		envProvider usecases.Env
 	}
 	// Home is HomeController
 	Home interface {
@@ -19,10 +16,9 @@ type (
 )
 
 // NewHome is create instance.
-func NewHome(envProvider usecases.Env) Home {
-	return &home{envProvider: envProvider}
+func NewHome() Home {
+	return &home{}
 }
 func (home *home) Get(c echo.Context) error {
-	secret := home.envProvider.GetSecret()
-	return c.JSON(http.StatusOK, secret)
+	return c.JSON(http.StatusOK, "hello")
 }

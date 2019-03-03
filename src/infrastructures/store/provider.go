@@ -6,13 +6,13 @@ import (
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
-	"github.com/wakuwaku3/account-book.api/src/usecases"
+	"github.com/wakuwaku3/account-book.api/src/domains"
 	"google.golang.org/api/option"
 )
 
 type (
 	provider struct {
-		env    usecases.Env
+		env    domains.Env
 		app    *firebase.App
 		client *firestore.Client
 	}
@@ -24,7 +24,7 @@ type (
 )
 
 // NewProvider はProviderインスタンスを生成します
-func NewProvider(env usecases.Env) Provider {
+func NewProvider(env domains.Env) Provider {
 	return &provider{env: env}
 }
 func (provider *provider) Initialize() error {
@@ -45,8 +45,8 @@ func (provider *provider) Initialize() error {
 
 func (provider *provider) createApp(ctx context.Context) (*firebase.App, error) {
 	credentialsFilePath := provider.env.GetCredentialsFilePath()
-	if credentialsFilePath != "" {
-		sa := option.WithCredentialsFile(credentialsFilePath)
+	if *credentialsFilePath != "" {
+		sa := option.WithCredentialsFile(*credentialsFilePath)
 
 		return firebase.NewApp(ctx, nil, sa)
 	}

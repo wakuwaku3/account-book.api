@@ -1,9 +1,10 @@
 {
   "files.autoSave": "onFocusChange",
-  "editor.formatOnSave": true,
   "cSpell.words": [
     "cmnlog",
     "cmnweb",
+    "ctrls",
+    "dgrijalva",
     "dijct",
     "dylib",
     "gcloud",
@@ -14,8 +15,12 @@
     "gomock",
     "infs",
     "joho",
+    "jwtgo",
     "mthd",
+    "repos",
+    "scrypt",
     "tampopos",
+    "uuid",
     "wakuwaku"
   ],
   "files.exclude": {
@@ -36,5 +41,7 @@
     "typings",
     "go.mod",
     "go.sum"
-  ]
+  ],
+  "editor.formatOnSave": true,
+  "editor.codeLens": false
 }

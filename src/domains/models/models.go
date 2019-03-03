@@ -5,6 +5,13 @@ import (
 )
 
 type (
+	// Account は アカウントです
+	Account struct {
+		Email          string `db:"Email" firestore:"-"`
+		UserID         string `db:"UserID" firestore:"user-id"`
+		HashedPassword string `db:"UserID" firestore:"hashed-password"`
+		AccountToken   string `db:"UserID" firestore:"account-token"`
+	}
 	// User はユーザーです
 	User struct {
 		UserID   string `db:"UserID" firestore:"-"`

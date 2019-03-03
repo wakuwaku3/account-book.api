@@ -1,18 +1,15 @@
 package usecases
 
-import (
-	"github.com/wakuwaku3/account-book.api/src/domains/models"
-)
+import "github.com/wakuwaku3/account-book.api/src/domains"
 
 type (
-	// Env は環境変数を取得します
-	Env interface {
-		Initialize() error
-		GetCredentialsFilePath() string
-		GetSecret() string
+	// AccountsQuery はアカウントのクエリです
+	AccountsQuery interface {
+		GetSignInInfo(email *string) (*SignInInfo, error)
 	}
-	// UsersRepository は新ユーザーのリポジトリです
-	UsersRepository interface {
-		Get() (*[]models.User, error)
+	// SignInInfo サインインのために必要な情報です
+	SignInInfo struct {
+		HashedPassword string
+		JwtClaims      domains.JwtClaims
 	}
 )
