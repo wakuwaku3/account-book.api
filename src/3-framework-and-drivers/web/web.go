@@ -2,14 +2,14 @@ package web
 
 import (
 	"github.com/labstack/echo"
+	"github.com/tampopos/dijct"
 	entitieslog "github.com/wakuwaku3/account-book.api/src/0-enterprise-business-rules/entities/log"
 	"github.com/wakuwaku3/account-book.api/src/3-framework-and-drivers/di"
-	"go.uber.org/dig"
 )
 
 type web struct {
 	echo      *echo.Echo
-	container *dig.Container
+	container dijct.Container
 }
 
 // Web はWebサーバーのインターフェイスです
