@@ -2,6 +2,7 @@ package web
 
 import (
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"github.com/tampopos/dijct"
 	entitieslog "github.com/wakuwaku3/account-book.api/src/domains/entities/log"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/di"
@@ -25,7 +26,11 @@ func NewWeb() (Web, error) {
 		return nil, err
 	}
 	web := &web{echo, container}
-	return web.setLogger(entitieslog.Info).setRoute(), nil
+	web.setLogger(entitieslog.Info)
+	web.echo.Use(middleware.Recover())
+	web.setRoute()
+	return web, nil
+
 }
 
 func (web *web) Start() {

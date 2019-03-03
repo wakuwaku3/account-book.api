@@ -36,9 +36,6 @@ func CreateContainer() (dijct.Container, error) {
 	}
 
 	// controllers
-	if err := container.Register(ctrls.NewHome); err != nil {
-		return nil, err
-	}
 	if err := container.Register(ctrls.NewAccounts); err != nil {
 		return nil, err
 	}

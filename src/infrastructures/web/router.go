@@ -9,9 +9,7 @@ import (
 
 func (web *web) setRoute() *web {
 	web.echo.GET("/", func(c echo.Context) error {
-		return web.container.Invoke(func(home ctrl.Home) error {
-			return home.Get(c)
-		})
+		return c.JSON(http.StatusOK, "hello")
 	})
 	web.echo.GET("/_ah/warmup", func(c echo.Context) error {
 		return c.NoContent(http.StatusNoContent)
