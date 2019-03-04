@@ -23,12 +23,15 @@ type (
 	}
 	// JwtClaims はJwtTokenにうめこまれます
 	JwtClaims struct {
-		UserID       string
-		UserName     string
-		Email        string
-		AccountToken string
+		UserID   string
+		UserName string
+		Email    string
 	}
-
+	// ClaimsProvider は Claimsを取得します
+	ClaimsProvider interface {
+		GetUserID() *string
+		GetEmail() *string
+	}
 	// UsersRepository は新ユーザーのリポジトリです
 	UsersRepository interface {
 		Get(userID *string) (*models.User, error)

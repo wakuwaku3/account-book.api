@@ -3,14 +3,14 @@ package web
 import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/tampopos/dijct"
-	entitieslog "github.com/wakuwaku3/account-book.api/src/domains/entities/log"
+	"github.com/labstack/gommon/log"
+	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/di"
 )
 
 type web struct {
-	echo      *echo.Echo
-	container dijct.Container
+	echo *echo.Echo
+	env  domains.Env
 }
 
 // Web はWebサーバーのインターフェイスです
@@ -25,12 +25,16 @@ func NewWeb() (Web, error) {
 	if err != nil {
 		return nil, err
 	}
-	web := &web{echo, container}
-	web.setLogger(entitieslog.Info)
+	web := &web{echo, nil}
+	container.Invoke(func(env domains.Env) {
+		web.env = env
+	})
+	web.echo.Use(DI(container))
+	web.echo.Logger.SetLevel(log.INFO)
+	web.echo.Use(middleware.Logger())
 	web.echo.Use(middleware.Recover())
 	web.setRoute()
 	return web, nil
-
 }
 
 func (web *web) Start() {

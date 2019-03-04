@@ -38,6 +38,9 @@ type (
 	signInResponse struct {
 		Claim claimResponse `json:"claim"`
 	}
+	refreshResponse struct {
+		Claim claimResponse `json:"claim"`
+	}
 )
 
 // NewAccounts is create instance.
@@ -76,7 +79,20 @@ func (t *signInRequest) Convert() *usecases.SignInArgs {
 	}
 }
 func (t *accounts) Refresh(c echo.Context) error {
-	return c.JSON(http.StatusOK, "res")
+	res, err := t.useCase.Refresh()
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, Response{
+		Result: refreshResponse{
+			Claim: claimResponse{
+				Token:    res.Claims.Token,
+				UserID:   res.Claims.UserID,
+				UserName: res.Claims.UserName,
+				Email:    res.Claims.Email,
+			},
+		},
+	})
 }
 func (t *accounts) PasswordResetRequesting(c echo.Context) error {
 	return c.JSON(http.StatusOK, "res")

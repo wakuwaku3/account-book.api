@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"log"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
@@ -39,7 +38,6 @@ func (provider *provider) Initialize() error {
 		return err
 	}
 	provider.client = client
-	log.Printf("Storeに接続しました。")
 	return nil
 }
 

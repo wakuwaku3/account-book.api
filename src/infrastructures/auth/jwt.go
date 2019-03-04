@@ -10,29 +10,28 @@ import (
 )
 
 type (
-	body struct {
+	j struct {
 		env domains.Env
 	}
-	customClaims struct {
+	// CustomClaims は CustomClaimsです
+	CustomClaims struct {
 		UserID        string `json:"nonce"`
 		UserName      string `json:"name"`
 		Email         string `json:"email"`
 		EmailVerified bool   `json:"email_verified"`
-		AccountToken  string `json:"account-token"`
 		jwt.StandardClaims
 	}
 )
 
 // NewJwt is create instance
 func NewJwt(env domains.Env) domains.Jwt {
-	return &body{env: env}
+	return &j{env: env}
 }
-func (t *body) CreateToken(claims *domains.JwtClaims) (*string, error) {
+func (t *j) CreateToken(claims *domains.JwtClaims) (*string, error) {
 	now := time.Now()
-	cc := customClaims{
+	cc := CustomClaims{
 		UserID:        claims.UserID,
 		UserName:      claims.UserName,
-		AccountToken:  claims.AccountToken,
 		Email:         claims.Email,
 		EmailVerified: true,
 		StandardClaims: jwt.StandardClaims{
@@ -53,6 +52,6 @@ func (t *body) CreateToken(claims *domains.JwtClaims) (*string, error) {
 	}
 	return &tokenString, nil
 }
-func (t *body) Parse(token *string) (*domains.JwtClaims, error) {
+func (t *j) Parse(token *string) (*domains.JwtClaims, error) {
 	return &domains.JwtClaims{}, nil
 }

@@ -10,9 +10,10 @@ import (
 
 type (
 	accounts struct {
-		query   AccountsQuery
-		jwt     domains.Jwt
-		service services.Accounts
+		query          AccountsQuery
+		jwt            domains.Jwt
+		claimsProvider domains.ClaimsProvider
+		service        services.Accounts
 	}
 	// Accounts is AccountsController
 	Accounts interface {
@@ -38,6 +39,7 @@ type (
 	SignInResult struct {
 		Claims Claims
 	}
+	// RefreshResult は 結果です
 	RefreshResult struct {
 		Claims Claims
 	}
@@ -59,11 +61,13 @@ type (
 func NewAccounts(
 	query AccountsQuery,
 	jwt domains.Jwt,
+	claimsProvider domains.ClaimsProvider,
 	service services.Accounts) Accounts {
 	return &accounts{
-		query:   query,
-		jwt:     jwt,
-		service: service,
+		query:          query,
+		jwt:            jwt,
+		claimsProvider: claimsProvider,
+		service:        service,
 	}
 }
 func (t *accounts) SignIn(args *SignInArgs) (*SignInResult, error, error) {
@@ -111,7 +115,23 @@ func (t *SignInArgs) Valid() error {
 	return nil
 }
 func (t *accounts) Refresh() (*RefreshResult, error) {
-	return &RefreshResult{}, nil
+	email := t.claimsProvider.GetEmail()
+	info, err := t.query.GetSignInInfo(email)
+	if err != nil {
+		return nil, err
+	}
+	token, err := t.jwt.CreateToken(&info.JwtClaims)
+	if err != nil {
+		return nil, err
+	}
+	return &RefreshResult{
+		Claims: Claims{
+			Token:    *token,
+			UserID:   info.JwtClaims.UserID,
+			Email:    info.JwtClaims.Email,
+			UserName: info.JwtClaims.UserName,
+		},
+	}, nil
 }
 func (t *accounts) PasswordResetRequesting(args *PasswordResetRequestingArgs) error {
 	return nil

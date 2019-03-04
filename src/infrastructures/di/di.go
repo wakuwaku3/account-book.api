@@ -2,6 +2,7 @@ package di
 
 import (
 	"log"
+	"reflect"
 
 	"github.com/wakuwaku3/account-book.api/src/usecases/queries"
 
@@ -32,6 +33,10 @@ func CreateContainer() (dijct.Container, error) {
 		return nil, err
 	}
 	if err := container.Register(auth.NewJwt, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+		return nil, err
+	}
+	ifs := []reflect.Type{reflect.TypeOf((*domains.ClaimsProvider)(nil)).Elem()}
+	if err := container.Register(auth.NewAnonymousClaimsProvider(), dijct.RegisterOptions{Interfaces: ifs}); err != nil {
 		return nil, err
 	}
 

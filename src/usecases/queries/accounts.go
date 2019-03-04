@@ -32,10 +32,9 @@ func (t *accounts) GetSignInInfo(email *string) (*usecases.SignInInfo, error) {
 	return &usecases.SignInInfo{
 		HashedPassword: account.HashedPassword,
 		JwtClaims: domains.JwtClaims{
-			AccountToken: account.AccountToken,
-			Email:        *email,
-			UserID:       account.UserID,
-			UserName:     user.UserName,
+			Email:    *email,
+			UserID:   account.UserID,
+			UserName: user.UserName,
 		},
 	}, nil
 }
