@@ -1,6 +1,7 @@
 package mails
 
 import (
+	"net/url"
 	"path"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
@@ -18,7 +19,9 @@ func NewResetPassword(env domains.Env, helper Helper) domains.ResetPasswordMail 
 	return &resetPassword{env, helper}
 }
 func (t *resetPassword) Send(args *domains.ResetPasswordMailSendArgs) error {
-	url := path.Join(*t.env.GetFrontEndURL(), "reset-password", args.Token)
+	u, _ := url.Parse(*t.env.GetFrontEndURL())
+	u.Path = path.Join("reset-password", args.Token)
+
 	body := []byte(` {
 		"from": {
 			"email": "support@prj-account-book.firebaseapp.com",
@@ -32,7 +35,7 @@ func (t *resetPassword) Send(args *domains.ResetPasswordMailSendArgs) error {
 				}
 			],
 			"dynamic_template_data":{  
-			  "url":"` + url + `",
+			  "url":"` + u.String() + `",
 			}
 		  }
 		],
