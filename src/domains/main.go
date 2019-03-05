@@ -17,6 +17,8 @@ type (
 		GetJwtSecret() *[]byte
 		GetSendGridAPIKey() *string
 		GetFrontEndURL() *string
+		IsProduction() bool
+		GetAllowOrigins() *[]string
 	}
 	// Crypt はハッシュ化のサービスです
 	Crypt interface {

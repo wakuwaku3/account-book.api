@@ -9,6 +9,7 @@ import (
 
 type (
 	env struct {
+		isProduction        bool
 		credentialsFilePath *string
 		jwtSecret           *[]byte
 		passwordHashedKey   *[]byte
@@ -30,6 +31,7 @@ func (env *env) Initialize() error {
 		slice = append(slice, "./.env")
 	}
 	err := godotenv.Load(slice...)
+	env.isProduction = os.Getenv("APPLICATION_MODE") == "PRODUCTION"
 	credentialsFilePath := os.Getenv("CREDENTIALS_FILE_PATH")
 	env.credentialsFilePath = &credentialsFilePath
 	passwordHashedKey := []byte(os.Getenv("PASSWORD_HASHED_KEY"))
@@ -57,7 +59,15 @@ func (env *env) GetPasswordHashedKey() *[]byte {
 func (env *env) GetJwtSecret() *[]byte {
 	return env.jwtSecret
 }
-
+func (env *env) IsProduction() bool {
+	return env.isProduction
+}
+func (env *env) GetAllowOrigins() *[]string {
+	if env.isProduction {
+		return &[]string{*env.frontEndURL}
+	}
+	return &[]string{"*"}
+}
 func exists(path string) bool {
 	_, err := os.Stat(path)
 	return !os.IsNotExist(err)

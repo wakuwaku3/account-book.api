@@ -29,10 +29,13 @@ func NewWeb() (Web, error) {
 	container.Invoke(func(env domains.Env) {
 		web.env = env
 	})
-	web.echo.Use(DI(container))
 	web.echo.Logger.SetLevel(log.INFO)
+	corsConfig := middleware.DefaultCORSConfig
+	corsConfig.AllowOrigins = *web.env.GetAllowOrigins()
+	web.echo.Use(middleware.CORSWithConfig(corsConfig))
 	web.echo.Use(middleware.Logger())
 	web.echo.Use(middleware.Recover())
+	web.echo.Use(DI(container))
 	web.setRoute()
 	return web, nil
 }

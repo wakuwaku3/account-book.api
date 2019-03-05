@@ -1,6 +1,8 @@
 {
   "files.autoSave": "onFocusChange",
   "cSpell.words": [
+    "CORS",
+    "SENDGRID",
     "cmnlog",
     "cmnweb",
     "ctrls",

@@ -38,6 +38,9 @@ jobs:
       - run:
           name: add env sendgrid
           command: echo SENDGRID_API_KEY="${SENDGRID_API_KEY}" >> .user.env
+      - run:
+          name: add env prod
+          command: echo APPLICATION_MODE="PRODUCTION" >> .user.env
       - run: gcloud app deploy --no-promote --version $CIRCLE_SHA1 --quiet
 
   set-traffic:
