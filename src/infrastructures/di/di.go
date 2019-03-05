@@ -4,6 +4,8 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/wakuwaku3/account-book.api/src/infrastructures/mails"
+
 	"github.com/wakuwaku3/account-book.api/src/usecases/queries"
 
 	"github.com/tampopos/dijct"
@@ -37,6 +39,14 @@ func CreateContainer() (dijct.Container, error) {
 	}
 	ifs := []reflect.Type{reflect.TypeOf((*domains.ClaimsProvider)(nil)).Elem()}
 	if err := container.Register(auth.NewAnonymousClaimsProvider(), dijct.RegisterOptions{Interfaces: ifs}); err != nil {
+		return nil, err
+	}
+
+	// mails
+	if err := container.Register(mails.NewHelper, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+		return nil, err
+	}
+	if err := container.Register(mails.NewResetPassword, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}
 

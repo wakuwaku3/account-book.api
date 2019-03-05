@@ -12,6 +12,8 @@ type (
 		credentialsFilePath *string
 		jwtSecret           *[]byte
 		passwordHashedKey   *[]byte
+		sendGridAPIKey      *string
+		frontEndURL         *string
 	}
 )
 
@@ -34,10 +36,20 @@ func (env *env) Initialize() error {
 	env.passwordHashedKey = &passwordHashedKey
 	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 	env.jwtSecret = &jwtSecret
+	sendGridAPIKey := os.Getenv("SENDGRID_API_KEY")
+	env.sendGridAPIKey = &sendGridAPIKey
+	frontEndURL := os.Getenv("FRONT_END_URL")
+	env.frontEndURL = &frontEndURL
 	return err
 }
 func (env *env) GetCredentialsFilePath() *string {
 	return env.credentialsFilePath
+}
+func (env *env) GetSendGridAPIKey() *string {
+	return env.sendGridAPIKey
+}
+func (env *env) GetFrontEndURL() *string {
+	return env.frontEndURL
 }
 func (env *env) GetPasswordHashedKey() *[]byte {
 	return env.passwordHashedKey

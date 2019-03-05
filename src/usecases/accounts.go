@@ -10,16 +10,17 @@ import (
 
 type (
 	accounts struct {
-		query          AccountsQuery
-		jwt            domains.Jwt
-		claimsProvider domains.ClaimsProvider
-		service        services.Accounts
+		query             AccountsQuery
+		jwt               domains.Jwt
+		claimsProvider    domains.ClaimsProvider
+		service           services.Accounts
+		resetPasswordMail domains.ResetPasswordMail
 	}
 	// Accounts is AccountsController
 	Accounts interface {
 		SignIn(args *SignInArgs) (*SignInResult, error, error)
 		Refresh() (*RefreshResult, error)
-		PasswordResetRequesting(args *PasswordResetRequestingArgs) error
+		PasswordResetRequesting(args *PasswordResetRequestingArgs) (error, error)
 		GetResetPasswordModel(args *ResetPasswordArgs) (*GetResetPasswordModelResult, error)
 		ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error)
 	}
@@ -62,16 +63,19 @@ func NewAccounts(
 	query AccountsQuery,
 	jwt domains.Jwt,
 	claimsProvider domains.ClaimsProvider,
-	service services.Accounts) Accounts {
+	service services.Accounts,
+	resetPasswordMail domains.ResetPasswordMail,
+) Accounts {
 	return &accounts{
-		query:          query,
-		jwt:            jwt,
-		claimsProvider: claimsProvider,
-		service:        service,
+		query:             query,
+		jwt:               jwt,
+		claimsProvider:    claimsProvider,
+		service:           service,
+		resetPasswordMail: resetPasswordMail,
 	}
 }
 func (t *accounts) SignIn(args *SignInArgs) (*SignInResult, error, error) {
-	err := args.Valid()
+	err := args.valid()
 	if err != nil {
 		return nil, err, nil
 	}
@@ -99,9 +103,7 @@ func (t *accounts) SignIn(args *SignInArgs) (*SignInResult, error, error) {
 		},
 	}, nil, nil
 }
-
-// Valid は SignInArgsを検証します
-func (t *SignInArgs) Valid() error {
+func (t *SignInArgs) valid() error {
 	array := make([]string, 0)
 	if t.Email == "" {
 		array = append(array, "メールアドレスが入力されていません。")
@@ -133,7 +135,35 @@ func (t *accounts) Refresh() (*RefreshResult, error) {
 		},
 	}, nil
 }
-func (t *accounts) PasswordResetRequesting(args *PasswordResetRequestingArgs) error {
+func (t *accounts) PasswordResetRequesting(args *PasswordResetRequestingArgs) (error, error) {
+	if err := args.valid(); err != nil {
+		return err, nil
+	}
+	token, err := t.service.CreatePasswordResetToken(&services.CreatePasswordResetTokenArgs{
+		Email: args.Email,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if token != nil {
+		go func() {
+			args := domains.ResetPasswordMailSendArgs{
+				Email: args.Email,
+				Token: token.PasswordResetToken,
+			}
+			t.resetPasswordMail.Send(&args)
+		}()
+	}
+	return nil, nil
+}
+func (t *PasswordResetRequestingArgs) valid() error {
+	array := make([]string, 0)
+	if t.Email == "" {
+		array = append(array, "メールアドレスが入力されていません。")
+	}
+	if len(array) > 0 {
+		return errors.New(strings.Join(array, "\n"))
+	}
 	return nil
 }
 func (t *accounts) GetResetPasswordModel(args *ResetPasswordArgs) (*GetResetPasswordModelResult, error) {

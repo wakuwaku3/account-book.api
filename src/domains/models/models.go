@@ -7,64 +7,69 @@ import (
 type (
 	// Account は アカウントです
 	Account struct {
-		Email          string `db:"Email" firestore:"-"`
-		UserID         string `db:"UserID" firestore:"user-id"`
-		HashedPassword string `db:"UserID" firestore:"hashed-password"`
+		Email          string `firestore:"-"`
+		UserID         string `firestore:"user-id"`
+		HashedPassword string `firestore:"hashed-password"`
+	}
+	// PasswordResetToken は パスワードリセットのトークンです
+	PasswordResetToken struct {
+		PasswordResetToken string    `firestore:"-"`
+		Expires            time.Time `firestore:"expires"`
 	}
 	// User はユーザーです
 	User struct {
-		UserID   string `db:"UserID" firestore:"-"`
-		UserName string `db:"UserName" firestore:"user-name"`
-		Email    string `db:"Email" firestore:"email"`
+		UserID   string `firestore:"-"`
+		UserName string `firestore:"user-name"`
+		Email    string `firestore:"email"`
 	}
 	// Plan は計画です
 	Plan struct {
-		PlanID     string     `db:"PlanID" firestore:"-"`
-		PlanName   string     `db:"PlanName" firestore:"plan-name"`
-		Interval   int        `db:"Interval" firestore:"interval"`
-		PlanAmount int        `db:"PlanAmount" firestore:"plan-amount"`
-		IsIncome   bool       `db:"IsIncome" firestore:"is-income"`
-		Start      *time.Time `db:"Start" firestore:"start"`
-		End        *time.Time `db:"End" firestore:"end"`
-		IsDeleted  bool       `db:"IsDeleted" firestore:"is-deleted"`
+		PlanID     string     `firestore:"-"`
+		PlanName   string     `firestore:"plan-name"`
+		Interval   int        `firestore:"interval"`
+		PlanAmount int        `firestore:"plan-amount"`
+		IsIncome   bool       `firestore:"is-income"`
+		Start      *time.Time `firestore:"start"`
+		End        *time.Time `firestore:"end"`
+		IsDeleted  bool       `firestore:"is-deleted"`
 	}
 	// Transaction は取引です
 	Transaction struct {
-		TransactionID string    `db:"TransactionID" firestore:"-"`
-		Amount        int       `db:"Amount" firestore:"amount"`
-		Category      int       `db:"Category" firestore:"category"`
-		Date          time.Time `db:"Date" firestore:"date"`
-		Notes         *string   `db:"Notes" firestore:"notes"`
-		DailyID       *string   `db:"DailyID" firestore:"daily-id"`
+		TransactionID string    `firestore:"-"`
+		Amount        int       `firestore:"amount"`
+		Category      int       `firestore:"category"`
+		Date          time.Time `firestore:"date"`
+		Notes         *string   `firestore:"notes"`
+		DailyID       *string   `firestore:"daily-id"`
 	}
 	// Dashboard はダッシュボードです
 	Dashboard struct {
-		DashboardID         string    `db:"DashboardID" firestore:"-"`
-		Date                time.Time `db:"Date" firestore:"date"`
-		Income              *int      `db:"Income" firestore:"income"`
-		Expense             *int      `db:"Expense" firestore:"expense"`
-		CurrentBalance      *int      `db:"CurrentBalance" firestore:"current-balance"`
-		Balance             *int      `db:"Balance" firestore:"balance"`
-		PreviousDashboardID *string   `db:"PreviousDashboardID" firestore:"previous-dashboard-id"`
-		PreviousBalance     *int      `db:"PreviousBalance" firestore:"previous-balance"`
+		DashboardID         string    `firestore:"-"`
+		Date                time.Time `firestore:"date"`
+		Income              *int      `firestore:"income"`
+		Expense             *int      `firestore:"expense"`
+		CurrentBalance      *int      `firestore:"current-balance"`
+		Balance             *int      `firestore:"balance"`
+		PreviousDashboardID *string   `firestore:"previous-dashboard-id"`
+		PreviousBalance     *int      `firestore:"previous-balance"`
 		Daily               []Daily   `firestore:"-"`
 		Actual              []Actual  `firestore:"-"`
 	}
 	// Daily は日毎のデータです
 	Daily struct {
-		DailyID string    `db:"DailyID" firestore:"-"`
-		Date    time.Time `db:"Date" firestore:"date"`
-		Income  int       `db:"Income" firestore:"income"`
-		Expense int       `db:"Expense" firestore:"expense"`
+		DailyID string    `firestore:"-"`
+		Date    time.Time `firestore:"date"`
+		Income  int       `firestore:"income"`
+		Expense int       `firestore:"expense"`
 	}
 	// Actual は実費のデータです
 	Actual struct {
-		ActualID     string    `db:"ActualID" firestore:"-"`
-		Date         time.Time `db:"Date" firestore:"-"`
-		ActualAmount int       `db:"ActualAmount" firestore:"actual-amount"`
-		PlanID       string    `db:"PlanID" firestore:"plan-id"`
-		PlanName     string    `db:"PlanName" firestore:"plan-name"`
-		PlanAmount   int       `db:"PlanAmount" firestore:"plan-amount"`
-		IsIncome     bool      `db:"IsIncome" firestore:"is-income"`
+		ActualID     string    `firestore:"-"`
+		Date         time.Time `firestore:"-"`
+		ActualAmount int       `firestore:"actual-amount"`
+		PlanID       string    `firestore:"plan-id"`
+		PlanName     string    `firestore:"plan-name"`
+		PlanAmount   int       `firestore:"plan-amount"`
+		IsIncome     bool      `firestore:"is-income"`
 	}
 )

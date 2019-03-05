@@ -1,6 +1,10 @@
 package domains
 
 import (
+	"time"
+
+	"github.com/labstack/gommon/log"
+
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
 )
 
@@ -11,6 +15,8 @@ type (
 		GetCredentialsFilePath() *string
 		GetPasswordHashedKey() *[]byte
 		GetJwtSecret() *[]byte
+		GetSendGridAPIKey() *string
+		GetFrontEndURL() *string
 	}
 	// Crypt はハッシュ化のサービスです
 	Crypt interface {
@@ -39,5 +45,33 @@ type (
 	// AccountsRepository はアカウントのリポジトリです
 	AccountsRepository interface {
 		Get(email *string) (*models.Account, error)
+		CreatePasswordResetToken(email *string, expires *time.Time) (*string, error)
+		CleanUp() error
+		CleanUpByEmail(email string) error
+	}
+	// ResetPasswordMail はパスワード再設定メール送信サービスです
+	ResetPasswordMail interface {
+		Send(args *ResetPasswordMailSendArgs) error
+	}
+	// ResetPasswordMailSendArgs はパスワード再設定メール送信用パラメータです
+	ResetPasswordMailSendArgs struct {
+		Email string
+		Token string
 	}
 )
+
+// Try は成功するか上限回数まで処理を繰り返し行います
+func Try(f func() error, limit int) error {
+	count := 0
+	for {
+		err := f()
+		if err == nil {
+			return nil
+		}
+		count++
+		if count >= limit {
+			return err
+		}
+		log.Warn(err)
+	}
+}

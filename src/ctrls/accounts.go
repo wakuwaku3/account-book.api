@@ -3,6 +3,7 @@ package ctrls
 import (
 	"net/http"
 
+	"github.com/wakuwaku3/account-book.api/src/ctrls/responses"
 	"github.com/wakuwaku3/account-book.api/src/usecases"
 
 	"github.com/labstack/echo"
@@ -20,11 +21,6 @@ type (
 		GetResetPasswordModel(c echo.Context) error
 		ResetPassword(c echo.Context) error
 	}
-	// Response はレスポンスです
-	Response struct {
-		Errors []string    `json:"errors"`
-		Result interface{} `json:"result"`
-	}
 	signInRequest struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -40,6 +36,9 @@ type (
 	}
 	refreshResponse struct {
 		Claim claimResponse `json:"claim"`
+	}
+	passwordResetRequestingRequest struct {
+		Email string `json:"email"`
 	}
 )
 
@@ -57,11 +56,11 @@ func (t *accounts) SignIn(c echo.Context) error {
 		return err
 	}
 	if clientErr != nil {
-		return c.JSON(http.StatusOK, Response{
+		return c.JSON(http.StatusBadRequest, responses.Response{
 			Errors: []string{clientErr.Error()},
 		})
 	}
-	return c.JSON(http.StatusOK, Response{
+	return c.JSON(http.StatusOK, responses.Response{
 		Result: signInResponse{
 			Claim: claimResponse{
 				Token:    res.Claims.Token,
@@ -83,7 +82,7 @@ func (t *accounts) Refresh(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, Response{
+	return c.JSON(http.StatusOK, responses.Response{
 		Result: refreshResponse{
 			Claim: claimResponse{
 				Token:    res.Claims.Token,
@@ -95,7 +94,20 @@ func (t *accounts) Refresh(c echo.Context) error {
 	})
 }
 func (t *accounts) PasswordResetRequesting(c echo.Context) error {
-	return c.JSON(http.StatusOK, "res")
+	request := new(passwordResetRequestingRequest)
+	if err := c.Bind(&request); err != nil {
+		return err
+	}
+	cErr, err := t.useCase.PasswordResetRequesting(&usecases.PasswordResetRequestingArgs{Email: request.Email})
+	if err != nil {
+		return err
+	}
+	if cErr != nil {
+		return c.JSON(http.StatusBadRequest, responses.Response{
+			Errors: []string{cErr.Error()},
+		})
+	}
+	return c.NoContent(http.StatusNoContent)
 }
 func (t *accounts) GetResetPasswordModel(c echo.Context) error {
 	return c.JSON(http.StatusOK, "res")
