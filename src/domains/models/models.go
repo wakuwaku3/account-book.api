@@ -16,6 +16,7 @@ type (
 	PasswordResetToken struct {
 		PasswordResetToken string    `firestore:"-"`
 		Expires            time.Time `firestore:"expires"`
+		Email              string    `firestore:"email"`
 	}
 	// User はユーザーです
 	User struct {

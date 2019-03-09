@@ -2,7 +2,12 @@ package services
 
 import (
 	"errors"
+	"regexp"
+	"strings"
 	"time"
+	"unicode/utf8"
+
+	"github.com/wakuwaku3/account-book.api/src/domains/models"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
 )
@@ -15,13 +20,15 @@ type (
 
 	// Accounts は Accountsのサービスです
 	Accounts interface {
-		ValidPassword(args *ValidPasswordArgs) error
+		ValidPassword(password *string) error
+		ComparePassword(args *ComparePasswordArgs) error
 		CreatePasswordResetToken(
 			args *CreatePasswordResetTokenArgs) (
 			*CreatePasswordResetTokenResult, error)
+		SetPassword(args *SetPasswordArgs) error
 	}
-	// ValidPasswordArgs は Password.Validの引数です
-	ValidPasswordArgs struct {
+	// ComparePasswordArgs は 引数です
+	ComparePasswordArgs struct {
 		HashedPassword string
 		InputPassword  string
 	}
@@ -33,6 +40,11 @@ type (
 	CreatePasswordResetTokenResult struct {
 		PasswordResetToken string
 	}
+	// SetPasswordArgs は 引数です
+	SetPasswordArgs struct {
+		Password string
+		Email    string
+	}
 )
 
 // NewAccounts is create instance.
@@ -41,7 +53,23 @@ func NewAccounts(
 	repos domains.AccountsRepository) Accounts {
 	return &accounts{crypt, repos}
 }
-func (t *accounts) ValidPassword(args *ValidPasswordArgs) error {
+
+var passwordRegex = regexp.MustCompile(`^.*[0-9].*[a-z].*[A-Z]$|^.*[0-9].*[A-Z].*[a-z]$|^.*[a-z].*[0-9].*[A-Z]$|^.*[a-z].*[A-Z].*[0-9]$|^.*[A-Z].*[0-9].*[a-z]$|^.*[A-Z].*[a-z].*[0-9]$`)
+
+func (t *accounts) ValidPassword(password *string) error {
+	array := make([]string, 0)
+	if utf8.RuneCountInString(*password) < 8 {
+		array = append(array, "パスワードは8文字以上設定してください。")
+	}
+	if !passwordRegex.MatchString(*password) {
+		array = append(array, "パスワードには、半角英小文字、大文字、数字をそれぞれ1種類以上使用してください。")
+	}
+	if len(array) > 0 {
+		return errors.New(strings.Join(array, "\n"))
+	}
+	return nil
+}
+func (t *accounts) ComparePassword(args *ComparePasswordArgs) error {
 	hashedPassword := t.crypt.Hash(&args.InputPassword)
 	if *hashedPassword != args.HashedPassword {
 		return errors.New("パスワードが違います。")
@@ -55,7 +83,10 @@ func (t *accounts) CreatePasswordResetToken(
 		return nil, nil
 	}
 	expires := time.Now().AddDate(0, 0, 2)
-	id, err := t.repos.CreatePasswordResetToken(&args.Email, &expires)
+	id, err := t.repos.CreatePasswordResetToken(&models.PasswordResetToken{
+		Email:   args.Email,
+		Expires: expires,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -63,4 +94,12 @@ func (t *accounts) CreatePasswordResetToken(
 	return &CreatePasswordResetTokenResult{
 		PasswordResetToken: *id,
 	}, nil
+}
+func (t *accounts) SetPassword(args *SetPasswordArgs) error {
+	hashedPassword := t.crypt.Hash(&args.Password)
+	if err := t.repos.SetPassword(&args.Email, hashedPassword); err != nil {
+		return err
+	}
+	go t.repos.CleanUpByEmail(&args.Email)
+	return nil
 }

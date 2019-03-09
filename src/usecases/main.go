@@ -1,12 +1,18 @@
 package usecases
 
-import "github.com/wakuwaku3/account-book.api/src/domains"
+import (
+	"time"
+
+	"github.com/wakuwaku3/account-book.api/src/domains"
+)
 
 type (
 	// AccountsQuery はアカウントのクエリです
 	AccountsQuery interface {
 		GetSignInInfo(email *string) (*SignInInfo, error)
 		GetRefreshInfo(email *string) (*RefreshInfo, error)
+		GetResetPasswordModelInfo(passwordResetToken *string) (*ResetPasswordModelInfo, error)
+		GetResetPasswordInfo(passwordResetToken *string) (*ResetPasswordInfo, error)
 	}
 	// SignInInfo サインインのために必要な情報です
 	SignInInfo struct {
@@ -17,6 +23,18 @@ type (
 	// RefreshInfo トークンリフレッシュのために必要な情報です
 	RefreshInfo struct {
 		AccountToken     string
+		JwtClaims        domains.JwtClaims
+		JwtRefreshClaims domains.JwtRefreshClaims
+	}
+	// ResetPasswordModelInfo はパスワードリセット画面表示のために必要な情報です
+	ResetPasswordModelInfo struct {
+		Email   string
+		Expires time.Time
+	}
+	// ResetPasswordInfo はパスワードリセットのために必要な情報です
+	ResetPasswordInfo struct {
+		Email            string
+		Expires          time.Time
 		JwtClaims        domains.JwtClaims
 		JwtRefreshClaims domains.JwtRefreshClaims
 	}

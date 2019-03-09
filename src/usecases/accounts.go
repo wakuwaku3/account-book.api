@@ -3,6 +3,7 @@ package usecases
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/domains/services"
@@ -21,8 +22,8 @@ type (
 		SignIn(args *SignInArgs) (*SignInResult, error, error)
 		Refresh(args *RefreshArgs) (*RefreshResult, error)
 		PasswordResetRequesting(args *PasswordResetRequestingArgs) (error, error)
-		GetResetPasswordModel(args *ResetPasswordArgs) (*GetResetPasswordModelResult, error)
-		ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error)
+		GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetResetPasswordModelResult, error, error)
+		ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error, error)
 	}
 	// SignInArgs は 引数です
 	SignInArgs struct {
@@ -43,15 +44,24 @@ type (
 		Token        string
 		RefreshToken string
 	}
+	// PasswordResetRequestingArgs は 引数です
 	PasswordResetRequestingArgs struct {
 		Email string
 	}
-	ResetPasswordArgs struct {
-		ResetPasswordToken string
+	// GetResetPasswordModelArgs は 引数です
+	GetResetPasswordModelArgs struct {
+		PasswordResetToken string
 	}
+	// GetResetPasswordModelResult は 結果です
 	GetResetPasswordModelResult struct {
 		Email string
 	}
+	// ResetPasswordArgs は 引数です
+	ResetPasswordArgs struct {
+		PasswordResetToken string
+		Password           string
+	}
+	// ResetPasswordResult は 結果です
 	ResetPasswordResult struct {
 		Token        string
 		RefreshToken string
@@ -81,7 +91,7 @@ func (t *accounts) SignIn(args *SignInArgs) (*SignInResult, error, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	err = t.service.ValidPassword(&services.ValidPasswordArgs{
+	err = t.service.ComparePassword(&services.ComparePasswordArgs{
 		HashedPassword: info.HashedPassword,
 		InputPassword:  args.Password,
 	})
@@ -170,9 +180,75 @@ func (t *PasswordResetRequestingArgs) valid() error {
 	}
 	return nil
 }
-func (t *accounts) GetResetPasswordModel(args *ResetPasswordArgs) (*GetResetPasswordModelResult, error) {
-	return &GetResetPasswordModelResult{}, nil
+func (t *accounts) GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetResetPasswordModelResult, error, error) {
+	if err := args.valid(); err != nil {
+		return nil, err, nil
+	}
+	info, err := t.query.GetResetPasswordModelInfo(&args.PasswordResetToken)
+	if err != nil {
+		return nil, nil, err
+	}
+	if info.Expires.Before(time.Now()) {
+		return nil, errors.New("URLの有効期限が切れています。"), nil
+	}
+	return &GetResetPasswordModelResult{
+		Email: info.Email,
+	}, nil, nil
 }
-func (t *accounts) ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error) {
-	return &ResetPasswordResult{}, nil
+func (t *GetResetPasswordModelArgs) valid() error {
+	array := make([]string, 0)
+	if t.PasswordResetToken == "" {
+		array = append(array, "パスワードトークンが入力されていません。")
+	}
+	if len(array) > 0 {
+		return errors.New(strings.Join(array, "\n"))
+	}
+	return nil
+}
+func (t *accounts) ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error, error) {
+	if err := args.valid(); err != nil {
+		return nil, err, nil
+	}
+	if err := t.service.ValidPassword(&args.Password); err != nil {
+		return nil, err, nil
+	}
+	info, err := t.query.GetResetPasswordInfo(&args.PasswordResetToken)
+	if err != nil {
+		return nil, nil, err
+	}
+	if info.Expires.Before(time.Now()) {
+		return nil, errors.New("URLの有効期限が切れています。"), nil
+	}
+	setPasswordArgs := &services.SetPasswordArgs{
+		Email:    info.Email,
+		Password: args.Password,
+	}
+	if err := t.service.SetPassword(setPasswordArgs); err != nil {
+		return nil, nil, err
+	}
+	token, err := t.jwt.CreateToken(&info.JwtClaims)
+	if err != nil {
+		return nil, nil, err
+	}
+	refreshToken, err := t.jwt.CreateRefreshToken(&info.JwtRefreshClaims)
+	if err != nil {
+		return nil, nil, err
+	}
+	return &ResetPasswordResult{
+		Token:        *token,
+		RefreshToken: *refreshToken,
+	}, nil, nil
+}
+func (t *ResetPasswordArgs) valid() error {
+	array := make([]string, 0)
+	if t.PasswordResetToken == "" {
+		array = append(array, "パスワードトークンが入力されていません。")
+	}
+	if t.Password == "" {
+		array = append(array, "パスワードが入力されていません。")
+	}
+	if len(array) > 0 {
+		return errors.New(strings.Join(array, "\n"))
+	}
+	return nil
 }

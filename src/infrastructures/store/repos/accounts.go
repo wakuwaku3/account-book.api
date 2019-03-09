@@ -30,13 +30,11 @@ func (t *accounts) Get(email *string) (*models.Account, error) {
 	doc.DataTo(&model)
 	return &model, nil
 }
-func (t *accounts) CreatePasswordResetToken(email *string, expires *time.Time) (*string, error) {
+func (t *accounts) CreatePasswordResetToken(model *models.PasswordResetToken) (*string, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
 	passwordRestTokensRef := client.Collection("password-reset-tokens")
-	ref, _, err := passwordRestTokensRef.Add(ctx, map[string]interface{}{
-		"expires": *expires,
-	})
+	ref, _, err := passwordRestTokensRef.Add(ctx, model)
 	if err != nil {
 		return nil, err
 	}
@@ -69,14 +67,14 @@ func (t *accounts) CleanUp() error {
 	}
 	return nil
 }
-func (t *accounts) CleanUpByEmail(email string) error {
+func (t *accounts) CleanUpByEmail(email *string) error {
 	now := time.Now()
 	client := t.provider.GetClient()
 	batch := client.Batch()
 	ctx := context.Background()
 	passwordRestTokensRef := client.Collection("password-reset-tokens")
 
-	iter := passwordRestTokensRef.Where("email", "==", email).Documents(ctx)
+	iter := passwordRestTokensRef.Where("email", "==", *email).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -95,4 +93,29 @@ func (t *accounts) CleanUpByEmail(email string) error {
 		return err
 	}
 	return nil
+}
+func (t *accounts) GetPasswordResetToken(passwordResetToken *string) (*models.PasswordResetToken, error) {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+	doc, err := client.Collection("password-reset-tokens").Doc(*passwordResetToken).Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var model models.PasswordResetToken
+	doc.DataTo(&model)
+	return &model, nil
+}
+func (t *accounts) SetPassword(email *string, hashedPassword *string) error {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+	ref := client.Collection("accounts").Doc(*email)
+	doc, err := ref.Get(ctx)
+	if err != nil {
+		return err
+	}
+	var model models.Account
+	doc.DataTo(&model)
+	model.HashedPassword = *hashedPassword
+	_, err = ref.Set(ctx, &model)
+	return err
 }

@@ -1,8 +1,6 @@
 package domains
 
 import (
-	"time"
-
 	"github.com/labstack/gommon/log"
 
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
@@ -55,9 +53,11 @@ type (
 	// AccountsRepository はアカウントのリポジトリです
 	AccountsRepository interface {
 		Get(email *string) (*models.Account, error)
-		CreatePasswordResetToken(email *string, expires *time.Time) (*string, error)
+		CreatePasswordResetToken(model *models.PasswordResetToken) (*string, error)
 		CleanUp() error
-		CleanUpByEmail(email string) error
+		CleanUpByEmail(email *string) error
+		GetPasswordResetToken(passwordResetToken *string) (*models.PasswordResetToken, error)
+		SetPassword(email *string, hashedPassword *string) error
 	}
 	// ResetPasswordMail はパスワード再設定メール送信サービスです
 	ResetPasswordMail interface {
