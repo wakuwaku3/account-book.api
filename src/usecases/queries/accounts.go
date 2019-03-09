@@ -35,6 +35,7 @@ func (t *accounts) GetSignInInfo(email *string) (*usecases.SignInInfo, error) {
 			Email:    *email,
 			UserID:   account.UserID,
 			UserName: user.UserName,
+			Culture:  user.Culture,
 		},
 		JwtRefreshClaims: domains.JwtRefreshClaims{
 			Email:        *email,

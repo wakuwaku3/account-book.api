@@ -13,6 +13,19 @@ type (
 	Helper interface {
 		Send(body *[]byte) error
 	}
+	requestBody struct {
+		From             mailAddress       `json:"from"`
+		Personalizations []personalization `json:"personalizations,omitempty"`
+		TemplateID       string            `json:"template_id"`
+	}
+	mailAddress struct {
+		Name  string `json:"name,omitempty"`
+		Email string `json:"email,omitempty"`
+	}
+	personalization struct {
+		To                  []mailAddress     `json:"to"`
+		DynamicTemplateData map[string]string `json:"dynamic_template_data,omitempty"`
+	}
 )
 
 // NewHelper is create instance
