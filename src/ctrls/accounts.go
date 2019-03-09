@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/wakuwaku3/account-book.api/src/ctrls/responses"
+
 	"github.com/wakuwaku3/account-book.api/src/usecases"
 
 	"github.com/labstack/echo"
@@ -25,17 +26,16 @@ type (
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	claimResponse struct {
-		Token    string `json:"token"`
-		UserID   string `json:"userId"`
-		UserName string `json:"userName"`
-		Email    string `json:"email"`
-	}
 	signInResponse struct {
-		Claim claimResponse `json:"claim"`
+		Token        string `json:"token"`
+		RefreshToken string `json:"refreshToken"`
+	}
+	refreshRequest struct {
+		RefreshToken string `json:"refreshToken"`
 	}
 	refreshResponse struct {
-		Claim claimResponse `json:"claim"`
+		Token        string `json:"token"`
+		RefreshToken string `json:"refreshToken"`
 	}
 	passwordResetRequestingRequest struct {
 		Email string `json:"email"`
@@ -56,19 +56,11 @@ func (t *accounts) SignIn(c echo.Context) error {
 		return err
 	}
 	if clientErr != nil {
-		return c.JSON(http.StatusBadRequest, responses.Response{
-			Errors: []string{clientErr.Error()},
-		})
+		return responses.WriteErrorResponse(c, clientErr)
 	}
-	return c.JSON(http.StatusOK, responses.Response{
-		Result: signInResponse{
-			Claim: claimResponse{
-				Token:    res.Claims.Token,
-				UserID:   res.Claims.UserID,
-				UserName: res.Claims.UserName,
-				Email:    res.Claims.Email,
-			},
-		},
+	return responses.WriteResponse(c, signInResponse{
+		Token:        res.Token,
+		RefreshToken: res.RefreshToken,
 	})
 }
 func (t *signInRequest) Convert() *usecases.SignInArgs {
@@ -78,36 +70,37 @@ func (t *signInRequest) Convert() *usecases.SignInArgs {
 	}
 }
 func (t *accounts) Refresh(c echo.Context) error {
-	res, err := t.useCase.Refresh()
-	if err != nil {
-		return err
+	request := new(refreshRequest)
+	if err := c.Bind(&request); err != nil {
+		return responses.WriteUnAuthorizedErrorResponse(c)
 	}
-	return c.JSON(http.StatusOK, responses.Response{
-		Result: refreshResponse{
-			Claim: claimResponse{
-				Token:    res.Claims.Token,
-				UserID:   res.Claims.UserID,
-				UserName: res.Claims.UserName,
-				Email:    res.Claims.Email,
-			},
-		},
+	res, err := t.useCase.Refresh(request.Convert())
+	if err != nil {
+		return responses.WriteUnAuthorizedErrorResponse(c)
+	}
+	return responses.WriteResponse(c, refreshResponse{
+		Token:        res.Token,
+		RefreshToken: res.RefreshToken,
 	})
+}
+func (t *refreshRequest) Convert() *usecases.RefreshArgs {
+	return &usecases.RefreshArgs{
+		RefreshToken: t.RefreshToken,
+	}
 }
 func (t *accounts) PasswordResetRequesting(c echo.Context) error {
 	request := new(passwordResetRequestingRequest)
 	if err := c.Bind(&request); err != nil {
 		return err
 	}
-	cErr, err := t.useCase.PasswordResetRequesting(&usecases.PasswordResetRequestingArgs{Email: request.Email})
+	clientErr, err := t.useCase.PasswordResetRequesting(&usecases.PasswordResetRequestingArgs{Email: request.Email})
 	if err != nil {
 		return err
 	}
-	if cErr != nil {
-		return c.JSON(http.StatusBadRequest, responses.Response{
-			Errors: []string{cErr.Error()},
-		})
+	if clientErr != nil {
+		return responses.WriteErrorResponse(c, clientErr)
 	}
-	return c.NoContent(http.StatusNoContent)
+	return responses.WriteEmptyResponse(c)
 }
 func (t *accounts) GetResetPasswordModel(c echo.Context) error {
 	return c.JSON(http.StatusOK, "res")

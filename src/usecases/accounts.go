@@ -19,7 +19,7 @@ type (
 	// Accounts is AccountsController
 	Accounts interface {
 		SignIn(args *SignInArgs) (*SignInResult, error, error)
-		Refresh() (*RefreshResult, error)
+		Refresh(args *RefreshArgs) (*RefreshResult, error)
 		PasswordResetRequesting(args *PasswordResetRequestingArgs) (error, error)
 		GetResetPasswordModel(args *ResetPasswordArgs) (*GetResetPasswordModelResult, error)
 		ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error)
@@ -29,20 +29,19 @@ type (
 		Email    string
 		Password string
 	}
-	// Claims は Claimsです
-	Claims struct {
-		Token    string
-		UserID   string
-		UserName string
-		Email    string
-	}
 	// SignInResult は 結果です
 	SignInResult struct {
-		Claims Claims
+		Token        string
+		RefreshToken string
+	}
+	// RefreshArgs は 引数です
+	RefreshArgs struct {
+		RefreshToken string
 	}
 	// RefreshResult は 結果です
 	RefreshResult struct {
-		Claims Claims
+		Token        string
+		RefreshToken string
 	}
 	PasswordResetRequestingArgs struct {
 		Email string
@@ -54,7 +53,8 @@ type (
 		Email string
 	}
 	ResetPasswordResult struct {
-		Claims Claims
+		Token        string
+		RefreshToken string
 	}
 )
 
@@ -62,14 +62,12 @@ type (
 func NewAccounts(
 	query AccountsQuery,
 	jwt domains.Jwt,
-	claimsProvider domains.ClaimsProvider,
 	service services.Accounts,
 	resetPasswordMail domains.ResetPasswordMail,
 ) Accounts {
 	return &accounts{
 		query:             query,
 		jwt:               jwt,
-		claimsProvider:    claimsProvider,
 		service:           service,
 		resetPasswordMail: resetPasswordMail,
 	}
@@ -94,13 +92,13 @@ func (t *accounts) SignIn(args *SignInArgs) (*SignInResult, error, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	refreshToken, err := t.jwt.CreateRefreshToken(&info.JwtRefreshClaims)
+	if err != nil {
+		return nil, nil, err
+	}
 	return &SignInResult{
-		Claims: Claims{
-			Token:    *token,
-			UserID:   info.JwtClaims.UserID,
-			Email:    info.JwtClaims.Email,
-			UserName: info.JwtClaims.UserName,
-		},
+		Token:        *token,
+		RefreshToken: *refreshToken,
 	}, nil, nil
 }
 func (t *SignInArgs) valid() error {
@@ -116,23 +114,29 @@ func (t *SignInArgs) valid() error {
 	}
 	return nil
 }
-func (t *accounts) Refresh() (*RefreshResult, error) {
-	email := t.claimsProvider.GetEmail()
-	info, err := t.query.GetSignInInfo(email)
+func (t *accounts) Refresh(args *RefreshArgs) (*RefreshResult, error) {
+	claims, err := t.jwt.ParseRefreshToken(&args.RefreshToken)
 	if err != nil {
 		return nil, err
+	}
+	info, err := t.query.GetRefreshInfo(&claims.Email)
+	if err != nil {
+		return nil, err
+	}
+	if info.AccountToken != claims.AccountToken {
+		return nil, errors.New("accountToken does not match")
 	}
 	token, err := t.jwt.CreateToken(&info.JwtClaims)
 	if err != nil {
 		return nil, err
 	}
+	refreshToken, err := t.jwt.CreateRefreshToken(&info.JwtRefreshClaims)
+	if err != nil {
+		return nil, err
+	}
 	return &RefreshResult{
-		Claims: Claims{
-			Token:    *token,
-			UserID:   info.JwtClaims.UserID,
-			Email:    info.JwtClaims.Email,
-			UserName: info.JwtClaims.UserName,
-		},
+		Token:        *token,
+		RefreshToken: *refreshToken,
 	}, nil
 }
 func (t *accounts) PasswordResetRequesting(args *PasswordResetRequestingArgs) (error, error) {

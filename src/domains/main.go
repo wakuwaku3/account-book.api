@@ -27,13 +27,21 @@ type (
 	// Jwt はJwtのサービスです
 	Jwt interface {
 		CreateToken(claims *JwtClaims) (*string, error)
-		Parse(token *string) (*JwtClaims, error)
+		CreateRefreshToken(claims *JwtRefreshClaims) (*string, error)
+		ParseRefreshToken(refreshToken *string) (*JwtRefreshClaims, error)
 	}
 	// JwtClaims はJwtTokenにうめこまれます
 	JwtClaims struct {
 		UserID   string
 		UserName string
 		Email    string
+		Culture  string
+	}
+	// JwtRefreshClaims はRefreshTokenにうめこまれます
+	JwtRefreshClaims struct {
+		UserID       string
+		Email        string
+		AccountToken string
 	}
 	// ClaimsProvider は Claimsを取得します
 	ClaimsProvider interface {

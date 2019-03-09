@@ -10,6 +10,7 @@ type (
 		Email          string `firestore:"-"`
 		UserID         string `firestore:"user-id"`
 		HashedPassword string `firestore:"hashed-password"`
+		AccountToken   string `firestore:"account-token"`
 	}
 	// PasswordResetToken は パスワードリセットのトークンです
 	PasswordResetToken struct {
@@ -21,6 +22,7 @@ type (
 		UserID   string `firestore:"-"`
 		UserName string `firestore:"user-name"`
 		Email    string `firestore:"email"`
+		Culture  string `firestore:"culture"`
 	}
 	// Plan は計画です
 	Plan struct {

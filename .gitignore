@@ -1,3 +1,5 @@
 dist/
 store-account.json
 .user.env
+account-book.api
+debug
