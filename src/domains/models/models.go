@@ -20,10 +20,11 @@ type (
 	}
 	// User はユーザーです
 	User struct {
-		UserID   string `firestore:"-"`
-		UserName string `firestore:"user-name"`
-		Email    string `firestore:"email"`
-		Culture  string `firestore:"culture"`
+		UserID       string    `firestore:"-"`
+		UserName     string    `firestore:"user-name"`
+		Email        string    `firestore:"email"`
+		Culture      string    `firestore:"culture"`
+		UseStartDate time.Time `firestore:"use-start-date"`
 	}
 	// Plan は計画です
 	Plan struct {

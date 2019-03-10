@@ -2,17 +2,18 @@ package auth
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
 
 type (
 	j struct {
-		env domains.Env
+		env   domains.Env
+		clock cmn.Clock
 	}
 	customClaims struct {
 		UserID        string `json:"nonce"`
@@ -32,11 +33,11 @@ type (
 )
 
 // NewJwt is create instance
-func NewJwt(env domains.Env) domains.Jwt {
-	return &j{env: env}
+func NewJwt(env domains.Env, clock cmn.Clock) domains.Jwt {
+	return &j{env, clock}
 }
 func (t *j) CreateToken(claims *domains.JwtClaims) (*string, error) {
-	now := time.Now()
+	now := t.clock.Now()
 	url := t.env.GetFrontEndURL()
 	cc := customClaims{
 		UserID:        claims.UserID,
@@ -49,7 +50,7 @@ func (t *j) CreateToken(claims *domains.JwtClaims) (*string, error) {
 			Subject:   *url,
 			Audience:  *url,
 			ExpiresAt: now.AddDate(0, 0, 1).Unix(),
-			NotBefore: now.Unix(),
+			NotBefore: claims.UseStartDate.Unix(),
 			IssuedAt:  now.Unix(),
 			Id:        uuid.New().String(),
 		},
@@ -57,7 +58,7 @@ func (t *j) CreateToken(claims *domains.JwtClaims) (*string, error) {
 	return t.createToken(cc)
 }
 func (t *j) CreateRefreshToken(claims *domains.JwtRefreshClaims) (*string, error) {
-	now := time.Now()
+	now := t.clock.Now()
 	url := t.env.GetFrontEndURL()
 	cc := customRefreshClaims{
 		UserID:        claims.UserID,

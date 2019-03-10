@@ -1,6 +1,8 @@
 package domains
 
 import (
+	"time"
+
 	"github.com/labstack/gommon/log"
 
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
@@ -30,10 +32,11 @@ type (
 	}
 	// JwtClaims はJwtTokenにうめこまれます
 	JwtClaims struct {
-		UserID   string
-		UserName string
-		Email    string
-		Culture  string
+		UserID       string
+		UserName     string
+		Email        string
+		Culture      string
+		UseStartDate time.Time
 	}
 	// JwtRefreshClaims はRefreshTokenにうめこまれます
 	JwtRefreshClaims struct {
@@ -67,6 +70,14 @@ type (
 	ResetPasswordMailSendArgs struct {
 		Email string
 		Token string
+	}
+	// TransactionsRepository は取引のリポジトリです
+	TransactionsRepository interface {
+		Get(id *string) (*models.Transaction, error)
+		GetByMonth(month *time.Time) (*[]models.Transaction, error)
+		Create(model *models.Transaction) (*string, error)
+		Update(id *string, model *models.Transaction) error
+		Delete(id *string) error
 	}
 )
 

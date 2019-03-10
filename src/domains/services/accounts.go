@@ -4,10 +4,10 @@ import (
 	"errors"
 	"regexp"
 	"strings"
-	"time"
 	"unicode/utf8"
 
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
+	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
 )
@@ -16,6 +16,7 @@ type (
 	accounts struct {
 		crypt domains.Crypt
 		repos domains.AccountsRepository
+		clock cmn.Clock
 	}
 
 	// Accounts は Accountsのサービスです
@@ -50,8 +51,10 @@ type (
 // NewAccounts is create instance.
 func NewAccounts(
 	crypt domains.Crypt,
-	repos domains.AccountsRepository) Accounts {
-	return &accounts{crypt, repos}
+	repos domains.AccountsRepository,
+	clock cmn.Clock,
+) Accounts {
+	return &accounts{crypt, repos, clock}
 }
 
 var passwordRegex = regexp.MustCompile(`^.*[0-9].*[a-z].*[A-Z]$|^.*[0-9].*[A-Z].*[a-z]$|^.*[a-z].*[0-9].*[A-Z]$|^.*[a-z].*[A-Z].*[0-9]$|^.*[A-Z].*[0-9].*[a-z]$|^.*[A-Z].*[a-z].*[0-9]$`)
@@ -82,7 +85,7 @@ func (t *accounts) CreatePasswordResetToken(
 	if _, err := t.repos.Get(&args.Email); err != nil {
 		return nil, nil
 	}
-	expires := time.Now().AddDate(0, 0, 2)
+	expires := t.clock.Now().AddDate(0, 0, 2)
 	id, err := t.repos.CreatePasswordResetToken(&models.PasswordResetToken{
 		Email:   args.Email,
 		Expires: expires,

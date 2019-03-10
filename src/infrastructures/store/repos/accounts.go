@@ -2,21 +2,22 @@ package repos
 
 import (
 	"context"
-	"time"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
+	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/store"
 	"google.golang.org/api/iterator"
 )
 
 type accounts struct {
 	provider store.Provider
+	clock    cmn.Clock
 }
 
 // NewAccounts はインスタンスを生成します
-func NewAccounts(provider store.Provider) domains.AccountsRepository {
-	return &accounts{provider: provider}
+func NewAccounts(provider store.Provider, clock cmn.Clock) domains.AccountsRepository {
+	return &accounts{provider, clock}
 }
 
 func (t *accounts) Get(email *string) (*models.Account, error) {
@@ -41,7 +42,7 @@ func (t *accounts) CreatePasswordResetToken(model *models.PasswordResetToken) (*
 	return &ref.ID, nil
 }
 func (t *accounts) CleanUp() error {
-	now := time.Now()
+	now := t.clock.Now()
 	client := t.provider.GetClient()
 	batch := client.Batch()
 	ctx := context.Background()
@@ -56,11 +57,7 @@ func (t *accounts) CleanUp() error {
 		if err != nil {
 			return err
 		}
-		var old models.PasswordResetToken
-		doc.DataTo(&old)
-		if old.Expires.Equal(now) || old.Expires.Before(now) {
-			batch.Delete(doc.Ref)
-		}
+		batch.Delete(doc.Ref)
 	}
 	if _, err := batch.Commit(ctx); err != nil {
 		return err
@@ -68,13 +65,13 @@ func (t *accounts) CleanUp() error {
 	return nil
 }
 func (t *accounts) CleanUpByEmail(email *string) error {
-	now := time.Now()
+	now := t.clock.Now()
 	client := t.provider.GetClient()
 	batch := client.Batch()
 	ctx := context.Background()
 	passwordRestTokensRef := client.Collection("password-reset-tokens")
 
-	iter := passwordRestTokensRef.Where("email", "==", *email).Documents(ctx)
+	iter := passwordRestTokensRef.Where("email", "==", *email).Where("expires", "<=", now).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -83,11 +80,7 @@ func (t *accounts) CleanUpByEmail(email *string) error {
 		if err != nil {
 			return err
 		}
-		var old models.PasswordResetToken
-		doc.DataTo(&old)
-		if old.Expires.Equal(now) || old.Expires.Before(now) {
-			batch.Delete(doc.Ref)
-		}
+		batch.Delete(doc.Ref)
 	}
 	if _, err := batch.Commit(ctx); err != nil {
 		return err

@@ -3,19 +3,19 @@ package usecases
 import (
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/domains/services"
+	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
 
 type (
 	accounts struct {
 		query             AccountsQuery
 		jwt               domains.Jwt
-		claimsProvider    domains.ClaimsProvider
 		service           services.Accounts
 		resetPasswordMail domains.ResetPasswordMail
+		clock             cmn.Clock
 	}
 	// Accounts is AccountsController
 	Accounts interface {
@@ -74,12 +74,14 @@ func NewAccounts(
 	jwt domains.Jwt,
 	service services.Accounts,
 	resetPasswordMail domains.ResetPasswordMail,
+	clock cmn.Clock,
 ) Accounts {
 	return &accounts{
-		query:             query,
-		jwt:               jwt,
-		service:           service,
-		resetPasswordMail: resetPasswordMail,
+		query,
+		jwt,
+		service,
+		resetPasswordMail,
+		clock,
 	}
 }
 func (t *accounts) SignIn(args *SignInArgs) (*SignInResult, error, error) {
@@ -188,7 +190,7 @@ func (t *accounts) GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetR
 	if err != nil {
 		return nil, nil, err
 	}
-	if info.Expires.Before(time.Now()) {
+	if info.Expires.Before(t.clock.Now()) {
 		return nil, errors.New("URLの有効期限が切れています。"), nil
 	}
 	return &GetResetPasswordModelResult{
@@ -216,7 +218,7 @@ func (t *accounts) ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult,
 	if err != nil {
 		return nil, nil, err
 	}
-	if info.Expires.Before(time.Now()) {
+	if info.Expires.Before(t.clock.Now()) {
 		return nil, errors.New("URLの有効期限が切れています。"), nil
 	}
 	setPasswordArgs := &services.SetPasswordArgs{

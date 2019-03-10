@@ -4,6 +4,7 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/mails"
 
 	"github.com/wakuwaku3/account-book.api/src/usecases/queries"
@@ -37,6 +38,9 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(auth.NewJwt, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}
+	if err := container.Register(cmn.NewClock, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+		return nil, err
+	}
 	ifs := []reflect.Type{reflect.TypeOf((*domains.ClaimsProvider)(nil)).Elem()}
 	if err := container.Register(auth.NewAnonymousClaimsProvider(), dijct.RegisterOptions{Interfaces: ifs}); err != nil {
 		return nil, err
@@ -54,9 +58,15 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(ctrls.NewAccounts); err != nil {
 		return nil, err
 	}
+	if err := container.Register(ctrls.NewTransactions); err != nil {
+		return nil, err
+	}
 
 	// usecases
 	if err := container.Register(usecases.NewAccounts); err != nil {
+		return nil, err
+	}
+	if err := container.Register(usecases.NewTransactions); err != nil {
 		return nil, err
 	}
 
@@ -64,9 +74,15 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(queries.NewAccounts); err != nil {
 		return nil, err
 	}
+	if err := container.Register(queries.NewTransactions); err != nil {
+		return nil, err
+	}
 
 	// services
 	if err := container.Register(services.NewAccounts); err != nil {
+		return nil, err
+	}
+	if err := container.Register(services.NewTransactions); err != nil {
 		return nil, err
 	}
 
@@ -75,6 +91,9 @@ func CreateContainer() (dijct.Container, error) {
 		return nil, err
 	}
 	if err := container.Register(repos.NewAccounts); err != nil {
+		return nil, err
+	}
+	if err := container.Register(repos.NewTransactions); err != nil {
 		return nil, err
 	}
 

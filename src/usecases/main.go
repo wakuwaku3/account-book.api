@@ -38,4 +38,9 @@ type (
 		JwtClaims        domains.JwtClaims
 		JwtRefreshClaims domains.JwtRefreshClaims
 	}
+	// TransactionsQuery はアカウントのクエリです
+	TransactionsQuery interface {
+		GetTransactions(args *GetTransactionsArgs) (*GetTransactionsResult, error)
+		GetTransaction(id *string) (*GetTransactionResult, error)
+	}
 )
