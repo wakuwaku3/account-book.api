@@ -77,12 +77,9 @@ func (t *transactions) Create(args *TransactionArgs) (*CreateTransactionResult, 
 	if err := args.valid(); err != nil {
 		return nil, err
 	}
-	res, cErr, err := t.service.Create(args.convert())
+	res, err := t.service.Create(args.convert())
 	if err != nil {
 		return nil, err
-	}
-	if cErr != nil {
-		return nil, cErr
 	}
 	return &CreateTransactionResult{
 		TransactionID: res.TransactionID,

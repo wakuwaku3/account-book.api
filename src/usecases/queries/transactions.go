@@ -29,7 +29,7 @@ func (t *transactions) GetTransactions(
 	transactions := make([]usecases.GetTransactionResult, len(*records))
 	for i, record := range *records {
 		r := &record
-		transactions[i] = *convert(r)
+		transactions[i] = *convertTransaction(r)
 	}
 	return &usecases.GetTransactionsResult{Transactions: transactions}, nil
 }
@@ -41,9 +41,9 @@ func (t *transactions) GetTransaction(id *string) (
 	if err != nil {
 		return nil, err
 	}
-	return convert(model), nil
+	return convertTransaction(model), nil
 }
-func convert(model *models.Transaction) *usecases.GetTransactionResult {
+func convertTransaction(model *models.Transaction) *usecases.GetTransactionResult {
 	return &usecases.GetTransactionResult{
 		Amount:        model.Amount,
 		Category:      model.Category,

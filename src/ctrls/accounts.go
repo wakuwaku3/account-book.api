@@ -1,7 +1,9 @@
 package ctrls
 
 import (
+	"github.com/labstack/gommon/log"
 	"github.com/wakuwaku3/account-book.api/src/ctrls/responses"
+	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
 
 	"github.com/wakuwaku3/account-book.api/src/usecases"
 
@@ -65,6 +67,10 @@ func (t *accounts) SignIn(c echo.Context) error {
 	}
 	res, err := t.useCase.SignIn(request.Convert())
 	if err != nil {
+		if _, ok := err.(apperrors.ClientError); !ok {
+			log.Error(err)
+			return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.FailureSignIn))
+		}
 		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteResponse(c, signInResponse{
@@ -85,6 +91,10 @@ func (t *accounts) Refresh(c echo.Context) error {
 	}
 	res, err := t.useCase.Refresh(request.Convert())
 	if err != nil {
+		if _, ok := err.(apperrors.ClientError); !ok {
+			log.Error(err)
+			return responses.WriteEmptyResponse(c)
+		}
 		return responses.WriteUnAuthorizedErrorResponse(c)
 	}
 	return responses.WriteResponse(c, refreshResponse{
@@ -104,6 +114,10 @@ func (t *accounts) PasswordResetRequesting(c echo.Context) error {
 	}
 	err := t.useCase.PasswordResetRequesting(&usecases.PasswordResetRequestingArgs{Email: request.Email})
 	if err != nil {
+		if _, ok := err.(apperrors.ClientError); !ok {
+			log.Error(err)
+			return responses.WriteEmptyResponse(c)
+		}
 		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteEmptyResponse(c)
@@ -133,6 +147,10 @@ func (t *accounts) ResetPassword(c echo.Context) error {
 		Password:           request.Password,
 	})
 	if err != nil {
+		if _, ok := err.(apperrors.ClientError); !ok {
+			log.Error(err)
+			return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.FailurePasswordReset))
+		}
 		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteResponse(c, resetPasswordResponse{

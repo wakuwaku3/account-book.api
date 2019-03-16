@@ -1,8 +1,9 @@
 package ctrls
 
 import (
-	"errors"
 	"time"
+
+	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
 
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 	"github.com/wakuwaku3/account-book.api/src/usecases"
@@ -61,14 +62,11 @@ func (t *transactions) GetTransactions(c echo.Context) error {
 			return err
 		}
 	}
-	res, clientErr, err := t.useCase.GetTransactions(&usecases.GetTransactionsArgs{
+	res, err := t.useCase.GetTransactions(&usecases.GetTransactionsArgs{
 		SelectedMonth: selectedMonth,
 	})
 	if err != nil {
-		return err
-	}
-	if clientErr != nil {
-		return responses.WriteErrorResponse(c, clientErr)
+		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteResponse(c, getTransactionsResponse{
 		Transactions: convertTransactions(res.Transactions),
@@ -94,14 +92,11 @@ func convertTransaction(transaction usecases.GetTransactionResult) getTransactio
 func (t *transactions) GetTransaction(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return responses.WriteErrorResponse(c, errors.New("IDが指定されていません。"))
+		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
 	}
-	res, clientErr, err := t.useCase.GetTransaction(&id)
+	res, err := t.useCase.GetTransaction(&id)
 	if err != nil {
-		return err
-	}
-	if clientErr != nil {
-		return responses.WriteErrorResponse(c, clientErr)
+		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteResponse(c, convertTransaction(*res))
 }
@@ -110,12 +105,9 @@ func (t *transactions) Create(c echo.Context) error {
 	if err := c.Bind(&request); err != nil {
 		return err
 	}
-	res, clientErr, err := t.useCase.Create(request.convert())
+	res, err := t.useCase.Create(request.convert())
 	if err != nil {
-		return err
-	}
-	if clientErr != nil {
-		return responses.WriteErrorResponse(c, clientErr)
+		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteResponse(c, createTransactionResponse{
 		TransactionID: res.TransactionID,
@@ -132,32 +124,24 @@ func (t *transactionRequest) convert() *usecases.TransactionArgs {
 func (t *transactions) Update(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return responses.WriteErrorResponse(c, errors.New("IDが指定されていません。"))
+		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
 	}
 	request := new(transactionRequest)
 	if err := c.Bind(&request); err != nil {
 		return err
 	}
-	clientErr, err := t.useCase.Update(&id, request.convert())
-	if err != nil {
-		return err
-	}
-	if clientErr != nil {
-		return responses.WriteErrorResponse(c, clientErr)
+	if err := t.useCase.Update(&id, request.convert()); err != nil {
+		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteEmptyResponse(c)
 }
 func (t *transactions) Delete(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return responses.WriteErrorResponse(c, errors.New("IDが指定されていません。"))
+		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
 	}
-	clientErr, err := t.useCase.Delete(&id)
-	if err != nil {
-		return err
-	}
-	if clientErr != nil {
-		return responses.WriteErrorResponse(c, clientErr)
+	if err := t.useCase.Delete(&id); err != nil {
+		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteEmptyResponse(c)
 }

@@ -79,6 +79,13 @@ type (
 		Update(id *string, model *models.Transaction) error
 		Delete(id *string) error
 	}
+	// PlansRepository は計画のリポジトリです
+	PlansRepository interface {
+		Get() (*[]models.Plan, error)
+		GetByID(id *string) (*models.Plan, error)
+		Create(model *models.Plan) (*string, error)
+		Update(id *string, model *models.Plan) error
+	}
 )
 
 // Try は成功するか上限回数まで処理を繰り返し行います
