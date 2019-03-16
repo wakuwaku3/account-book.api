@@ -1,8 +1,9 @@
 package services
 
 import (
-	"errors"
 	"time"
+
+	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
@@ -16,9 +17,9 @@ type (
 	}
 	// Transactions is TransactionsService
 	Transactions interface {
-		Create(args *TransactionArgs) (*CreateTransactionResult, error, error)
-		Update(id *string, args *TransactionArgs) (error, error)
-		Delete(id *string) (error, error)
+		Create(args *TransactionArgs) (*CreateTransactionResult, error)
+		Update(id *string, args *TransactionArgs) error
+		Delete(id *string) error
 	}
 	// TransactionArgs は引数です
 	TransactionArgs struct {
@@ -36,12 +37,12 @@ type (
 func NewTransactions(repos domains.TransactionsRepository, clock cmn.Clock) Transactions {
 	return &transactions{repos, clock}
 }
-func (t *transactions) Create(args *TransactionArgs) (*CreateTransactionResult, error, error) {
+func (t *transactions) Create(args *TransactionArgs) (*CreateTransactionResult, error) {
 	id, err := t.repos.Create(args.convert(t.clock.Now()))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return &CreateTransactionResult{TransactionID: *id}, nil, nil
+	return &CreateTransactionResult{TransactionID: *id}, nil
 }
 func (t *TransactionArgs) convert(now time.Time) *models.Transaction {
 	return &models.Transaction{
@@ -51,13 +52,13 @@ func (t *TransactionArgs) convert(now time.Time) *models.Transaction {
 		Date:     now,
 	}
 }
-func (t *transactions) Update(id *string, args *TransactionArgs) (error, error) {
+func (t *transactions) Update(id *string, args *TransactionArgs) error {
 	model, err := t.repos.Get(id)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if model.DailyID != nil {
-		return errors.New("締め処理後の取引は変更できません。"), nil
+		return apperrors.NewClientError(apperrors.ClosedTransaction)
 	}
 
 	model.Amount = args.Amount
@@ -65,21 +66,21 @@ func (t *transactions) Update(id *string, args *TransactionArgs) (error, error) 
 	model.Notes = args.Notes
 
 	if err := t.repos.Update(id, model); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, nil
+	return nil
 }
-func (t *transactions) Delete(id *string) (error, error) {
+func (t *transactions) Delete(id *string) error {
 	model, err := t.repos.Get(id)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if model.DailyID != nil {
-		return errors.New("締め処理後の取引は削除できません。"), nil
+		return apperrors.NewClientError(apperrors.ClosedTransaction)
 	}
 
 	if err := t.repos.Delete(id); err != nil {
-		return nil, err
+		return err
 	}
-	return nil, nil
+	return nil
 }

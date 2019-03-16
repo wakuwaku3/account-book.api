@@ -2,9 +2,9 @@ package usecases
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
 	"github.com/wakuwaku3/account-book.api/src/domains/services"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
@@ -19,11 +19,11 @@ type (
 	}
 	// Accounts is AccountsController
 	Accounts interface {
-		SignIn(args *SignInArgs) (*SignInResult, error, error)
+		SignIn(args *SignInArgs) (*SignInResult, error)
 		Refresh(args *RefreshArgs) (*RefreshResult, error)
-		PasswordResetRequesting(args *PasswordResetRequestingArgs) (error, error)
-		GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetResetPasswordModelResult, error, error)
-		ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error, error)
+		PasswordResetRequesting(args *PasswordResetRequestingArgs) error
+		GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetResetPasswordModelResult, error)
+		ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error)
 	}
 	// SignInArgs は 引数です
 	SignInArgs struct {
@@ -84,45 +84,45 @@ func NewAccounts(
 		clock,
 	}
 }
-func (t *accounts) SignIn(args *SignInArgs) (*SignInResult, error, error) {
+func (t *accounts) SignIn(args *SignInArgs) (*SignInResult, error) {
 	err := args.valid()
 	if err != nil {
-		return nil, err, nil
+		return nil, err
 	}
 	info, err := t.query.GetSignInInfo(&args.Email)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	err = t.service.ComparePassword(&services.ComparePasswordArgs{
 		HashedPassword: info.HashedPassword,
 		InputPassword:  args.Password,
 	})
 	if err != nil {
-		return nil, err, nil
+		return nil, err
 	}
 	token, err := t.jwt.CreateToken(&info.JwtClaims)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	refreshToken, err := t.jwt.CreateRefreshToken(&info.JwtRefreshClaims)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	return &SignInResult{
 		Token:        *token,
 		RefreshToken: *refreshToken,
-	}, nil, nil
+	}, nil
 }
 func (t *SignInArgs) valid() error {
-	array := make([]string, 0)
+	err := apperrors.NewClientError()
 	if t.Email == "" {
-		array = append(array, "メールアドレスが入力されていません。")
+		err.Append(apperrors.RequiredMailAddress)
 	}
 	if t.Password == "" {
-		array = append(array, "パスワードが入力されていません。")
+		err.Append(apperrors.RequiredPassword)
 	}
-	if len(array) > 0 {
-		return errors.New(strings.Join(array, "\n"))
+	if err.HasError() {
+		return err
 	}
 	return nil
 }
@@ -151,15 +151,15 @@ func (t *accounts) Refresh(args *RefreshArgs) (*RefreshResult, error) {
 		RefreshToken: *refreshToken,
 	}, nil
 }
-func (t *accounts) PasswordResetRequesting(args *PasswordResetRequestingArgs) (error, error) {
+func (t *accounts) PasswordResetRequesting(args *PasswordResetRequestingArgs) error {
 	if err := args.valid(); err != nil {
-		return err, nil
+		return err
 	}
 	token, err := t.service.CreatePasswordResetToken(&services.CreatePasswordResetTokenArgs{
 		Email: args.Email,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if token != nil {
 		go func() {
@@ -170,87 +170,87 @@ func (t *accounts) PasswordResetRequesting(args *PasswordResetRequestingArgs) (e
 			t.resetPasswordMail.Send(&args)
 		}()
 	}
-	return nil, nil
+	return nil
 }
 func (t *PasswordResetRequestingArgs) valid() error {
-	array := make([]string, 0)
+	err := apperrors.NewClientError()
 	if t.Email == "" {
-		array = append(array, "メールアドレスが入力されていません。")
+		err.Append(apperrors.RequiredMailAddress)
 	}
-	if len(array) > 0 {
-		return errors.New(strings.Join(array, "\n"))
+	if err.HasError() {
+		return err
 	}
 	return nil
 }
-func (t *accounts) GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetResetPasswordModelResult, error, error) {
+func (t *accounts) GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetResetPasswordModelResult, error) {
 	if err := args.valid(); err != nil {
-		return nil, err, nil
+		return nil, err
 	}
 	info, err := t.query.GetResetPasswordModelInfo(&args.PasswordResetToken)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if info.Expires.Before(t.clock.Now()) {
-		return nil, errors.New("URLの有効期限が切れています。"), nil
+		return nil, errors.New("URLの有効期限が切れています。")
 	}
 	return &GetResetPasswordModelResult{
 		Email: info.Email,
-	}, nil, nil
+	}, nil
 }
 func (t *GetResetPasswordModelArgs) valid() error {
-	array := make([]string, 0)
+	err := apperrors.NewClientError()
 	if t.PasswordResetToken == "" {
-		array = append(array, "パスワードトークンが入力されていません。")
+		err.Append(apperrors.RequiredPasswordToken)
 	}
-	if len(array) > 0 {
-		return errors.New(strings.Join(array, "\n"))
+	if err.HasError() {
+		return err
 	}
 	return nil
 }
-func (t *accounts) ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error, error) {
+func (t *accounts) ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error) {
 	if err := args.valid(); err != nil {
-		return nil, err, nil
+		return nil, err
 	}
 	if err := t.service.ValidPassword(&args.Password); err != nil {
-		return nil, err, nil
+		return nil, err
 	}
 	info, err := t.query.GetResetPasswordInfo(&args.PasswordResetToken)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if info.Expires.Before(t.clock.Now()) {
-		return nil, errors.New("URLの有効期限が切れています。"), nil
+		return nil, errors.New("URLの有効期限が切れています。")
 	}
 	setPasswordArgs := &services.SetPasswordArgs{
 		Email:    info.Email,
 		Password: args.Password,
 	}
 	if err := t.service.SetPassword(setPasswordArgs); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	token, err := t.jwt.CreateToken(&info.JwtClaims)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	refreshToken, err := t.jwt.CreateRefreshToken(&info.JwtRefreshClaims)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	return &ResetPasswordResult{
 		Token:        *token,
 		RefreshToken: *refreshToken,
-	}, nil, nil
+	}, nil
 }
 func (t *ResetPasswordArgs) valid() error {
-	array := make([]string, 0)
+	err := apperrors.NewClientError()
 	if t.PasswordResetToken == "" {
-		array = append(array, "パスワードトークンが入力されていません。")
+		err.Append(apperrors.RequiredPasswordToken)
 	}
 	if t.Password == "" {
-		array = append(array, "パスワードが入力されていません。")
+		err.Append(apperrors.RequiredPassword)
 	}
-	if len(array) > 0 {
-		return errors.New(strings.Join(array, "\n"))
+	if err.HasError() {
+		return err
 	}
 	return nil
 }

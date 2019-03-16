@@ -3,6 +3,8 @@ package responses
 import (
 	"net/http"
 
+	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
+
 	"github.com/labstack/echo"
 )
 
@@ -18,14 +20,13 @@ type (
 )
 
 // WriteErrorResponse はエラーをレスポンスボディーに書き込みます
-func WriteErrorResponse(c echo.Context, errs ...error) error {
-	errors := make([]string, len(errs))
-	for i, err := range errs {
-		errors[i] = err.Error()
+func WriteErrorResponse(c echo.Context, err error) error {
+	if cErr, ok := err.(apperrors.ClientError); ok {
+		return c.JSON(http.StatusBadRequest, ErrorResponse{
+			Errors: *cErr.GetErrorCodes(),
+		})
 	}
-	return c.JSON(http.StatusBadRequest, ErrorResponse{
-		Errors: errors,
-	})
+	return err
 }
 
 // WriteResponse は結果をレスポンスボディーに書き込みます

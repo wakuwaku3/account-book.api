@@ -63,12 +63,9 @@ func (t *accounts) SignIn(c echo.Context) error {
 	if err := c.Bind(&request); err != nil {
 		return err
 	}
-	res, clientErr, err := t.useCase.SignIn(request.Convert())
+	res, err := t.useCase.SignIn(request.Convert())
 	if err != nil {
-		return err
-	}
-	if clientErr != nil {
-		return responses.WriteErrorResponse(c, clientErr)
+		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteResponse(c, signInResponse{
 		Token:        res.Token,
@@ -105,12 +102,9 @@ func (t *accounts) PasswordResetRequesting(c echo.Context) error {
 	if err := c.Bind(&request); err != nil {
 		return err
 	}
-	clientErr, err := t.useCase.PasswordResetRequesting(&usecases.PasswordResetRequestingArgs{Email: request.Email})
+	err := t.useCase.PasswordResetRequesting(&usecases.PasswordResetRequestingArgs{Email: request.Email})
 	if err != nil {
-		return err
-	}
-	if clientErr != nil {
-		return responses.WriteErrorResponse(c, clientErr)
+		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteEmptyResponse(c)
 }
@@ -119,14 +113,11 @@ func (t *accounts) GetResetPasswordModel(c echo.Context) error {
 	request := &getResetPasswordModelRequest{
 		PasswordResetToken: passwordResetToken,
 	}
-	res, clientErr, err := t.useCase.GetResetPasswordModel(&usecases.GetResetPasswordModelArgs{
+	res, err := t.useCase.GetResetPasswordModel(&usecases.GetResetPasswordModelArgs{
 		PasswordResetToken: request.PasswordResetToken,
 	})
 	if err != nil {
-		return err
-	}
-	if clientErr != nil {
-		return responses.WriteErrorResponse(c, clientErr)
+		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteResponse(c, getResetPasswordModelResponse{
 		Email: res.Email,
@@ -137,15 +128,12 @@ func (t *accounts) ResetPassword(c echo.Context) error {
 	if err := c.Bind(&request); err != nil {
 		return err
 	}
-	res, clientErr, err := t.useCase.ResetPassword(&usecases.ResetPasswordArgs{
+	res, err := t.useCase.ResetPassword(&usecases.ResetPasswordArgs{
 		PasswordResetToken: request.PasswordResetToken,
 		Password:           request.Password,
 	})
 	if err != nil {
-		return err
-	}
-	if clientErr != nil {
-		return responses.WriteErrorResponse(c, clientErr)
+		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteResponse(c, resetPasswordResponse{
 		Token:        res.Token,

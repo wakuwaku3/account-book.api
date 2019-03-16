@@ -1,10 +1,9 @@
 package usecases
 
 import (
-	"errors"
-	"strings"
 	"time"
 
+	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
 	"github.com/wakuwaku3/account-book.api/src/domains/services"
 )
 
@@ -15,11 +14,11 @@ type (
 	}
 	// Transactions is TransactionsUseCases
 	Transactions interface {
-		GetTransactions(args *GetTransactionsArgs) (*GetTransactionsResult, error, error)
-		GetTransaction(id *string) (*GetTransactionResult, error, error)
-		Create(args *TransactionArgs) (*CreateTransactionResult, error, error)
-		Update(id *string, args *TransactionArgs) (error, error)
-		Delete(id *string) (error, error)
+		GetTransactions(args *GetTransactionsArgs) (*GetTransactionsResult, error)
+		GetTransaction(id *string) (*GetTransactionResult, error)
+		Create(args *TransactionArgs) (*CreateTransactionResult, error)
+		Update(id *string, args *TransactionArgs) error
+		Delete(id *string) error
 	}
 	// GetTransactionsArgs は引数です
 	GetTransactionsArgs struct {
@@ -60,45 +59,45 @@ func NewTransactions(
 		service,
 	}
 }
-func (t *transactions) GetTransactions(args *GetTransactionsArgs) (*GetTransactionsResult, error, error) {
+func (t *transactions) GetTransactions(args *GetTransactionsArgs) (*GetTransactionsResult, error) {
 	info, err := t.query.GetTransactions(args)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return info, nil, nil
+	return info, nil
 }
-func (t *transactions) GetTransaction(id *string) (*GetTransactionResult, error, error) {
+func (t *transactions) GetTransaction(id *string) (*GetTransactionResult, error) {
 	info, err := t.query.GetTransaction(id)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return info, nil, nil
+	return info, nil
 }
-func (t *transactions) Create(args *TransactionArgs) (*CreateTransactionResult, error, error) {
+func (t *transactions) Create(args *TransactionArgs) (*CreateTransactionResult, error) {
 	if err := args.valid(); err != nil {
-		return nil, err, nil
+		return nil, err
 	}
 	res, cErr, err := t.service.Create(args.convert())
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if cErr != nil {
-		return nil, cErr, nil
+		return nil, cErr
 	}
 	return &CreateTransactionResult{
 		TransactionID: res.TransactionID,
-	}, nil, nil
+	}, nil
 }
 func (t *TransactionArgs) valid() error {
-	array := make([]string, 0)
+	err := apperrors.NewClientError()
 	if t.Amount == nil {
-		array = append(array, "金額が入力されていません。")
+		err.Append(apperrors.RequiredAmount)
 	}
 	if t.Category == nil {
-		array = append(array, "カテゴリが入力されていません。")
+		err.Append(apperrors.RequiredCategory)
 	}
-	if len(array) > 0 {
-		return errors.New(strings.Join(array, "\n"))
+	if err.HasError() {
+		return err
 	}
 	return nil
 }
@@ -109,12 +108,12 @@ func (t *TransactionArgs) convert() *services.TransactionArgs {
 		Notes:    t.Notes,
 	}
 }
-func (t *transactions) Update(id *string, args *TransactionArgs) (error, error) {
+func (t *transactions) Update(id *string, args *TransactionArgs) error {
 	if err := args.valid(); err != nil {
-		return err, nil
+		return err
 	}
 	return t.service.Update(id, args.convert())
 }
-func (t *transactions) Delete(id *string) (error, error) {
+func (t *transactions) Delete(id *string) error {
 	return t.service.Delete(id)
 }
