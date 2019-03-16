@@ -46,5 +46,6 @@
     "go.sum"
   ],
   "editor.formatOnSave": true,
-  "editor.codeLens": false
+  "editor.codeLens": false,
+  "workbench.colorTheme": "Monokai"
 }
