@@ -2,6 +2,7 @@ package repos
 
 import (
 	"context"
+	"time"
 
 	"cloud.google.com/go/firestore"
 
@@ -68,6 +69,32 @@ func (t *plans) Get() (*[]models.Plan, error) {
 		}
 		plan.PlanID = doc.Ref.ID
 		plans = append(plans, plan)
+	}
+	return &plans, nil
+}
+func (t *plans) GetByMonth(month *time.Time) (*[]models.Plan, error) {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+	start := t.clock.GetMonthStartDay(month)
+
+	plans := make([]models.Plan, 0)
+	iter := t.plansRef(client).Where("is-deleted", "==", false).Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		var plan models.Plan
+		if err := doc.DataTo(&plan); err != nil {
+			return nil, err
+		}
+		plan.PlanID = doc.Ref.ID
+		if (plan.Start == nil || plan.Start.Equal(start) || plan.Start.Before(start)) && (plan.End == nil || plan.End.Equal(start) || plan.End.After(start)) {
+			plans = append(plans, plan)
+		}
 	}
 	return &plans, nil
 }

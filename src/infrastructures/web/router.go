@@ -132,5 +132,14 @@ func (web *web) setRoute() *web {
 		})
 	})
 
+	// Dashboard
+	//GET
+	auth.GET("/dashboard", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrl.Dashboard) error {
+			return controller.GetDashboard(c)
+		})
+	})
+
 	return web
 }

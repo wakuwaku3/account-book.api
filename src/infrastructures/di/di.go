@@ -64,6 +64,9 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(ctrls.NewPlans); err != nil {
 		return nil, err
 	}
+	if err := container.Register(ctrls.NewDashboard); err != nil {
+		return nil, err
+	}
 
 	// usecases
 	if err := container.Register(usecases.NewAccounts); err != nil {
@@ -73,6 +76,9 @@ func CreateContainer() (dijct.Container, error) {
 		return nil, err
 	}
 	if err := container.Register(usecases.NewPlans); err != nil {
+		return nil, err
+	}
+	if err := container.Register(usecases.NewDashboard); err != nil {
 		return nil, err
 	}
 
@@ -86,6 +92,9 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(queries.NewPlans); err != nil {
 		return nil, err
 	}
+	if err := container.Register(queries.NewDashboard); err != nil {
+		return nil, err
+	}
 
 	// services
 	if err := container.Register(services.NewAccounts); err != nil {
@@ -95,6 +104,9 @@ func CreateContainer() (dijct.Container, error) {
 		return nil, err
 	}
 	if err := container.Register(services.NewPlans); err != nil {
+		return nil, err
+	}
+	if err := container.Register(services.NewDashboard); err != nil {
 		return nil, err
 	}
 
@@ -109,6 +121,9 @@ func CreateContainer() (dijct.Container, error) {
 		return nil, err
 	}
 	if err := container.Register(repos.NewPlans); err != nil {
+		return nil, err
+	}
+	if err := container.Register(repos.NewDashboard); err != nil {
 		return nil, err
 	}
 

@@ -43,9 +43,13 @@ type (
 		GetTransactions(args *GetTransactionsArgs) (*GetTransactionsResult, error)
 		GetTransaction(id *string) (*GetTransactionResult, error)
 	}
-	// PlansQuery はアカウントのクエリです
+	// PlansQuery は計画のクエリです
 	PlansQuery interface {
 		GetPlans() (*GetPlansResult, error)
 		GetPlan(id *string) (*GetPlanResult, error)
+	}
+	// DashboardQuery はダッシュボードのクエリです
+	DashboardQuery interface {
+		GetSummary(args *GetDashboardArgs) (*GetDashboardResult, error)
 	}
 )

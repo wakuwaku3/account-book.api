@@ -49,6 +49,13 @@ const (
 	FailurePasswordReset Code = "00013"
 	// IsDeleted :削除済みです
 	IsDeleted Code = "00014"
+
+	// NotSamePassword :パスワードが違います
+	NotSamePassword Code = "00015"
+	// LessLengthPathword :パスワードは8文字以上設定してください。
+	LessLengthPathword Code = "00016"
+	// InvalidCharPassword :パスワードには、半角英小文字、大文字、数字をそれぞれ1種類以上使用してください。
+	InvalidCharPassword Code = "00017"
 )
 
 // NewClientError はClientErrorを生成します。

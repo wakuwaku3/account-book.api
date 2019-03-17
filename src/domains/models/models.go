@@ -56,6 +56,7 @@ type (
 		Balance             *int      `firestore:"balance"`
 		PreviousDashboardID *string   `firestore:"previous-dashboard-id"`
 		PreviousBalance     *int      `firestore:"previous-balance"`
+		State               string    `firestore:"state"`
 		Daily               []Daily   `firestore:"-"`
 		Actual              []Actual  `firestore:"-"`
 	}

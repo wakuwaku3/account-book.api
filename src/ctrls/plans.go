@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 	"github.com/wakuwaku3/account-book.api/src/usecases"
 
 	"github.com/wakuwaku3/account-book.api/src/ctrls/responses"
@@ -15,7 +14,6 @@ import (
 type (
 	plans struct {
 		useCase usecases.Plans
-		clock   cmn.Clock
 	}
 	// Plans is PlansController
 	Plans interface {
@@ -51,8 +49,8 @@ type (
 )
 
 // NewPlans is create instance
-func NewPlans(useCase usecases.Plans, clock cmn.Clock) Plans {
-	return &plans{useCase, clock}
+func NewPlans(useCase usecases.Plans) Plans {
+	return &plans{useCase}
 }
 
 func (t *plans) GetPlans(c echo.Context) error {

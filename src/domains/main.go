@@ -82,9 +82,16 @@ type (
 	// PlansRepository は計画のリポジトリです
 	PlansRepository interface {
 		Get() (*[]models.Plan, error)
+		GetByMonth(month *time.Time) (*[]models.Plan, error)
 		GetByID(id *string) (*models.Plan, error)
 		Create(model *models.Plan) (*string, error)
 		Update(id *string, model *models.Plan) error
+	}
+	// DashboardRepository はダッシュボードのリポジトリです
+	DashboardRepository interface {
+		GetLatestClosedDashboard() (*models.Dashboard, error)
+		GetOldestOpenDashboard() (*models.Dashboard, error)
+		GetByMonth(month *time.Time) (*models.Dashboard, error)
 	}
 )
 

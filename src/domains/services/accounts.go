@@ -1,11 +1,10 @@
 package services
 
 import (
-	"errors"
 	"regexp"
-	"strings"
 	"unicode/utf8"
 
+	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 
@@ -60,22 +59,22 @@ func NewAccounts(
 var passwordRegex = regexp.MustCompile(`^.*[0-9].*[a-z].*[A-Z]$|^.*[0-9].*[A-Z].*[a-z]$|^.*[a-z].*[0-9].*[A-Z]$|^.*[a-z].*[A-Z].*[0-9]$|^.*[A-Z].*[0-9].*[a-z]$|^.*[A-Z].*[a-z].*[0-9]$`)
 
 func (t *accounts) ValidPassword(password *string) error {
-	array := make([]string, 0)
+	err := apperrors.NewClientError()
 	if utf8.RuneCountInString(*password) < 8 {
-		array = append(array, "パスワードは8文字以上設定してください。")
+		err.Append(apperrors.LessLengthPathword)
 	}
 	if !passwordRegex.MatchString(*password) {
-		array = append(array, "パスワードには、半角英小文字、大文字、数字をそれぞれ1種類以上使用してください。")
+		err.Append(apperrors.InvalidCharPassword)
 	}
-	if len(array) > 0 {
-		return errors.New(strings.Join(array, "\n"))
+	if err.HasError() {
+		return err
 	}
 	return nil
 }
 func (t *accounts) ComparePassword(args *ComparePasswordArgs) error {
-	hashedPassword := t.crypt.Hash(&args.InputPassword)
-	if *hashedPassword != args.HashedPassword {
-		return errors.New("パスワードが違います。")
+	hashedPassword := *t.crypt.Hash(&args.InputPassword)
+	if hashedPassword != args.HashedPassword {
+		return apperrors.NewClientError(apperrors.NotSamePassword)
 	}
 	return nil
 }
