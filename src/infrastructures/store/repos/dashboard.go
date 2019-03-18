@@ -46,10 +46,41 @@ func (t *dashboard) GetLatestClosedDashboard() (*models.Dashboard, error) {
 	}
 	var model models.Dashboard
 	if err := doc.DataTo(&model); err != nil {
+		iter.Stop()
 		return nil, err
 	}
 	model.DashboardID = doc.Ref.ID
+	iter.Stop()
+	actual, err := t.getActual(ctx, client, model.DashboardID)
+	if err != nil {
+		return nil, err
+	}
+	model.Actual = *actual
 	return &model, nil
+}
+func (t *dashboard) getActual(
+	ctx context.Context,
+	client *firestore.Client,
+	documentID string,
+) (*[]models.Actual, error) {
+	iter := t.dashboardsRef(client).Doc(documentID).Collection("actual").Documents(ctx)
+	slice := make([]models.Actual, 0)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		var model models.Actual
+		if err := doc.DataTo(&model); err != nil {
+			return nil, err
+		}
+		model.ActualID = doc.Ref.ID
+		slice = append(slice, model)
+	}
+	return &slice, nil
 }
 func (t *dashboard) GetOldestOpenDashboard() (*models.Dashboard, error) {
 	client := t.provider.GetClient()
@@ -65,9 +96,16 @@ func (t *dashboard) GetOldestOpenDashboard() (*models.Dashboard, error) {
 	}
 	var model models.Dashboard
 	if err := doc.DataTo(&model); err != nil {
+		iter.Stop()
 		return nil, err
 	}
 	model.DashboardID = doc.Ref.ID
+	iter.Stop()
+	actual, err := t.getActual(ctx, client, model.DashboardID)
+	if err != nil {
+		return nil, err
+	}
+	model.Actual = *actual
 	return &model, nil
 }
 func (t *dashboard) GetByMonth(month *time.Time) (*models.Dashboard, error) {
@@ -88,5 +126,10 @@ func (t *dashboard) GetByMonth(month *time.Time) (*models.Dashboard, error) {
 		return nil, err
 	}
 	model.DashboardID = doc.Ref.ID
+	actual, err := t.getActual(ctx, client, model.DashboardID)
+	if err != nil {
+		return nil, err
+	}
+	model.Actual = *actual
 	return &model, nil
 }
