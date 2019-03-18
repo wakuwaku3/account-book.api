@@ -74,7 +74,7 @@ func (t *accounts) ValidPassword(password *string) error {
 func (t *accounts) ComparePassword(args *ComparePasswordArgs) error {
 	hashedPassword := *t.crypt.Hash(&args.InputPassword)
 	if hashedPassword != args.HashedPassword {
-		return apperrors.NewClientError(apperrors.NotSamePassword)
+		return apperrors.NewClientError(apperrors.FailureSignIn)
 	}
 	return nil
 }
