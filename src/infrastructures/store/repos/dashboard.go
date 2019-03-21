@@ -32,6 +32,10 @@ func (t *dashboard) dashboardsRef(client *firestore.Client) *firestore.Collectio
 	return client.Collection("users").Doc(*userID).Collection("dashboards")
 }
 
+func (t *dashboard) actualRef(client *firestore.Client, dashboardID *string) *firestore.CollectionRef {
+	return t.dashboardsRef(client).Doc(*dashboardID).Collection("actual")
+}
+
 func (t *dashboard) GetLatestClosedDashboard() (*models.Dashboard, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
@@ -132,4 +136,48 @@ func (t *dashboard) GetByMonth(month *time.Time) (*models.Dashboard, error) {
 	}
 	model.Actual = *actual
 	return &model, nil
+}
+func (t *dashboard) GetActual(dashboardID *string, id *string) (*models.Actual, error) {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+	doc, err := t.actualRef(client, dashboardID).Doc(*id).Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var model models.Actual
+	doc.DataTo(&model)
+	model.ActualID = doc.Ref.ID
+	return &model, nil
+}
+func (t *dashboard) ExistsActual(dashboardID *string, planID *string) (*string, error) {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+
+	iter := t.actualRef(client, dashboardID).Where("plan-id", "==", *planID).Documents(ctx)
+	doc, err := iter.Next()
+	if err == iterator.Done {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &doc.Ref.ID, nil
+}
+func (t *dashboard) CreateActual(dashboardID *string, model *models.Actual) (*string, error) {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+	ref, _, err := t.actualRef(client, dashboardID).Add(ctx, model)
+	if err != nil {
+		return nil, err
+	}
+	return &ref.ID, nil
+}
+func (t *dashboard) UpdateActual(dashboardID *string, id *string, model *models.Actual) error {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+	_, err := t.actualRef(client, dashboardID).Doc(*id).Delete(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }

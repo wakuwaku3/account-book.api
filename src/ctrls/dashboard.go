@@ -19,9 +19,12 @@ type (
 		GetDashboard(c echo.Context) error
 	}
 	getDashboardResponse struct {
-		SelectedMonth time.Time                   `json:"selectedMonth"`
-		Summary       getDashboardSummaryResponse `json:"summary"`
-		Plans         []getDashboardPlanResponse  `json:"plans"`
+		SelectedMonth    time.Time                   `json:"selectedMonth"`
+		Summary          getDashboardSummaryResponse `json:"summary"`
+		Plans            []getDashboardPlanResponse  `json:"plans"`
+		State            string                      `json:"state"`
+		CanApprove       bool                        `json:"canApprove"`
+		CanCancelApprove bool                        `json:"canCancelApprove"`
 	}
 	getDashboardSummaryResponse struct {
 		Income          int  `json:"income"`
@@ -76,8 +79,11 @@ func convertDashboard(t *usecases.GetDashboardResult) getDashboardResponse {
 		}
 	}
 	return getDashboardResponse{
-		SelectedMonth: t.SelectedMonth,
-		Plans:         plans,
+		SelectedMonth:    t.SelectedMonth,
+		Plans:            plans,
+		State:       t.State,
+		CanApprove:       t.CanApprove,
+		CanCancelApprove: t.CanCancelApprove,
 		Summary: getDashboardSummaryResponse{
 			Expense:         t.Expense,
 			Income:          t.Income,

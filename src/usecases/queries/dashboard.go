@@ -54,7 +54,7 @@ func (t *dashboard) GetSummary(args *usecases.GetDashboardArgs) (*usecases.GetDa
 	}
 
 	// 前月のダッシュボード取得
-	previousDashboard, err := t.GetPreviousDashboard(selectedMonth)
+	previousDashboard, err := t.getPreviousDashboard(selectedMonth)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (t *dashboard) GetSummary(args *usecases.GetDashboardArgs) (*usecases.GetDa
 		selectedMonth = &m
 	}
 
-	result, err := t.getSummaryByMonthWithoutPreviousDashboard(selectedMonth, currentDashboard)
+	result, allInputPlans, err := t.getSummaryByMonthWithoutPreviousDashboard(selectedMonth, currentDashboard)
 	if err != nil {
 		return nil, err
 	}
@@ -75,10 +75,21 @@ func (t *dashboard) GetSummary(args *usecases.GetDashboardArgs) (*usecases.GetDa
 		// 前月ダッシュボードが取得できた場合のみ設定
 		result.PreviousBalance = previousDashboard.Balance
 	}
-
+	result.CanApprove = t.canApprove(result, allInputPlans, previousDashboard)
+	result.CanCancelApprove = false
 	return result, nil
 }
-func (t *dashboard) GetPreviousDashboard(selectedMonth *time.Time) (*models.Dashboard, error) {
+func (t *dashboard) canApprove(result *usecases.GetDashboardResult, allInputPlans bool, previousDashboard *models.Dashboard) bool {
+	if !allInputPlans {
+		return false
+	}
+	if previousDashboard != nil && previousDashboard.State == "open" {
+		return false
+	}
+	monthStart := t.clock.GetMonthStartDay(nil)
+	return monthStart.Before(result.SelectedMonth)
+}
+func (t *dashboard) getPreviousDashboard(selectedMonth *time.Time) (*models.Dashboard, error) {
 	if selectedMonth != nil {
 		previousMonth := selectedMonth.AddDate(0, -1, 0)
 		return t.repos.GetByMonth(&previousMonth)
@@ -91,25 +102,43 @@ func (t *dashboard) getSummaryByMonth(selectedMonth *time.Time) (*usecases.GetDa
 		return nil, err
 	}
 	if currentDashboard != nil && currentDashboard.State == "closed" {
+		chError := make(chan error)
+		chNext := t.getDashboardByNextMonthWorker(selectedMonth, chError)
+
 		// 締め処理済みの場合、集計済みなのでそのまま返す
 		plans := make([]usecases.PlanResult, len(currentDashboard.Actual))
 		for i, actual := range currentDashboard.Actual {
+			actualID := actual.ActualID
+			actualAmount := actual.ActualAmount
 			plans[i] = usecases.PlanResult{
-				ActualID:     &actual.ActualID,
+				ActualID:     &actualID,
 				IsIncome:     actual.IsIncome,
-				ActualAmount: &actual.ActualAmount,
+				ActualAmount: &actualAmount,
 				PlanAmount:   actual.PlanAmount,
 				PlanID:       actual.PlanID,
 				PlanName:     actual.PlanName,
 			}
 		}
-		return &usecases.GetDashboardResult{
+
+		result := &usecases.GetDashboardResult{
 			Expense:         *currentDashboard.Expense,
 			Income:          *currentDashboard.Income,
 			PreviousBalance: currentDashboard.PreviousBalance,
 			SelectedMonth:   *selectedMonth,
 			Plans:           plans,
-		}, nil
+			State:           "closed",
+		}
+
+		select {
+		case err := <-chError:
+			return nil, err
+		case nextDashboard := <-chNext:
+			result.CanApprove = false
+			result.CanCancelApprove = nextDashboard == nil || nextDashboard.State == "open"
+			break
+		}
+
+		return result, nil
 	}
 
 	return t.getSummaryByMonthWithCurrentDashboard(selectedMonth, currentDashboard)
@@ -118,7 +147,7 @@ func (t *dashboard) getSummaryByMonthWithCurrentDashboard(selectedMonth *time.Ti
 	chError := make(chan error)
 	chPrevious := t.getDashboardByPreviousMonthWorker(selectedMonth, chError)
 
-	result, err := t.getSummaryByMonthWithoutPreviousDashboard(selectedMonth, currentDashboard)
+	result, allInputPlans, err := t.getSummaryByMonthWithoutPreviousDashboard(selectedMonth, currentDashboard)
 	if err != nil {
 		return nil, err
 	}
@@ -131,12 +160,14 @@ func (t *dashboard) getSummaryByMonthWithCurrentDashboard(selectedMonth *time.Ti
 			// 前月ダッシュボードが取得できた場合のみ設定
 			result.PreviousBalance = previousDashboard.Balance
 		}
+		result.CanApprove = t.canApprove(result, allInputPlans, previousDashboard)
+		result.CanCancelApprove = false
 		break
 	}
 
 	return result, nil
 }
-func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *time.Time, currentDashboard *models.Dashboard) (*usecases.GetDashboardResult, error) {
+func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *time.Time, currentDashboard *models.Dashboard) (*usecases.GetDashboardResult, bool, error) {
 	chError := make(chan error)
 
 	chIncome, chExpense := t.getTransactionsWorker(selectedMonth, chError)
@@ -148,7 +179,7 @@ func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *tim
 	var pMap map[string]usecases.PlanResult
 	select {
 	case err := <-chError:
-		return nil, err
+		return nil, false, err
 	case p := <-chPln:
 		pMap = *p
 		break
@@ -157,10 +188,12 @@ func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *tim
 	if currentDashboard != nil {
 		// 実績がある場合優先して上書きする
 		for _, actual := range currentDashboard.Actual {
+			actualID := actual.ActualID
+			actualAmount := actual.ActualAmount
 			pMap[actual.PlanID] = usecases.PlanResult{
-				ActualID:     &actual.ActualID,
+				ActualID:     &actualID,
 				IsIncome:     actual.IsIncome,
-				ActualAmount: &actual.ActualAmount,
+				ActualAmount: &actualAmount,
 				PlanAmount:   actual.PlanAmount,
 				PlanID:       actual.PlanID,
 				PlanName:     actual.PlanName,
@@ -171,6 +204,7 @@ func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *tim
 	// 計画から集計(ついでに戻り値として型を整形する)
 	income := 0
 	expense := 0
+	allInput := true
 	ps := make([]usecases.PlanResult, len(pMap))
 	index := 0
 	for _, pm := range pMap {
@@ -180,6 +214,7 @@ func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *tim
 			} else {
 				expense += pm.PlanAmount
 			}
+			allInput = false
 		} else {
 			if pm.IsIncome {
 				income += *pm.ActualAmount
@@ -193,7 +228,7 @@ func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *tim
 
 	select {
 	case err := <-chError:
-		return nil, err
+		return nil, false, err
 	case i := <-chIncome:
 		income += i
 		break
@@ -201,7 +236,7 @@ func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *tim
 
 	select {
 	case err := <-chError:
-		return nil, err
+		return nil, false, err
 	case e := <-chExpense:
 		expense += e
 		break
@@ -210,7 +245,8 @@ func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *tim
 	result.Income = income
 	result.Expense = expense
 	result.Plans = ps
-	return result, nil
+	result.State = "open"
+	return result, allInput, nil
 }
 func (t *dashboard) getDashboardByMonthWorker(selectedMonth *time.Time, chError chan error) <-chan *models.Dashboard {
 	ch := make(chan *models.Dashboard)
@@ -225,6 +261,10 @@ func (t *dashboard) getDashboardByMonthWorker(selectedMonth *time.Time, chError 
 }
 func (t *dashboard) getDashboardByPreviousMonthWorker(selectedMonth *time.Time, chError chan error) <-chan *models.Dashboard {
 	previousMonth := selectedMonth.AddDate(0, -1, 0)
+	return t.getDashboardByMonthWorker(&previousMonth, chError)
+}
+func (t *dashboard) getDashboardByNextMonthWorker(selectedMonth *time.Time, chError chan error) <-chan *models.Dashboard {
+	previousMonth := selectedMonth.AddDate(0, 1, 0)
 	return t.getDashboardByMonthWorker(&previousMonth, chError)
 }
 func (t *dashboard) getTransactionsWorker(selectedMonth *time.Time, chError chan error) (<-chan int, <-chan int) {

@@ -93,7 +93,7 @@ func (t *accounts) Refresh(c echo.Context) error {
 	if err != nil {
 		if _, ok := err.(apperrors.ClientError); !ok {
 			log.Error(err)
-			return responses.WriteEmptyResponse(c)
+			return responses.WriteUnAuthorizedErrorResponse(c)
 		}
 		return responses.WriteUnAuthorizedErrorResponse(c)
 	}

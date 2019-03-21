@@ -69,12 +69,11 @@ type (
 	}
 	// Actual は実費のデータです
 	Actual struct {
-		ActualID     string    `firestore:"-"`
-		Date         time.Time `firestore:"-"`
-		ActualAmount int       `firestore:"actual-amount"`
-		PlanID       string    `firestore:"plan-id"`
-		PlanName     string    `firestore:"plan-name"`
-		PlanAmount   int       `firestore:"plan-amount"`
-		IsIncome     bool      `firestore:"is-income"`
+		ActualID     string `firestore:"-"`
+		ActualAmount int    `firestore:"actual-amount"`
+		PlanID       string `firestore:"plan-id"`
+		PlanName     string `firestore:"plan-name"`
+		PlanAmount   int    `firestore:"plan-amount"`
+		IsIncome     bool   `firestore:"is-income"`
 	}
 )

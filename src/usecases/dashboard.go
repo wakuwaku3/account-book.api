@@ -21,11 +21,14 @@ type (
 	}
 	// GetDashboardResult は結果です
 	GetDashboardResult struct {
-		SelectedMonth   time.Time
-		Income          int
-		Expense         int
-		PreviousBalance *int
-		Plans           []PlanResult
+		SelectedMonth    time.Time
+		Income           int
+		Expense          int
+		PreviousBalance  *int
+		Plans            []PlanResult
+		State            string
+		CanApprove       bool
+		CanCancelApprove bool
 	}
 	// PlanResult は結果です
 	PlanResult struct {

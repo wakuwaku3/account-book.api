@@ -52,4 +52,9 @@ type (
 	DashboardQuery interface {
 		GetSummary(args *GetDashboardArgs) (*GetDashboardResult, error)
 	}
+	// ActualQuery は実績のクエリです
+	ActualQuery interface {
+		Get(dashboardID *string, id *string) (*GetActualResult, error)
+		GetActualInfo(planID *string) (*ActualInfo, error)
+	}
 )

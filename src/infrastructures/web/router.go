@@ -133,11 +133,34 @@ func (web *web) setRoute() *web {
 	})
 
 	// Dashboard
-	//GET
+	// GET
 	auth.GET("/dashboard", func(c echo.Context) error {
 		container := GetContainer(c)
 		return container.Invoke(func(controller ctrl.Dashboard) error {
 			return controller.GetDashboard(c)
+		})
+	})
+
+	// Actual
+	// Create
+	auth.POST("/actual", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrl.Actual) error {
+			return controller.Create(c)
+		})
+	})
+	// GET
+	auth.GET("/actual/:id", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrl.Actual) error {
+			return controller.Get(c)
+		})
+	})
+	// Edit
+	auth.PUT("/actual/:id", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrl.Actual) error {
+			return controller.Update(c)
 		})
 	})
 

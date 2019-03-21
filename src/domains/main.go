@@ -92,6 +92,10 @@ type (
 		GetLatestClosedDashboard() (*models.Dashboard, error)
 		GetOldestOpenDashboard() (*models.Dashboard, error)
 		GetByMonth(month *time.Time) (*models.Dashboard, error)
+		GetActual(dashboardID *string, id *string) (*models.Actual, error)
+		ExistsActual(dashboardID *string, planID *string) (*string, error)
+		CreateActual(dashboardID *string, model *models.Actual) (*string, error)
+		UpdateActual(dashboardID *string, id *string, model *models.Actual) error
 	}
 )
 
