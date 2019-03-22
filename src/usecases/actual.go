@@ -1,6 +1,9 @@
 package usecases
 
 import (
+	"time"
+
+	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/domains/services"
 )
 
@@ -11,34 +14,31 @@ type (
 	}
 	// Actual is ActualUseCases
 	Actual interface {
-		Get(dashboardID *string, id *string) (*GetActualResult, error)
-		Create(args *ActualArgs) (*CreateActualResult, error)
-		Update(id *string, args *ActualArgs) error
-	}
-	// GetActualResult は結果です
-	GetActualResult struct {
-		ActualID     string
-		ActualAmount int
-		PlanID       string
-		PlanName     string
-		PlanAmount   int
+		Get(args *GetActualArgs) (*GetActualResult, error)
+		Enter(args *EnterActualArgs) error
 	}
 	// ActualInfo は実績登録のための情報です
 	ActualInfo struct {
-		PlanID     string
-		PlanName   string
-		PlanAmount int
-		IsIncome   bool
+		PlanID        string
+		PlanName      string
+		PlanAmount    int
+		IsIncome      bool
+		PlanCreatedAt time.Time
 	}
-	// ActualArgs は引数です
-	ActualArgs struct {
+	// GetActualArgs は引数です
+	GetActualArgs struct {
+		domains.ActualKey
+	}
+	// GetActualResult は結果です
+	GetActualResult struct {
+		PlanName     string
+		PlanAmount   int
+		ActualAmount *int
+	}
+	// EnterActualArgs は引数です
+	EnterActualArgs struct {
+		domains.ActualKey
 		ActualAmount int
-		PlanID       string
-		DashboardID  string
-	}
-	// CreateActualResult は結果です
-	CreateActualResult struct {
-		ActualID string
 	}
 )
 
@@ -52,36 +52,28 @@ func NewActual(
 		service,
 	}
 }
-func (t *actual) Get(dashboardID *string, id *string) (*GetActualResult, error) {
-	return t.query.Get(dashboardID, id)
+func (t *actual) Get(args *GetActualArgs) (*GetActualResult, error) {
+	return t.query.Get(args)
 }
-func (t *actual) Create(args *ActualArgs) (*CreateActualResult, error) {
-	info, err := t.query.GetActualInfo(&args.PlanID)
-	if err != nil {
-		return nil, err
-	}
-	res, err := t.service.Create(args.convert(info))
-	if err != nil {
-		return nil, err
-	}
-	return &CreateActualResult{
-		ActualID: res.ActualID,
-	}, nil
-}
-func (t *ActualArgs) convert(info *ActualInfo) *services.ActualArgs {
-	return &services.ActualArgs{
-		ActualAmount: t.ActualAmount,
-		DashboardID:  t.DashboardID,
-		IsIncome:     info.IsIncome,
-		PlanAmount:   info.PlanAmount,
-		PlanID:       info.PlanID,
-		PlanName:     info.PlanName,
-	}
-}
-func (t *actual) Update(id *string, args *ActualArgs) error {
-	info, err := t.query.GetActualInfo(&args.PlanID)
+func (t *actual) Enter(args *EnterActualArgs) error {
+	info, err := t.query.GetActualInfo(&args.ActualKey)
 	if err != nil {
 		return err
 	}
-	return t.service.Update(id, args.convert(info))
+	return t.service.Enter(args.convert(info))
+}
+func (t *EnterActualArgs) convert(info *ActualInfo) *services.ActualArgs {
+	return &services.ActualArgs{
+		ActualAmount:  t.ActualAmount,
+		IsIncome:      info.IsIncome,
+		PlanAmount:    info.PlanAmount,
+		PlanName:      info.PlanName,
+		PlanCreatedAt: info.PlanCreatedAt,
+		ActualKey: domains.ActualKey{
+			DashboardID:   t.DashboardID,
+			PlanID:        t.PlanID,
+			ActualID:      t.ActualID,
+			SelectedMonth: t.SelectedMonth,
+		},
+	}
 }

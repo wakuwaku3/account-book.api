@@ -8,9 +8,9 @@ type (
 	// Account は アカウントです
 	Account struct {
 		Email          string `firestore:"-"`
-		UserID         string `firestore:"user-id"`
-		HashedPassword string `firestore:"hashed-password"`
-		AccountToken   string `firestore:"account-token"`
+		UserID         string `firestore:"userId"`
+		HashedPassword string `firestore:"hashedPassword"`
+		AccountToken   string `firestore:"accountToken"`
 	}
 	// PasswordResetToken は パスワードリセットのトークンです
 	PasswordResetToken struct {
@@ -21,21 +21,22 @@ type (
 	// User はユーザーです
 	User struct {
 		UserID       string    `firestore:"-"`
-		UserName     string    `firestore:"user-name"`
+		UserName     string    `firestore:"userName"`
 		Email        string    `firestore:"email"`
 		Culture      string    `firestore:"culture"`
-		UseStartDate time.Time `firestore:"use-start-date"`
+		UseStartDate time.Time `firestore:"useStartDate"`
 	}
 	// Plan は計画です
 	Plan struct {
 		PlanID     string     `firestore:"-"`
-		PlanName   string     `firestore:"plan-name"`
+		PlanName   string     `firestore:"planName"`
 		Interval   int        `firestore:"interval"`
-		PlanAmount int        `firestore:"plan-amount"`
-		IsIncome   bool       `firestore:"is-income"`
+		PlanAmount int        `firestore:"planAmount"`
+		IsIncome   bool       `firestore:"isIncome"`
 		Start      *time.Time `firestore:"start"`
 		End        *time.Time `firestore:"end"`
-		IsDeleted  bool       `firestore:"is-deleted"`
+		IsDeleted  bool       `firestore:"isDeleted"`
+		CreatedAt  time.Time  `firestore:"createdAt"`
 	}
 	// Transaction は取引です
 	Transaction struct {
@@ -44,7 +45,7 @@ type (
 		Category      int       `firestore:"category"`
 		Date          time.Time `firestore:"date"`
 		Notes         *string   `firestore:"notes"`
-		DailyID       *string   `firestore:"daily-id"`
+		DailyID       *string   `firestore:"dailyId"`
 	}
 	// Dashboard はダッシュボードです
 	Dashboard struct {
@@ -52,10 +53,10 @@ type (
 		Date                time.Time `firestore:"date"`
 		Income              *int      `firestore:"income"`
 		Expense             *int      `firestore:"expense"`
-		CurrentBalance      *int      `firestore:"current-balance"`
+		CurrentBalance      *int      `firestore:"currentBalance"`
 		Balance             *int      `firestore:"balance"`
-		PreviousDashboardID *string   `firestore:"previous-dashboard-id"`
-		PreviousBalance     *int      `firestore:"previous-balance"`
+		PreviousDashboardID *string   `firestore:"previousDashboardId"`
+		PreviousBalance     *int      `firestore:"previousBalance"`
 		State               string    `firestore:"state"`
 		Daily               []Daily   `firestore:"-"`
 		Actual              []Actual  `firestore:"-"`
@@ -69,11 +70,12 @@ type (
 	}
 	// Actual は実費のデータです
 	Actual struct {
-		ActualID     string `firestore:"-"`
-		ActualAmount int    `firestore:"actual-amount"`
-		PlanID       string `firestore:"plan-id"`
-		PlanName     string `firestore:"plan-name"`
-		PlanAmount   int    `firestore:"plan-amount"`
-		IsIncome     bool   `firestore:"is-income"`
+		ActualID      string    `firestore:"-"`
+		ActualAmount  int       `firestore:"actualAmount"`
+		PlanID        string    `firestore:"planId"`
+		PlanName      string    `firestore:"planName"`
+		PlanAmount    int       `firestore:"planAmount"`
+		IsIncome      bool      `firestore:"isIncome"`
+		PlanCreatedAt time.Time `firestore:"planCreatedAt"`
 	}
 )

@@ -1,7 +1,9 @@
 package ctrls
 
 import (
-	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
+	"time"
+
+	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/usecases"
 
 	"github.com/wakuwaku3/account-book.api/src/ctrls/responses"
@@ -16,23 +18,22 @@ type (
 	// Actual is ActualController
 	Actual interface {
 		Get(c echo.Context) error
-		Create(c echo.Context) error
-		Update(c echo.Context) error
+		Put(c echo.Context) error
+	}
+	getActualRequest struct {
+		PlanID        string     `json:"planId"`
+		ActualID      *string    `json:"actualId"`
+		DashboardID   *string    `json:"dashboardId"`
+		SelectedMonth *time.Time `json:"selectedMonth"`
 	}
 	getActualResponse struct {
-		ActualID     string `json:"actualId"`
-		ActualAmount int    `json:"actualAmount"`
-		PlanID       string `json:"planId"`
 		PlanName     string `json:"planName"`
 		PlanAmount   int    `json:"planAmount"`
+		ActualAmount *int   `json:"actualAmount"`
 	}
-	actualRequest struct {
-		ActualAmount int    `json:"actualAmount"`
-		PlanID       string `json:"planId"`
-		DashboardID  string `json:"dashboardId"`
-	}
-	createActualResponse struct {
-		ActualID string `json:"id"`
+	putActualRequest struct {
+		getActualRequest
+		ActualAmount int `json:"actualAmount"`
 	}
 )
 
@@ -41,62 +42,57 @@ func NewActual(useCase usecases.Actual) Actual {
 	return &actual{useCase}
 }
 
-func convertActual(t usecases.GetActualResult) getActualResponse {
-	return getActualResponse{
-		ActualAmount: t.ActualAmount,
-		ActualID:     t.ActualID,
-		PlanAmount:   t.PlanAmount,
-		PlanID:       t.PlanID,
-		PlanName:     t.PlanName,
-	}
-}
 func (t *actual) Get(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
+	request := new(getActualRequest)
+	request.PlanID = c.QueryParam("planId")
+	if aid := c.QueryParam("actualId"); aid != "" {
+		request.ActualID = &aid
 	}
-	dashboardID := c.Param("dashboardID")
-	if dashboardID == "" {
-		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
+	if did := c.QueryParam("dashboardId"); did != "" {
+		request.DashboardID = &did
 	}
-	res, err := t.useCase.Get(&dashboardID, &id)
+	if month := c.QueryParam("month"); month != "" {
+		s, err := time.Parse("2006-01-02", month)
+		if err != nil {
+			return err
+		}
+		request.SelectedMonth = &s
+	}
+	res, err := t.useCase.Get(&usecases.GetActualArgs{ActualKey: request.convert()})
 	if err != nil {
 		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteResponse(c, convertActual(*res))
 }
-func (t *actual) Create(c echo.Context) error {
-	request := new(actualRequest)
-	if err := c.Bind(&request); err != nil {
-		return err
+func (t *getActualRequest) convert() domains.ActualKey {
+	return domains.ActualKey{
+		ActualID:      t.ActualID,
+		PlanID:        t.PlanID,
+		DashboardID:   t.DashboardID,
+		SelectedMonth: t.SelectedMonth,
 	}
-	res, err := t.useCase.Create(request.convert())
-	if err != nil {
-		return responses.WriteErrorResponse(c, err)
-	}
-	return responses.WriteResponse(c, createActualResponse{
-		ActualID: res.ActualID,
-	})
 }
-func (t *actualRequest) convert() *usecases.ActualArgs {
-	return &usecases.ActualArgs{
+func convertActual(t usecases.GetActualResult) getActualResponse {
+	return getActualResponse{
 		ActualAmount: t.ActualAmount,
-		DashboardID:  t.DashboardID,
-		PlanID:       t.PlanID,
+		PlanAmount:   t.PlanAmount,
+		PlanName:     t.PlanName,
 	}
 }
 
-func (t *actual) Update(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
-	}
-	request := new(actualRequest)
+func (t *actual) Put(c echo.Context) error {
+	request := new(putActualRequest)
 	if err := c.Bind(&request); err != nil {
 		return err
 	}
-	if err := t.useCase.Update(&id, request.convert()); err != nil {
+	if err := t.useCase.Enter(request.convert()); err != nil {
 		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteEmptyResponse(c)
+}
+func (t *putActualRequest) convert() *usecases.EnterActualArgs {
+	return &usecases.EnterActualArgs{
+		ActualKey:    t.getActualRequest.convert(),
+		ActualAmount: t.ActualAmount,
+	}
 }

@@ -142,25 +142,18 @@ func (web *web) setRoute() *web {
 	})
 
 	// Actual
-	// Create
-	auth.POST("/actual", func(c echo.Context) error {
-		container := GetContainer(c)
-		return container.Invoke(func(controller ctrl.Actual) error {
-			return controller.Create(c)
-		})
-	})
 	// GET
-	auth.GET("/actual/:id", func(c echo.Context) error {
+	auth.GET("/actual", func(c echo.Context) error {
 		container := GetContainer(c)
 		return container.Invoke(func(controller ctrl.Actual) error {
 			return controller.Get(c)
 		})
 	})
-	// Edit
-	auth.PUT("/actual/:id", func(c echo.Context) error {
+	// PUT
+	auth.PUT("/actual", func(c echo.Context) error {
 		container := GetContainer(c)
 		return container.Invoke(func(controller ctrl.Actual) error {
-			return controller.Update(c)
+			return controller.Put(c)
 		})
 	})
 

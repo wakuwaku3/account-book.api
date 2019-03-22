@@ -5,6 +5,7 @@ require (
 	firebase.google.com/go v3.6.0+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.1.1
+	github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.2.8
@@ -14,6 +15,7 @@ require (
 	github.com/sendgrid/sendgrid-go v3.4.1+incompatible
 	github.com/tampopos/dijct v0.0.0-20190304155008-393e619c3a6e
 	github.com/valyala/fasttemplate v1.0.1 // indirect
+	golang.org/x/arch v0.0.0-20190312162104-788fe5ffcd8c // indirect
 	golang.org/x/crypto v0.0.0-20190313024323-a1f597ede03a
 	google.golang.org/api v0.2.0
 )

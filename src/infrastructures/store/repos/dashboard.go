@@ -65,9 +65,9 @@ func (t *dashboard) GetLatestClosedDashboard() (*models.Dashboard, error) {
 func (t *dashboard) getActual(
 	ctx context.Context,
 	client *firestore.Client,
-	documentID string,
+	dashboardID string,
 ) (*[]models.Actual, error) {
-	iter := t.dashboardsRef(client).Doc(documentID).Collection("actual").Documents(ctx)
+	iter := t.actualRef(client, &dashboardID).OrderBy("planCreatedAt", firestore.Asc).Documents(ctx)
 	slice := make([]models.Actual, 0)
 	for {
 		doc, err := iter.Next()
@@ -137,6 +137,28 @@ func (t *dashboard) GetByMonth(month *time.Time) (*models.Dashboard, error) {
 	model.Actual = *actual
 	return &model, nil
 }
+func (t *dashboard) Create(month *time.Time) (*string, error) {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+	start := t.clock.GetMonthStartDay(month)
+
+	iter := t.dashboardsRef(client).Where("date", "==", start).Documents(ctx)
+	doc, err := iter.Next()
+	if err == iterator.Done {
+		doc, _, err := t.dashboardsRef(client).Add(ctx, models.Dashboard{
+			Date:  start,
+			State: "open",
+		})
+		if err != nil {
+			return nil, err
+		}
+		return &doc.ID, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &doc.Ref.ID, nil
+}
 func (t *dashboard) GetActual(dashboardID *string, id *string) (*models.Actual, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
@@ -153,7 +175,7 @@ func (t *dashboard) ExistsActual(dashboardID *string, planID *string) (*string, 
 	client := t.provider.GetClient()
 	ctx := context.Background()
 
-	iter := t.actualRef(client, dashboardID).Where("plan-id", "==", *planID).Documents(ctx)
+	iter := t.actualRef(client, dashboardID).Where("planId", "==", *planID).Documents(ctx)
 	doc, err := iter.Next()
 	if err == iterator.Done {
 		return nil, nil
@@ -175,7 +197,7 @@ func (t *dashboard) CreateActual(dashboardID *string, model *models.Actual) (*st
 func (t *dashboard) UpdateActual(dashboardID *string, id *string, model *models.Actual) error {
 	client := t.provider.GetClient()
 	ctx := context.Background()
-	_, err := t.actualRef(client, dashboardID).Doc(*id).Delete(ctx)
+	_, err := t.actualRef(client, dashboardID).Doc(*id).Set(ctx, model)
 	if err != nil {
 		return err
 	}

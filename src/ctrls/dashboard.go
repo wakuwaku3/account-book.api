@@ -1,6 +1,7 @@
 package ctrls
 
 import (
+	"sort"
 	"time"
 
 	"github.com/wakuwaku3/account-book.api/src/usecases"
@@ -19,6 +20,7 @@ type (
 		GetDashboard(c echo.Context) error
 	}
 	getDashboardResponse struct {
+		DashboardID      string                      `json:"id"`
 		SelectedMonth    time.Time                   `json:"selectedMonth"`
 		Summary          getDashboardSummaryResponse `json:"summary"`
 		Plans            []getDashboardPlanResponse  `json:"plans"`
@@ -68,7 +70,9 @@ func (t *dashboard) GetDashboard(c echo.Context) error {
 
 func convertDashboard(t *usecases.GetDashboardResult) getDashboardResponse {
 	plans := make([]getDashboardPlanResponse, len(t.Plans))
-	for i, plan := range t.Plans {
+	ps := t.Plans
+	sort.SliceStable(ps, func(i, j int) bool { return ps[i].CreatedAt.Before(ps[j].CreatedAt) })
+	for i, plan := range ps {
 		plans[i] = getDashboardPlanResponse{
 			ActualAmount: plan.ActualAmount,
 			ActualID:     plan.ActualID,
@@ -79,9 +83,10 @@ func convertDashboard(t *usecases.GetDashboardResult) getDashboardResponse {
 		}
 	}
 	return getDashboardResponse{
+		DashboardID:      t.DashboardID,
 		SelectedMonth:    t.SelectedMonth,
 		Plans:            plans,
-		State:       t.State,
+		State:            t.State,
 		CanApprove:       t.CanApprove,
 		CanCancelApprove: t.CanCancelApprove,
 		Summary: getDashboardSummaryResponse{

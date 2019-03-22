@@ -22,38 +22,45 @@ func NewActual(
 		plansRepos,
 	}
 }
-func (t *actual) Get(dashboardID *string, id *string) (
+func (t *actual) Get(args *usecases.GetActualArgs) (
 	*usecases.GetActualResult,
 	error,
 ) {
-	model, err := t.dashboardRepos.GetActual(dashboardID, id)
+	plan, err := t.plansRepos.GetByID(&args.PlanID)
 	if err != nil {
 		return nil, err
 	}
-	plan, err := t.plansRepos.GetByID(&model.PlanID)
-	if err != nil {
-		return nil, err
+
+	result := &usecases.GetActualResult{
+		PlanAmount: plan.PlanAmount,
+		PlanName:   plan.PlanName,
 	}
-	return convertActual(model, plan), nil
+	if args.DashboardID != nil && args.ActualID != nil {
+		actual, err := t.dashboardRepos.GetActual(args.DashboardID, args.ActualID)
+		if err != nil {
+			return nil, err
+		}
+		result.ActualAmount = &actual.ActualAmount
+	}
+	return result, nil
 }
 func convertActual(t *models.Actual, p *models.Plan) *usecases.GetActualResult {
 	return &usecases.GetActualResult{
-		ActualAmount: t.ActualAmount,
-		ActualID:     t.ActualID,
+		ActualAmount: &t.ActualAmount,
 		PlanAmount:   p.PlanAmount,
-		PlanID:       p.PlanID,
 		PlanName:     p.PlanName,
 	}
 }
-func (t *actual) GetActualInfo(planID *string) (*usecases.ActualInfo, error) {
-	plan, err := t.plansRepos.GetByID(planID)
+func (t *actual) GetActualInfo(key *domains.ActualKey) (*usecases.ActualInfo, error) {
+	plan, err := t.plansRepos.GetByID(&key.PlanID)
 	if err != nil {
 		return nil, err
 	}
 	return &usecases.ActualInfo{
-		PlanID:     plan.PlanID,
-		PlanName:   plan.PlanName,
-		PlanAmount: plan.PlanAmount,
-		IsIncome:   plan.IsIncome,
+		PlanID:        plan.PlanID,
+		PlanName:      plan.PlanName,
+		PlanAmount:    plan.PlanAmount,
+		IsIncome:      plan.IsIncome,
+		PlanCreatedAt: plan.CreatedAt,
 	}, nil
 }

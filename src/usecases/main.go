@@ -54,7 +54,7 @@ type (
 	}
 	// ActualQuery は実績のクエリです
 	ActualQuery interface {
-		Get(dashboardID *string, id *string) (*GetActualResult, error)
-		GetActualInfo(planID *string) (*ActualInfo, error)
+		Get(args *GetActualArgs) (*GetActualResult, error)
+		GetActualInfo(key *domains.ActualKey) (*ActualInfo, error)
 	}
 )

@@ -1,6 +1,8 @@
 package services
 
 import (
+	"time"
+
 	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
@@ -13,17 +15,16 @@ type (
 	}
 	// Actual is ActualService
 	Actual interface {
-		Create(args *ActualArgs) (*CreateActualResult, error)
-		Update(id *string, args *ActualArgs) error
+		Enter(args *ActualArgs) error
 	}
 	// ActualArgs は引数です
 	ActualArgs struct {
-		DashboardID  string
-		ActualAmount int
-		PlanID       string
-		PlanName     string
-		PlanAmount   int
-		IsIncome     bool
+		domains.ActualKey
+		ActualAmount  int
+		PlanName      string
+		PlanAmount    int
+		IsIncome      bool
+		PlanCreatedAt time.Time
 	}
 	// CreateActualResult は結果です
 	CreateActualResult struct {
@@ -35,35 +36,30 @@ type (
 func NewActual(dashboardRepos domains.DashboardRepository, clock cmn.Clock) Actual {
 	return &actual{dashboardRepos, clock}
 }
-func (t *actual) Create(args *ActualArgs) (*CreateActualResult, error) {
-	id, err := t.dashboardRepos.ExistsActual(&args.DashboardID, &args.PlanID)
-	if err != nil {
-		return nil, err
-	}
-	if id != nil {
-		err := t.Update(id, args)
+func (t *actual) Enter(args *ActualArgs) error {
+	if args.DashboardID == nil {
+		dashboardID, err := t.dashboardRepos.Create(args.SelectedMonth)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		return &CreateActualResult{ActualID: *id}, nil
+		args.DashboardID = dashboardID
 	}
-	id, err = t.dashboardRepos.CreateActual(args.convert())
-	if err != nil {
-		return nil, err
+
+	if args.ActualID == nil {
+		id, err := t.dashboardRepos.ExistsActual(args.DashboardID, &args.PlanID)
+		if err != nil {
+			return err
+		}
+		if id == nil {
+			_, err = t.dashboardRepos.CreateActual(args.convert())
+			if err != nil {
+				return err
+			}
+			return nil
+		}
 	}
-	return &CreateActualResult{ActualID: *id}, nil
-}
-func (t *ActualArgs) convert() (*string, *models.Actual) {
-	return &t.DashboardID, &models.Actual{
-		ActualAmount: t.ActualAmount,
-		IsIncome:     t.IsIncome,
-		PlanAmount:   t.PlanAmount,
-		PlanID:       t.PlanID,
-		PlanName:     t.PlanName,
-	}
-}
-func (t *actual) Update(id *string, args *ActualArgs) error {
-	model, err := t.dashboardRepos.GetActual(&args.DashboardID, id)
+
+	model, err := t.dashboardRepos.GetActual(args.DashboardID, args.ActualID)
 	if err != nil {
 		return err
 	}
@@ -74,8 +70,18 @@ func (t *actual) Update(id *string, args *ActualArgs) error {
 	model.PlanID = args.PlanID
 	model.PlanName = args.PlanName
 
-	if err := t.dashboardRepos.UpdateActual(&args.DashboardID, id, model); err != nil {
+	if err := t.dashboardRepos.UpdateActual(args.DashboardID, args.ActualID, model); err != nil {
 		return err
 	}
 	return nil
+}
+func (t *ActualArgs) convert() (*string, *models.Actual) {
+	return t.DashboardID, &models.Actual{
+		ActualAmount:  t.ActualAmount,
+		IsIncome:      t.IsIncome,
+		PlanAmount:    t.PlanAmount,
+		PlanID:        t.PlanID,
+		PlanName:      t.PlanName,
+		PlanCreatedAt: t.PlanCreatedAt,
+	}
 }

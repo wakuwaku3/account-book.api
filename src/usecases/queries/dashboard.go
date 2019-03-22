@@ -117,10 +117,12 @@ func (t *dashboard) getSummaryByMonth(selectedMonth *time.Time) (*usecases.GetDa
 				PlanAmount:   actual.PlanAmount,
 				PlanID:       actual.PlanID,
 				PlanName:     actual.PlanName,
+				CreatedAt:    actual.PlanCreatedAt,
 			}
 		}
 
 		result := &usecases.GetDashboardResult{
+			DashboardID:     currentDashboard.DashboardID,
 			Expense:         *currentDashboard.Expense,
 			Income:          *currentDashboard.Income,
 			PreviousBalance: currentDashboard.PreviousBalance,
@@ -186,6 +188,7 @@ func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *tim
 	}
 
 	if currentDashboard != nil {
+		result.DashboardID = currentDashboard.DashboardID
 		// 実績がある場合優先して上書きする
 		for _, actual := range currentDashboard.Actual {
 			actualID := actual.ActualID
@@ -254,6 +257,7 @@ func (t *dashboard) getDashboardByMonthWorker(selectedMonth *time.Time, chError 
 		d, err := t.repos.GetByMonth(selectedMonth)
 		if err != nil {
 			chError <- err
+			return
 		}
 		ch <- d
 	}()
@@ -274,6 +278,7 @@ func (t *dashboard) getTransactionsWorker(selectedMonth *time.Time, chError chan
 		transactions, err := t.transactionsRepos.GetByMonth(selectedMonth)
 		if err != nil {
 			chError <- err
+			return
 		}
 		// 収入と支出を集計する
 		income := 0
@@ -298,6 +303,7 @@ func (t *dashboard) getPlansWorker(selectedMonth *time.Time, chError chan error)
 		plans, err := t.plansRepos.GetByMonth(selectedMonth)
 		if err != nil {
 			chError <- err
+			return
 		}
 		pMap := map[string]usecases.PlanResult{}
 		for _, plan := range *plans {
@@ -306,6 +312,7 @@ func (t *dashboard) getPlansWorker(selectedMonth *time.Time, chError chan error)
 				PlanAmount: plan.PlanAmount,
 				PlanID:     plan.PlanID,
 				PlanName:   plan.PlanName,
+				CreatedAt:  plan.CreatedAt,
 			}
 		}
 		ch <- &pMap

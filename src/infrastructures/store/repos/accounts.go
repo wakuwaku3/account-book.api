@@ -34,7 +34,7 @@ func (t *accounts) Get(email *string) (*models.Account, error) {
 func (t *accounts) CreatePasswordResetToken(model *models.PasswordResetToken) (*string, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
-	passwordRestTokensRef := client.Collection("password-reset-tokens")
+	passwordRestTokensRef := client.Collection("passwordResetTokens")
 	ref, _, err := passwordRestTokensRef.Add(ctx, model)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (t *accounts) CleanUp() error {
 	client := t.provider.GetClient()
 	batch := client.Batch()
 	ctx := context.Background()
-	passwordRestTokensRef := client.Collection("password-reset-tokens")
+	passwordRestTokensRef := client.Collection("passwordResetTokens")
 
 	iter := passwordRestTokensRef.Where("expires", "<=", now).Documents(ctx)
 	for {
@@ -69,7 +69,7 @@ func (t *accounts) CleanUpByEmail(email *string) error {
 	client := t.provider.GetClient()
 	batch := client.Batch()
 	ctx := context.Background()
-	passwordRestTokensRef := client.Collection("password-reset-tokens")
+	passwordRestTokensRef := client.Collection("passwordResetTokens")
 
 	iter := passwordRestTokensRef.Where("email", "==", *email).Where("expires", "<=", now).Documents(ctx)
 	for {
@@ -90,7 +90,7 @@ func (t *accounts) CleanUpByEmail(email *string) error {
 func (t *accounts) GetPasswordResetToken(passwordResetToken *string) (*models.PasswordResetToken, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
-	doc, err := client.Collection("password-reset-tokens").Doc(*passwordResetToken).Get(ctx)
+	doc, err := client.Collection("passwordResetTokens").Doc(*passwordResetToken).Get(ctx)
 	if err != nil {
 		return nil, err
 	}

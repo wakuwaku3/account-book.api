@@ -92,10 +92,18 @@ type (
 		GetLatestClosedDashboard() (*models.Dashboard, error)
 		GetOldestOpenDashboard() (*models.Dashboard, error)
 		GetByMonth(month *time.Time) (*models.Dashboard, error)
+		Create(month *time.Time) (*string, error)
 		GetActual(dashboardID *string, id *string) (*models.Actual, error)
 		ExistsActual(dashboardID *string, planID *string) (*string, error)
 		CreateActual(dashboardID *string, model *models.Actual) (*string, error)
 		UpdateActual(dashboardID *string, id *string, model *models.Actual) error
+	}
+	// ActualKey はActualを特定するための要素です
+	ActualKey struct {
+		PlanID        string
+		ActualID      *string
+		DashboardID   *string
+		SelectedMonth *time.Time
 	}
 )
 

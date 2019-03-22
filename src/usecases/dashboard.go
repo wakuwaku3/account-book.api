@@ -21,6 +21,7 @@ type (
 	}
 	// GetDashboardResult は結果です
 	GetDashboardResult struct {
+		DashboardID      string
 		SelectedMonth    time.Time
 		Income           int
 		Expense          int
@@ -38,6 +39,7 @@ type (
 		ActualAmount *int
 		PlanAmount   int
 		ActualID     *string
+		CreatedAt    time.Time
 	}
 )
 

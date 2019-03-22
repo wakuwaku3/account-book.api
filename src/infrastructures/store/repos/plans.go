@@ -54,7 +54,7 @@ func (t *plans) Get() (*[]models.Plan, error) {
 	ctx := context.Background()
 
 	plans := make([]models.Plan, 0)
-	iter := t.plansRef(client).Where("is-deleted", "==", false).Documents(ctx)
+	iter := t.plansRef(client).Where("isDeleted", "==", false).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -78,7 +78,7 @@ func (t *plans) GetByMonth(month *time.Time) (*[]models.Plan, error) {
 	start := t.clock.GetMonthStartDay(month)
 
 	plans := make([]models.Plan, 0)
-	iter := t.plansRef(client).Where("is-deleted", "==", false).Documents(ctx)
+	iter := t.plansRef(client).Where("isDeleted", "==", false).OrderBy("createdAt", firestore.Asc).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -93,7 +93,14 @@ func (t *plans) GetByMonth(month *time.Time) (*[]models.Plan, error) {
 		}
 		plan.PlanID = doc.Ref.ID
 		if (plan.Start == nil || plan.Start.Equal(start) || plan.Start.Before(start)) && (plan.End == nil || plan.End.Equal(start) || plan.End.After(start)) {
-			plans = append(plans, plan)
+			st := plan.CreatedAt
+			if plan.Start != nil {
+				st = *plan.Start
+			}
+			dif := (start.Year()-st.Year())*12 + int(start.Month()) - int(st.Month())
+			if dif%plan.Interval == 0 {
+				plans = append(plans, plan)
+			}
 		}
 	}
 	return &plans, nil
@@ -101,6 +108,7 @@ func (t *plans) GetByMonth(month *time.Time) (*[]models.Plan, error) {
 func (t *plans) Create(model *models.Plan) (*string, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
+	model.CreatedAt = t.clock.Now()
 	ref, _, err := t.plansRef(client).Add(ctx, model)
 	if err != nil {
 		return nil, err
