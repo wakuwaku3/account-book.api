@@ -87,7 +87,7 @@ func (t *dashboard) canApprove(result *usecases.GetDashboardResult, allInputPlan
 		return false
 	}
 	monthStart := t.clock.GetMonthStartDay(nil)
-	return monthStart.Before(result.SelectedMonth)
+	return result.SelectedMonth.Before(monthStart)
 }
 func (t *dashboard) getPreviousDashboard(selectedMonth *time.Time) (*models.Dashboard, error) {
 	if selectedMonth != nil {
@@ -172,7 +172,7 @@ func (t *dashboard) getSummaryByMonthWithCurrentDashboard(selectedMonth *time.Ti
 func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *time.Time, currentDashboard *models.Dashboard) (*usecases.GetDashboardResult, bool, error) {
 	chError := make(chan error)
 
-	chIncome, chExpense := t.getTransactionsWorker(selectedMonth, chError)
+	chIncome, chExpense := t.getTransactionsSummaryWorker(selectedMonth, chError)
 	chPln := t.getPlansWorker(selectedMonth, chError)
 
 	result := new(usecases.GetDashboardResult)
@@ -271,7 +271,7 @@ func (t *dashboard) getDashboardByNextMonthWorker(selectedMonth *time.Time, chEr
 	previousMonth := selectedMonth.AddDate(0, 1, 0)
 	return t.getDashboardByMonthWorker(&previousMonth, chError)
 }
-func (t *dashboard) getTransactionsWorker(selectedMonth *time.Time, chError chan error) (<-chan int, <-chan int) {
+func (t *dashboard) getTransactionsSummaryWorker(selectedMonth *time.Time, chError chan error) (<-chan int, <-chan int) {
 	chIncome := make(chan int)
 	chExpense := make(chan int)
 	go func() {

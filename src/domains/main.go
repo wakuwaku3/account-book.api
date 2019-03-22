@@ -89,10 +89,14 @@ type (
 	}
 	// DashboardRepository はダッシュボードのリポジトリです
 	DashboardRepository interface {
+		GetByID(id *string) (*models.Dashboard, error)
+		ExistsClosedNext(id *string) error
 		GetLatestClosedDashboard() (*models.Dashboard, error)
 		GetOldestOpenDashboard() (*models.Dashboard, error)
 		GetByMonth(month *time.Time) (*models.Dashboard, error)
 		Create(month *time.Time) (*string, error)
+		Approve(model *models.Dashboard) error
+		CancelApprove(model *models.Dashboard) error
 		GetActual(dashboardID *string, id *string) (*models.Actual, error)
 		ExistsActual(dashboardID *string, planID *string) (*string, error)
 		CreateActual(dashboardID *string, model *models.Actual) (*string, error)

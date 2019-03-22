@@ -140,6 +140,20 @@ func (web *web) setRoute() *web {
 			return controller.GetDashboard(c)
 		})
 	})
+	// Approve
+	auth.POST("/dashboard/:id", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrl.Dashboard) error {
+			return controller.Approve(c)
+		})
+	})
+	// CancelApprove
+	auth.DELETE("/dashboard/:id", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrl.Dashboard) error {
+			return controller.CancelApprove(c)
+		})
+	})
 
 	// Actual
 	// GET

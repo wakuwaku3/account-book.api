@@ -2,6 +2,7 @@ package repos
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -36,6 +37,46 @@ func (t *dashboard) actualRef(client *firestore.Client, dashboardID *string) *fi
 	return t.dashboardsRef(client).Doc(*dashboardID).Collection("actual")
 }
 
+func (t *dashboard) dailyRef(client *firestore.Client, dashboardID *string) *firestore.CollectionRef {
+	return t.dashboardsRef(client).Doc(*dashboardID).Collection("daily")
+}
+
+func (t *dashboard) GetByID(id *string) (*models.Dashboard, error) {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+
+	doc, err := t.dashboardsRef(client).Doc(*id).Get(ctx)
+	if err != nil {
+		if !doc.Exists() {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var model models.Dashboard
+	doc.DataTo(&model)
+	model.DashboardID = doc.Ref.ID
+	actual, err := t.getActual(ctx, client, model.DashboardID)
+	if err != nil {
+		return nil, err
+	}
+	model.Actual = *actual
+	return &model, nil
+}
+func (t *dashboard) ExistsClosedNext(id *string) error {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+
+	iter := t.dashboardsRef(client).Where("previousDashboardId", "==", *id).Where("state", "==", "closed").Documents(ctx)
+	_, err := iter.Next()
+	if err == iterator.Done {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	iter.Stop()
+	return errors.New("next dashboard is already closed")
+}
 func (t *dashboard) GetLatestClosedDashboard() (*models.Dashboard, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
@@ -158,6 +199,45 @@ func (t *dashboard) Create(month *time.Time) (*string, error) {
 		return nil, err
 	}
 	return &doc.Ref.ID, nil
+}
+func (t *dashboard) Approve(model *models.Dashboard) error {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+	batch := client.Batch()
+
+	ref := t.dashboardsRef(client).Doc(model.DashboardID)
+	batch.Set(ref, model)
+
+	for _, daily := range model.Daily {
+		newRef := t.dailyRef(client, &model.DashboardID).NewDoc()
+		batch.Create(newRef, daily)
+	}
+
+	_, err := batch.Commit(ctx)
+	return err
+}
+func (t *dashboard) CancelApprove(model *models.Dashboard) error {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+	batch := client.Batch()
+
+	ref := t.dashboardsRef(client).Doc(model.DashboardID)
+	batch.Set(ref, model)
+
+	iter := t.dailyRef(client, &model.DashboardID).Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		batch.Delete(doc.Ref)
+	}
+
+	_, err := batch.Commit(ctx)
+	return err
 }
 func (t *dashboard) GetActual(dashboardID *string, id *string) (*models.Actual, error) {
 	client := t.provider.GetClient()

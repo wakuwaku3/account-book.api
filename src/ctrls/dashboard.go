@@ -4,6 +4,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
 	"github.com/wakuwaku3/account-book.api/src/usecases"
 
 	"github.com/wakuwaku3/account-book.api/src/ctrls/responses"
@@ -18,6 +19,8 @@ type (
 	// Dashboard is DashboardController
 	Dashboard interface {
 		GetDashboard(c echo.Context) error
+		Approve(c echo.Context) error
+		CancelApprove(c echo.Context) error
 	}
 	getDashboardResponse struct {
 		DashboardID      string                      `json:"id"`
@@ -95,4 +98,25 @@ func convertDashboard(t *usecases.GetDashboardResult) getDashboardResponse {
 			PreviousBalance: t.PreviousBalance,
 		},
 	}
+}
+
+func (t *dashboard) Approve(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
+	}
+	if err := t.useCase.Approve(&id); err != nil {
+		return responses.WriteErrorResponse(c, err)
+	}
+	return responses.WriteEmptyResponse(c)
+}
+func (t *dashboard) CancelApprove(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
+	}
+	if err := t.useCase.CancelApprove(&id); err != nil {
+		return responses.WriteErrorResponse(c, err)
+	}
+	return responses.WriteEmptyResponse(c)
 }
