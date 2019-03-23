@@ -27,6 +27,7 @@ type (
 		SelectedMonth    time.Time                   `json:"selectedMonth"`
 		Summary          getDashboardSummaryResponse `json:"summary"`
 		Plans            []getDashboardPlanResponse  `json:"plans"`
+		Daily            []getDashboardDailyResponse `json:"daily"`
 		State            string                      `json:"state"`
 		CanApprove       bool                        `json:"canApprove"`
 		CanCancelApprove bool                        `json:"canCancelApprove"`
@@ -43,6 +44,12 @@ type (
 		ActualAmount *int    `json:"actualAmount,omitempty"`
 		PlanAmount   int     `json:"planAmount"`
 		ActualID     *string `json:"actualId,omitempty"`
+	}
+	getDashboardDailyResponse struct {
+		Date    time.Time `json:"date"`
+		Income  int       `json:"income"`
+		Expense int       `json:"expense"`
+		Balance int       `json:"balance"`
 	}
 )
 
@@ -85,10 +92,22 @@ func convertDashboard(t *usecases.GetDashboardResult) getDashboardResponse {
 			PlanName:     plan.PlanName,
 		}
 	}
+	daily := make([]getDashboardDailyResponse, len(t.Daily))
+	ds := t.Daily
+	sort.SliceStable(ds, func(i, j int) bool { return ds[i].Date.Before(ds[j].Date) })
+	for i, d := range ds {
+		daily[i] = getDashboardDailyResponse{
+			Date:    d.Date,
+			Balance: d.Balance,
+			Income:  d.Income,
+			Expense: d.Expense,
+		}
+	}
 	return getDashboardResponse{
 		DashboardID:      t.DashboardID,
 		SelectedMonth:    t.SelectedMonth,
 		Plans:            plans,
+		Daily:            daily,
 		State:            t.State,
 		CanApprove:       t.CanApprove,
 		CanCancelApprove: t.CanCancelApprove,

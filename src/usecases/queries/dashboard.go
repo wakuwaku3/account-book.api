@@ -3,6 +3,8 @@ package queries
 import (
 	"time"
 
+	"github.com/labstack/gommon/log"
+
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
@@ -35,6 +37,7 @@ func NewDashboard(
 
 func (t *dashboard) GetSummary(args *usecases.GetDashboardArgs) (*usecases.GetDashboardResult, error) {
 	if args.SelectedMonth != nil {
+		log.Info(args.SelectedMonth)
 		return t.getSummaryByMonth(args.SelectedMonth)
 	}
 
@@ -48,7 +51,8 @@ func (t *dashboard) GetSummary(args *usecases.GetDashboardArgs) (*usecases.GetDa
 
 	if selectedMonth == nil {
 		if currentDashboard != nil {
-			selectedMonth = &currentDashboard.Date
+			s := currentDashboard.Date.In(t.clock.DefaultLocation())
+			selectedMonth = &s
 			return t.getSummaryByMonthWithCurrentDashboard(selectedMonth, currentDashboard)
 		}
 	}
@@ -61,7 +65,7 @@ func (t *dashboard) GetSummary(args *usecases.GetDashboardArgs) (*usecases.GetDa
 	if selectedMonth == nil {
 		m := t.clock.GetMonthStartDay(nil)
 		if previousDashboard != nil {
-			m = previousDashboard.Date.AddDate(0, 1, 0)
+			m = previousDashboard.Date.In(t.clock.DefaultLocation()).AddDate(0, 1, 0)
 		}
 		selectedMonth = &m
 	}
@@ -106,10 +110,16 @@ func (t *dashboard) getSummaryByMonth(selectedMonth *time.Time) (*usecases.GetDa
 		chNext := t.getDashboardByNextMonthWorker(selectedMonth, chError)
 
 		// 締め処理済みの場合、集計済みなのでそのまま返す
+		balance := 0
 		plans := make([]usecases.PlanResult, len(currentDashboard.Actual))
 		for i, actual := range currentDashboard.Actual {
 			actualID := actual.ActualID
 			actualAmount := actual.ActualAmount
+			if actual.IsIncome {
+				balance += actualAmount
+			} else {
+				balance -= actualAmount
+			}
 			plans[i] = usecases.PlanResult{
 				ActualID:     &actualID,
 				IsIncome:     actual.IsIncome,
@@ -121,6 +131,41 @@ func (t *dashboard) getSummaryByMonth(selectedMonth *time.Time) (*usecases.GetDa
 			}
 		}
 
+		dMap := make(map[string]usecases.DailyResult)
+		for _, daily := range currentDashboard.Daily {
+			key := daily.Date.Format("2006-01-02")
+			val, ok := dMap[key]
+			if !ok {
+				val = usecases.DailyResult{
+					Date:    t.clock.GetDay(&daily.Date),
+					Balance: 0,
+					Expense: 0,
+					Income:  0,
+				}
+			}
+			val.Income += daily.Income
+			val.Expense += daily.Expense
+			dMap[key] = val
+		}
+
+		daily := make([]usecases.DailyResult, 0)
+		end := t.clock.GetDay(selectedMonth).AddDate(0, 1, 0)
+		for day := t.clock.GetDay(selectedMonth); day.Before(end); day = t.clock.GetDay(&day).AddDate(0, 0, 1) {
+			key := day.Format("2006-01-02")
+			val, ok := dMap[key]
+			if !ok {
+				val = usecases.DailyResult{
+					Date:    t.clock.GetDay(&day),
+					Balance: 0,
+					Expense: 0,
+					Income:  0,
+				}
+			}
+			balance = balance + val.Income - val.Expense
+			val.Balance = balance
+			daily = append(daily, val)
+		}
+
 		result := &usecases.GetDashboardResult{
 			DashboardID:     currentDashboard.DashboardID,
 			Expense:         *currentDashboard.Expense,
@@ -128,6 +173,7 @@ func (t *dashboard) getSummaryByMonth(selectedMonth *time.Time) (*usecases.GetDa
 			PreviousBalance: currentDashboard.PreviousBalance,
 			SelectedMonth:   *selectedMonth,
 			Plans:           plans,
+			Daily:           daily,
 			State:           "closed",
 		}
 
@@ -172,7 +218,7 @@ func (t *dashboard) getSummaryByMonthWithCurrentDashboard(selectedMonth *time.Ti
 func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *time.Time, currentDashboard *models.Dashboard) (*usecases.GetDashboardResult, bool, error) {
 	chError := make(chan error)
 
-	chIncome, chExpense := t.getTransactionsSummaryWorker(selectedMonth, chError)
+	chTrn := t.getTransactionsSummaryWorker(selectedMonth, chError)
 	chPln := t.getPlansWorker(selectedMonth, chError)
 
 	result := new(usecases.GetDashboardResult)
@@ -207,6 +253,7 @@ func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *tim
 	// 計画から集計(ついでに戻り値として型を整形する)
 	income := 0
 	expense := 0
+	balance := 0
 	allInput := true
 	ps := make([]usecases.PlanResult, len(pMap))
 	index := 0
@@ -214,40 +261,69 @@ func (t *dashboard) getSummaryByMonthWithoutPreviousDashboard(selectedMonth *tim
 		if pm.ActualID == nil {
 			if pm.IsIncome {
 				income += pm.PlanAmount
+				balance += pm.PlanAmount
 			} else {
 				expense += pm.PlanAmount
+				balance -= pm.PlanAmount
 			}
 			allInput = false
 		} else {
 			if pm.IsIncome {
 				income += *pm.ActualAmount
+				balance += *pm.ActualAmount
 			} else {
 				expense += *pm.ActualAmount
+				balance -= *pm.ActualAmount
 			}
 		}
 		ps[index] = pm
 		index++
 	}
 
+	var dMap map[string]usecases.DailyResult
 	select {
 	case err := <-chError:
 		return nil, false, err
-	case i := <-chIncome:
-		income += i
+	case trn := <-chTrn:
+		income += trn.income
+		expense += trn.expense
+		dMap = trn.dMap
 		break
 	}
 
-	select {
-	case err := <-chError:
-		return nil, false, err
-	case e := <-chExpense:
-		expense += e
-		break
+	daily := make([]usecases.DailyResult, 0)
+	end := t.clock.GetDay(selectedMonth).AddDate(0, 1, 0)
+	total := 0
+	i := 0
+	now := t.clock.GetDay(nil)
+	for day := t.clock.GetDay(selectedMonth); day.Before(end); day = t.clock.GetDay(&day).AddDate(0, 0, 1) {
+		key := day.Format("2006-01-02")
+		val, ok := dMap[key]
+		if !ok {
+			val = usecases.DailyResult{
+				Date:    t.clock.GetDay(&day),
+				Balance: 0,
+				Expense: 0,
+				Income:  0,
+			}
+		}
+		if day.After(now) && i > 0 {
+			avr := total / i
+			balance = balance + avr
+			val.Balance = balance
+		} else {
+			balance = balance + val.Income - val.Expense
+			val.Balance = balance
+			total = total - val.Expense
+			i++
+		}
+		daily = append(daily, val)
 	}
 
 	result.Income = income
 	result.Expense = expense
 	result.Plans = ps
+	result.Daily = daily
 	result.State = "open"
 	return result, allInput, nil
 }
@@ -271,9 +347,16 @@ func (t *dashboard) getDashboardByNextMonthWorker(selectedMonth *time.Time, chEr
 	previousMonth := selectedMonth.AddDate(0, 1, 0)
 	return t.getDashboardByMonthWorker(&previousMonth, chError)
 }
-func (t *dashboard) getTransactionsSummaryWorker(selectedMonth *time.Time, chError chan error) (<-chan int, <-chan int) {
-	chIncome := make(chan int)
-	chExpense := make(chan int)
+func (t *dashboard) getTransactionsSummaryWorker(selectedMonth *time.Time, chError chan error) <-chan struct {
+	income  int
+	expense int
+	dMap    map[string]usecases.DailyResult
+} {
+	ch := make(chan struct {
+		income  int
+		expense int
+		dMap    map[string]usecases.DailyResult
+	})
 	go func() {
 		transactions, err := t.transactionsRepos.GetByMonth(selectedMonth)
 		if err != nil {
@@ -281,20 +364,44 @@ func (t *dashboard) getTransactionsSummaryWorker(selectedMonth *time.Time, chErr
 			return
 		}
 		// 収入と支出を集計する
+		dMap := make(map[string]usecases.DailyResult)
 		income := 0
 		expense := 0
 		// 取引から集計
 		for _, transaction := range *transactions {
+			key := transaction.Date.Format("2006-01-02")
+			val, ok := dMap[key]
+			if !ok {
+				val = usecases.DailyResult{
+					Date:    t.clock.GetDay(&transaction.Date),
+					Balance: 0,
+					Expense: 0,
+					Income:  0,
+				}
+			}
+
 			if transaction.Category == 5 {
 				income += transaction.Amount
+				val.Income += transaction.Amount
 			} else {
 				expense += transaction.Amount
+				val.Expense += transaction.Amount
 			}
+
+			dMap[key] = val
 		}
-		chIncome <- income
-		chExpense <- expense
+
+		ch <- struct {
+			income  int
+			expense int
+			dMap    map[string]usecases.DailyResult
+		}{
+			income,
+			expense,
+			dMap,
+		}
 	}()
-	return chIncome, chExpense
+	return ch
 }
 func (t *dashboard) getPlansWorker(selectedMonth *time.Time, chError chan error) <-chan *map[string]usecases.PlanResult {
 	ch := make(chan *map[string]usecases.PlanResult)

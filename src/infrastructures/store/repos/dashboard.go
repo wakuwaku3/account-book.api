@@ -127,6 +127,30 @@ func (t *dashboard) getActual(
 	}
 	return &slice, nil
 }
+func (t *dashboard) getDaily(
+	ctx context.Context,
+	client *firestore.Client,
+	dashboardID string,
+) (*[]models.Daily, error) {
+	iter := t.dailyRef(client, &dashboardID).OrderBy("date", firestore.Asc).Documents(ctx)
+	slice := make([]models.Daily, 0)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		var model models.Daily
+		if err := doc.DataTo(&model); err != nil {
+			return nil, err
+		}
+		model.DailyID = doc.Ref.ID
+		slice = append(slice, model)
+	}
+	return &slice, nil
+}
 func (t *dashboard) GetOldestOpenDashboard() (*models.Dashboard, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
@@ -151,6 +175,11 @@ func (t *dashboard) GetOldestOpenDashboard() (*models.Dashboard, error) {
 		return nil, err
 	}
 	model.Actual = *actual
+	daily, err := t.getDaily(ctx, client, model.DashboardID)
+	if err != nil {
+		return nil, err
+	}
+	model.Daily = *daily
 	return &model, nil
 }
 func (t *dashboard) GetByMonth(month *time.Time) (*models.Dashboard, error) {
@@ -176,6 +205,11 @@ func (t *dashboard) GetByMonth(month *time.Time) (*models.Dashboard, error) {
 		return nil, err
 	}
 	model.Actual = *actual
+	daily, err := t.getDaily(ctx, client, model.DashboardID)
+	if err != nil {
+		return nil, err
+	}
+	model.Daily = *daily
 	return &model, nil
 }
 func (t *dashboard) Create(month *time.Time) (*string, error) {

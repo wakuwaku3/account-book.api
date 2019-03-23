@@ -3,7 +3,6 @@ package usecases
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains/models"
 	"github.com/wakuwaku3/account-book.api/src/domains/services"
 )
 
@@ -30,6 +29,7 @@ type (
 		Expense          int
 		PreviousBalance  *int
 		Plans            []PlanResult
+		Daily            []DailyResult
 		State            string
 		CanApprove       bool
 		CanCancelApprove bool
@@ -44,18 +44,12 @@ type (
 		ActualID     *string
 		CreatedAt    time.Time
 	}
-	// ApproveInfo は承認処理に必要な情報です
-	ApproveInfo struct {
-		Income              int
-		Expense             int
-		PreviousBalance     int
-		CurrentBalance      int
-		Balance             int
-		PreviousDashboardID *string
-		Daily               *[]*models.Daily
-	}
-	// CancelApproveInfo は承認処理に必要な情報です
-	CancelApproveInfo struct {
+	// DailyResult は結果です
+	DailyResult struct {
+		Date    time.Time
+		Income  int
+		Expense int
+		Balance int
 	}
 )
 
