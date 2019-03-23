@@ -51,8 +51,7 @@ func (t *dashboard) GetSummary(args *usecases.GetDashboardArgs) (*usecases.GetDa
 
 	if selectedMonth == nil {
 		if currentDashboard != nil {
-			s := currentDashboard.Date.In(t.clock.DefaultLocation())
-			selectedMonth = &s
+			selectedMonth = &currentDashboard.Date
 			return t.getSummaryByMonthWithCurrentDashboard(selectedMonth, currentDashboard)
 		}
 	}
@@ -65,7 +64,7 @@ func (t *dashboard) GetSummary(args *usecases.GetDashboardArgs) (*usecases.GetDa
 	if selectedMonth == nil {
 		m := t.clock.GetMonthStartDay(nil)
 		if previousDashboard != nil {
-			m = previousDashboard.Date.In(t.clock.DefaultLocation()).AddDate(0, 1, 0)
+			m = previousDashboard.Date.AddDate(0, 1, 0)
 		}
 		selectedMonth = &m
 	}

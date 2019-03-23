@@ -54,6 +54,7 @@ func (t *dashboard) GetByID(id *string) (*models.Dashboard, error) {
 	}
 	var model models.Dashboard
 	doc.DataTo(&model)
+	model.Date = model.Date.In(t.clock.DefaultLocation())
 	model.DashboardID = doc.Ref.ID
 	actual, err := t.getActual(ctx, client, model.DashboardID)
 	if err != nil {
@@ -94,6 +95,7 @@ func (t *dashboard) GetLatestClosedDashboard() (*models.Dashboard, error) {
 		iter.Stop()
 		return nil, err
 	}
+	model.Date = model.Date.In(t.clock.DefaultLocation())
 	model.DashboardID = doc.Ref.ID
 	iter.Stop()
 	actual, err := t.getActual(ctx, client, model.DashboardID)
@@ -168,6 +170,7 @@ func (t *dashboard) GetOldestOpenDashboard() (*models.Dashboard, error) {
 		iter.Stop()
 		return nil, err
 	}
+	model.Date = model.Date.In(t.clock.DefaultLocation())
 	model.DashboardID = doc.Ref.ID
 	iter.Stop()
 	actual, err := t.getActual(ctx, client, model.DashboardID)
@@ -199,6 +202,7 @@ func (t *dashboard) GetByMonth(month *time.Time) (*models.Dashboard, error) {
 	if err := doc.DataTo(&model); err != nil {
 		return nil, err
 	}
+	model.Date = model.Date.In(t.clock.DefaultLocation())
 	model.DashboardID = doc.Ref.ID
 	actual, err := t.getActual(ctx, client, model.DashboardID)
 	if err != nil {

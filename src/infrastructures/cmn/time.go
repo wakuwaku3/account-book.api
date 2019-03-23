@@ -48,12 +48,12 @@ func (t *clock) GetMonthStartDay(tm *time.Time) time.Time {
 		now := t.Now()
 		tm = &now
 	}
-	return time.Date(tm.Year(), tm.Month(), 1, 0, 0, 0, 0, tm.Location())
+	return time.Date(tm.Year(), tm.Month(), 1, 0, 0, 0, 0, t.location)
 }
 func (t *clock) GetDay(tm *time.Time) time.Time {
 	if tm == nil {
 		now := t.Now()
 		tm = &now
 	}
-	return time.Date(tm.Year(), tm.Month(), tm.Day(), 0, 0, 0, 0, tm.Location())
+	return time.Date(tm.Year(), tm.Month(), tm.Day(), 0, 0, 0, 0, t.location)
 }
