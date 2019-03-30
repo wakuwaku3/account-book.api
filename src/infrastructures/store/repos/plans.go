@@ -76,6 +76,7 @@ func (t *plans) GetByMonth(month *time.Time) (*[]models.Plan, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
 	start := t.clock.GetMonthStartDay(month)
+	next := start.AddDate(0, 1, 0)
 
 	plans := make([]models.Plan, 0)
 	iter := t.plansRef(client).Where("isDeleted", "==", false).OrderBy("createdAt", firestore.Asc).Documents(ctx)
@@ -92,7 +93,7 @@ func (t *plans) GetByMonth(month *time.Time) (*[]models.Plan, error) {
 			return nil, err
 		}
 		plan.PlanID = doc.Ref.ID
-		if (plan.Start == nil || plan.Start.Equal(start) || plan.Start.Before(start)) && (plan.End == nil || plan.End.Equal(start) || plan.End.After(start)) {
+		if (plan.Start == nil || plan.Start.Before(next)) && (plan.End == nil || plan.End.After(start)) {
 			st := plan.CreatedAt
 			if plan.Start != nil {
 				st = *plan.Start
