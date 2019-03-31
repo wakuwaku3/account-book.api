@@ -78,13 +78,12 @@ func (t *accounts) CleanUpPasswordResetToken() error {
 	return nil
 }
 func (t *accounts) CleanUpPasswordResetTokenByEmail(email *string) error {
-	now := t.clock.Now()
 	client := t.provider.GetClient()
 	batch := client.Batch()
 	ctx := context.Background()
 	passwordResetTokensRef := t.passwordResetTokensRef(client)
 
-	iter := passwordResetTokensRef.Where("email", "==", *email).Where("expires", "<=", now).Documents(ctx)
+	iter := passwordResetTokensRef.Where("email", "==", *email).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -170,7 +169,6 @@ func (t *accounts) GetSignUpToken(signUpToken *string) (*models.SignUpToken, err
 	return &model, nil
 }
 func (t *accounts) CreateUserAndAccount(user *models.User, account *models.Account) (*models.User, *models.Account, error) {
-	now := t.clock.Now()
 	client := t.provider.GetClient()
 	batch := client.Batch()
 	ctx := context.Background()
@@ -187,7 +185,7 @@ func (t *accounts) CreateUserAndAccount(user *models.User, account *models.Accou
 
 	signUpTokensRef := t.signUpTokensRef(client)
 	email := user.Email
-	iter := signUpTokensRef.Where("email", "==", email).Where("expires", "<=", now).Documents(ctx)
+	iter := signUpTokensRef.Where("email", "==", email).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
