@@ -15,6 +15,8 @@ type (
 		jwt               domains.Jwt
 		service           services.Accounts
 		resetPasswordMail domains.ResetPasswordMail
+		userCreationMail  domains.UserCreationMail
+		userExistingMail  domains.UserExistingMail
 		clock             cmn.Clock
 	}
 	// Accounts is AccountsController
@@ -24,6 +26,7 @@ type (
 		PasswordResetRequesting(args *PasswordResetRequestingArgs) error
 		GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetResetPasswordModelResult, error)
 		ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error)
+		SignUpRequesting(args *SignUpRequestingArgs) error
 	}
 	// SignInArgs は 引数です
 	SignInArgs struct {
@@ -66,6 +69,10 @@ type (
 		Token        string
 		RefreshToken string
 	}
+	// SignUpRequestingArgs は 引数です
+	SignUpRequestingArgs struct {
+		Email string
+	}
 )
 
 // NewAccounts is create instance.
@@ -74,6 +81,8 @@ func NewAccounts(
 	jwt domains.Jwt,
 	service services.Accounts,
 	resetPasswordMail domains.ResetPasswordMail,
+	userCreationMail domains.UserCreationMail,
+	userExistingMail domains.UserExistingMail,
 	clock cmn.Clock,
 ) Accounts {
 	return &accounts{
@@ -81,6 +90,8 @@ func NewAccounts(
 		jwt,
 		service,
 		resetPasswordMail,
+		userCreationMail,
+		userExistingMail,
 		clock,
 	}
 }
@@ -248,6 +259,54 @@ func (t *ResetPasswordArgs) valid() error {
 	}
 	if t.Password == "" {
 		err.Append(apperrors.RequiredPassword)
+	}
+	if err.HasError() {
+		return err
+	}
+	return nil
+}
+func (t *accounts) SignUpRequesting(args *SignUpRequestingArgs) error {
+	if err := args.valid(); err != nil {
+		return err
+	}
+
+	// 既にメールアドレスが使用されている場合、Tokenが生成される
+	token, err := t.service.CreatePasswordResetToken(&services.CreatePasswordResetTokenArgs{
+		Email: args.Email,
+	})
+	if err != nil {
+		return err
+	}
+	if token == nil {
+		// メールアドレスが使用されてない場合、UserCreationメールを送る
+		token, err := t.service.CreateSignUpToken(&services.CreateSignUpTokenArgs{
+			Email: args.Email,
+		})
+		if err != nil {
+			return err
+		}
+		go func() {
+			t.userCreationMail.Send(&domains.UserCreationMailSendArgs{
+				Email: args.Email,
+				Token: token.SignUpToken,
+			})
+		}()
+	}
+	if token != nil {
+		// メールアドレスが使用されていた場合、UserExistingメールを送る
+		go func() {
+			t.userExistingMail.Send(&domains.UserExistingMailSendArgs{
+				Email: args.Email,
+				Token: token.PasswordResetToken,
+			})
+		}()
+	}
+	return nil
+}
+func (t *SignUpRequestingArgs) valid() error {
+	err := apperrors.NewClientError()
+	if t.Email == "" {
+		err.Append(apperrors.RequiredMailAddress)
 	}
 	if err.HasError() {
 		return err

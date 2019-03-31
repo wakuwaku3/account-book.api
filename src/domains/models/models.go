@@ -18,6 +18,12 @@ type (
 		Expires            time.Time `firestore:"expires"`
 		Email              string    `firestore:"email"`
 	}
+	// SignUpToken は ユーザー作成のトークンです
+	SignUpToken struct {
+		SignUpToken string    `firestore:"-"`
+		Expires     time.Time `firestore:"expires"`
+		Email       string    `firestore:"email"`
+	}
 	// User はユーザーです
 	User struct {
 		UserID       string    `firestore:"-"`

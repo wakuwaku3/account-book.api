@@ -57,10 +57,12 @@ type (
 	AccountsRepository interface {
 		Get(email *string) (*models.Account, error)
 		CreatePasswordResetToken(model *models.PasswordResetToken) (*string, error)
-		CleanUp() error
-		CleanUpByEmail(email *string) error
+		CleanUpPasswordResetToken() error
+		CleanUpPasswordResetTokenByEmail(email *string) error
 		GetPasswordResetToken(passwordResetToken *string) (*models.PasswordResetToken, error)
 		SetPassword(email *string, hashedPassword *string) error
+		CleanUpSignUpToken() error
+		CreateSignUpToken(model *models.SignUpToken) (*string, error)
 	}
 	// ResetPasswordMail はパスワード再設定メール送信サービスです
 	ResetPasswordMail interface {
@@ -68,6 +70,24 @@ type (
 	}
 	// ResetPasswordMailSendArgs はパスワード再設定メール送信用パラメータです
 	ResetPasswordMailSendArgs struct {
+		Email string
+		Token string
+	}
+	// UserExistingMail はアカウント作成済みお知らせメール送信サービスです
+	UserExistingMail interface {
+		Send(args *UserExistingMailSendArgs) error
+	}
+	// UserExistingMailSendArgs はアカウント作成済みお知らせメール送信用パラメータです
+	UserExistingMailSendArgs struct {
+		Email string
+		Token string
+	}
+	// UserCreationMail はアカウント作成メール送信サービスです
+	UserCreationMail interface {
+		Send(args *UserCreationMailSendArgs) error
+	}
+	// UserCreationMailSendArgs はアカウント作成メール送信用パラメータです
+	UserCreationMailSendArgs struct {
 		Email string
 		Token string
 	}

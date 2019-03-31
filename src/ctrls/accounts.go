@@ -21,6 +21,7 @@ type (
 		PasswordResetRequesting(c echo.Context) error
 		GetResetPasswordModel(c echo.Context) error
 		ResetPassword(c echo.Context) error
+		SignUpRequesting(c echo.Context) error
 	}
 	signInRequest struct {
 		Email    string `json:"email"`
@@ -53,6 +54,9 @@ type (
 	resetPasswordResponse struct {
 		Token        string `json:"token"`
 		RefreshToken string `json:"refreshToken"`
+	}
+	signUpRequestingRequest struct {
+		Email string `json:"email"`
 	}
 )
 
@@ -157,4 +161,19 @@ func (t *accounts) ResetPassword(c echo.Context) error {
 		Token:        res.Token,
 		RefreshToken: res.RefreshToken,
 	})
+}
+func (t *accounts) SignUpRequesting(c echo.Context) error {
+	request := new(signUpRequestingRequest)
+	if err := c.Bind(&request); err != nil {
+		return err
+	}
+	err := t.useCase.SignUpRequesting(&usecases.SignUpRequestingArgs{Email: request.Email})
+	if err != nil {
+		if _, ok := err.(apperrors.ClientError); !ok {
+			log.Error(err)
+			return responses.WriteEmptyResponse(c)
+		}
+		return responses.WriteErrorResponse(c, err)
+	}
+	return responses.WriteEmptyResponse(c)
 }

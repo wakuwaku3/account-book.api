@@ -37,6 +37,9 @@ func (t *helper) Send(body *[]byte) error {
 	request := sendgrid.GetRequest(*apiKey, "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
 	request.Body = *body
-	_, err := sendgrid.API(request)
+	err := domains.Try(func() error {
+		_, err := sendgrid.API(request)
+		return err
+	}, 10)
 	return err
 }

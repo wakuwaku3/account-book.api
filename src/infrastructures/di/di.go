@@ -53,6 +53,12 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(mails.NewResetPassword, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}
+	if err := container.Register(mails.NewUserCreation, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+		return nil, err
+	}
+	if err := container.Register(mails.NewUserExisting, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+		return nil, err
+	}
 
 	// controllers
 	if err := container.Register(ctrls.NewAccounts); err != nil {

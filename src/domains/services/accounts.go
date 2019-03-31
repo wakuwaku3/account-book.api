@@ -26,6 +26,9 @@ type (
 			args *CreatePasswordResetTokenArgs) (
 			*CreatePasswordResetTokenResult, error)
 		SetPassword(args *SetPasswordArgs) error
+		CreateSignUpToken(
+			args *CreateSignUpTokenArgs) (
+			*CreateSignUpTokenResult, error)
 	}
 	// ComparePasswordArgs は 引数です
 	ComparePasswordArgs struct {
@@ -44,6 +47,14 @@ type (
 	SetPasswordArgs struct {
 		Password string
 		Email    string
+	}
+	// CreateSignUpTokenArgs は 引数です
+	CreateSignUpTokenArgs struct {
+		Email string
+	}
+	// CreateSignUpTokenResult は 結果です
+	CreateSignUpTokenResult struct {
+		SignUpToken string
 	}
 )
 
@@ -92,7 +103,7 @@ func (t *accounts) CreatePasswordResetToken(
 	if err != nil {
 		return nil, err
 	}
-	go t.repos.CleanUp()
+	go t.repos.CleanUpPasswordResetToken()
 	return &CreatePasswordResetTokenResult{
 		PasswordResetToken: *id,
 	}, nil
@@ -102,6 +113,22 @@ func (t *accounts) SetPassword(args *SetPasswordArgs) error {
 	if err := t.repos.SetPassword(&args.Email, hashedPassword); err != nil {
 		return err
 	}
-	go t.repos.CleanUpByEmail(&args.Email)
+	go t.repos.CleanUpPasswordResetTokenByEmail(&args.Email)
 	return nil
+}
+func (t *accounts) CreateSignUpToken(
+	args *CreateSignUpTokenArgs) (
+	*CreateSignUpTokenResult, error) {
+	expires := t.clock.Now().AddDate(0, 0, 2)
+	id, err := t.repos.CreateSignUpToken(&models.SignUpToken{
+		Email:   args.Email,
+		Expires: expires,
+	})
+	if err != nil {
+		return nil, err
+	}
+	go t.repos.CleanUpSignUpToken()
+	return &CreateSignUpTokenResult{
+		SignUpToken: *id,
+	}, nil
 }
