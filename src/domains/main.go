@@ -61,8 +61,10 @@ type (
 		CleanUpPasswordResetTokenByEmail(email *string) error
 		GetPasswordResetToken(passwordResetToken *string) (*models.PasswordResetToken, error)
 		SetPassword(email *string, hashedPassword *string) error
-		CleanUpSignUpToken() error
 		CreateSignUpToken(model *models.SignUpToken) (*string, error)
+		CleanUpSignUpToken() error
+		GetSignUpToken(signUpToken *string) (*models.SignUpToken, error)
+		CreateUserAndAccount(user *models.User, account *models.Account) (*models.User, *models.Account, error)
 	}
 	// ResetPasswordMail はパスワード再設定メール送信サービスです
 	ResetPasswordMail interface {

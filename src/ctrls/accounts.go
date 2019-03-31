@@ -22,6 +22,8 @@ type (
 		GetResetPasswordModel(c echo.Context) error
 		ResetPassword(c echo.Context) error
 		SignUpRequesting(c echo.Context) error
+		GetSignUpModel(c echo.Context) error
+		SignUp(c echo.Context) error
 	}
 	signInRequest struct {
 		Email    string `json:"email"`
@@ -57,6 +59,23 @@ type (
 	}
 	signUpRequestingRequest struct {
 		Email string `json:"email"`
+	}
+	getSignUpModelRequest struct {
+		SignUpToken string
+	}
+	getSignUpModelResponse struct {
+		Email string `json:"email"`
+	}
+	signUpRequest struct {
+		SignUpToken string `json:"signUpToken"`
+		Password    string `json:"password"`
+		UserName    string `json:"userName"`
+		Culture     string `json:"culture"`
+		Agreement   bool   `json:"agreement"`
+	}
+	signUpResponse struct {
+		Token        string `json:"token"`
+		RefreshToken string `json:"refreshToken"`
 	}
 )
 
@@ -176,4 +195,45 @@ func (t *accounts) SignUpRequesting(c echo.Context) error {
 		return responses.WriteErrorResponse(c, err)
 	}
 	return responses.WriteEmptyResponse(c)
+}
+func (t *accounts) GetSignUpModel(c echo.Context) error {
+	signUpToken := c.QueryParam("signUpToken")
+	request := &getSignUpModelRequest{
+		SignUpToken: signUpToken,
+	}
+	res, err := t.useCase.GetSignUpModel(&usecases.GetSignUpModelArgs{
+		SignUpToken: request.SignUpToken,
+	})
+	if err != nil {
+		return responses.WriteErrorResponse(c, err)
+	}
+	return responses.WriteResponse(c, getSignUpModelResponse{
+		Email: res.Email,
+	})
+}
+func (t *accounts) SignUp(c echo.Context) error {
+	request := new(signUpRequest)
+	if err := c.Bind(&request); err != nil {
+		return err
+	}
+	if !request.Agreement {
+		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredAgreement))
+	}
+	res, err := t.useCase.SignUp(&usecases.SignUpArgs{
+		SignUpToken: request.SignUpToken,
+		Password:    request.Password,
+		UserName:    request.UserName,
+		Culture:     request.Culture,
+	})
+	if err != nil {
+		if _, ok := err.(apperrors.ClientError); !ok {
+			log.Error(err)
+			return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.FailureSignUp))
+		}
+		return responses.WriteErrorResponse(c, err)
+	}
+	return responses.WriteResponse(c, signUpResponse{
+		Token:        res.Token,
+		RefreshToken: res.RefreshToken,
+	})
 }

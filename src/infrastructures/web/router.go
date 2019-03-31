@@ -60,6 +60,19 @@ func (web *web) setRoute() *web {
 			return controller.SignUpRequesting(c)
 		})
 	})
+	// sign-up
+	web.echo.GET("/accounts/sign-up", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrl.Accounts) error {
+			return controller.GetSignUpModel(c)
+		})
+	})
+	web.echo.POST("/accounts/sign-up", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrl.Accounts) error {
+			return controller.SignUp(c)
+		})
+	})
 
 	// auth aria
 	jwtSecret := web.env.GetJwtSecret()

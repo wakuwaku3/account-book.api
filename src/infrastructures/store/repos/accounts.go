@@ -20,6 +20,9 @@ type accounts struct {
 func NewAccounts(provider store.Provider, clock cmn.Clock) domains.AccountsRepository {
 	return &accounts{provider, clock}
 }
+func (t *accounts) usersRef(client *firestore.Client) *firestore.CollectionRef {
+	return client.Collection("users")
+}
 func (t *accounts) accountsRef(client *firestore.Client) *firestore.CollectionRef {
 	return client.Collection("accounts")
 }
@@ -44,8 +47,8 @@ func (t *accounts) Get(email *string) (*models.Account, error) {
 func (t *accounts) CreatePasswordResetToken(model *models.PasswordResetToken) (*string, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
-	passwordRestTokensRef := t.passwordResetTokensRef(client)
-	ref, _, err := passwordRestTokensRef.Add(ctx, model)
+	passwordResetTokensRef := t.passwordResetTokensRef(client)
+	ref, _, err := passwordResetTokensRef.Add(ctx, model)
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +59,9 @@ func (t *accounts) CleanUpPasswordResetToken() error {
 	client := t.provider.GetClient()
 	batch := client.Batch()
 	ctx := context.Background()
-	passwordRestTokensRef := t.passwordResetTokensRef(client)
+	passwordResetTokensRef := t.passwordResetTokensRef(client)
 
-	iter := passwordRestTokensRef.Where("expires", "<=", now).Documents(ctx)
+	iter := passwordResetTokensRef.Where("expires", "<=", now).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -79,9 +82,9 @@ func (t *accounts) CleanUpPasswordResetTokenByEmail(email *string) error {
 	client := t.provider.GetClient()
 	batch := client.Batch()
 	ctx := context.Background()
-	passwordRestTokensRef := t.passwordResetTokensRef(client)
+	passwordResetTokensRef := t.passwordResetTokensRef(client)
 
-	iter := passwordRestTokensRef.Where("email", "==", *email).Where("expires", "<=", now).Documents(ctx)
+	iter := passwordResetTokensRef.Where("email", "==", *email).Where("expires", "<=", now).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -154,4 +157,49 @@ func (t *accounts) CleanUpSignUpToken() error {
 		return err
 	}
 	return nil
+}
+func (t *accounts) GetSignUpToken(signUpToken *string) (*models.SignUpToken, error) {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+	doc, err := t.signUpTokensRef(client).Doc(*signUpToken).Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var model models.SignUpToken
+	doc.DataTo(&model)
+	return &model, nil
+}
+func (t *accounts) CreateUserAndAccount(user *models.User, account *models.Account) (*models.User, *models.Account, error) {
+	now := t.clock.Now()
+	client := t.provider.GetClient()
+	batch := client.Batch()
+	ctx := context.Background()
+
+	usersRef := t.usersRef(client)
+	userRef := usersRef.NewDoc()
+	batch.Set(userRef, user)
+	user.UserID = userRef.ID
+
+	accountsRef := t.accountsRef(client)
+	accountRef := accountsRef.Doc(user.Email)
+	account.UserID = user.UserID
+	batch.Set(accountRef, account)
+
+	signUpTokensRef := t.signUpTokensRef(client)
+	email := user.Email
+	iter := signUpTokensRef.Where("email", "==", email).Where("expires", "<=", now).Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, nil, err
+		}
+		batch.Delete(doc.Ref)
+	}
+	if _, err := batch.Commit(ctx); err != nil {
+		return nil, nil, err
+	}
+	return user, account, nil
 }

@@ -53,6 +53,18 @@ const (
 	LessLengthPathword Code = "00015"
 	// InvalidCharPassword :パスワードには、半角英小文字、大文字、数字をそれぞれ1種類以上使用してください。
 	InvalidCharPassword Code = "00016"
+	// RequiredAgreement :サービス利用規約への同意が必要です。
+	RequiredAgreement Code = "00017"
+	// FailureSignUp :サインアップに失敗しました。
+	FailureSignUp Code = "00018"
+	// ExpiredURL :URLの有効期限が切れています。
+	ExpiredURL Code = "00019"
+	// RequiredSignUpToken :サインアップトークンは必須です。
+	RequiredSignUpToken Code = "00020"
+	// RequiredName :名前は必須です。
+	RequiredName Code = "00021"
+	// InValidCulture :不正なカルチャーです。
+	InValidCulture Code = "00022"
 )
 
 // NewClientError はClientErrorを生成します。

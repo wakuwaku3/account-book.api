@@ -27,6 +27,8 @@ type (
 		GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetResetPasswordModelResult, error)
 		ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult, error)
 		SignUpRequesting(args *SignUpRequestingArgs) error
+		GetSignUpModel(args *GetSignUpModelArgs) (*GetSignUpModelResult, error)
+		SignUp(args *SignUpArgs) (*SignUpResult, error)
 	}
 	// SignInArgs は 引数です
 	SignInArgs struct {
@@ -72,6 +74,26 @@ type (
 	// SignUpRequestingArgs は 引数です
 	SignUpRequestingArgs struct {
 		Email string
+	}
+	// GetSignUpModelArgs は 引数です
+	GetSignUpModelArgs struct {
+		SignUpToken string
+	}
+	// GetSignUpModelResult は 結果です
+	GetSignUpModelResult struct {
+		Email string
+	}
+	// SignUpArgs は 引数です
+	SignUpArgs struct {
+		SignUpToken string
+		Password    string
+		UserName    string
+		Culture     string
+	}
+	// SignUpResult は 結果です
+	SignUpResult struct {
+		Token        string
+		RefreshToken string
 	}
 )
 
@@ -307,6 +329,87 @@ func (t *SignUpRequestingArgs) valid() error {
 	err := apperrors.NewClientError()
 	if t.Email == "" {
 		err.Append(apperrors.RequiredMailAddress)
+	}
+	if err.HasError() {
+		return err
+	}
+	return nil
+}
+func (t *accounts) GetSignUpModel(args *GetSignUpModelArgs) (*GetSignUpModelResult, error) {
+	if err := args.valid(); err != nil {
+		return nil, err
+	}
+	info, err := t.query.GetSignUpModelInfo(&args.SignUpToken)
+	if err != nil {
+		return nil, err
+	}
+	if info.Expires.Before(t.clock.Now()) {
+		return nil, apperrors.NewClientError(apperrors.ExpiredURL)
+	}
+	return &GetSignUpModelResult{
+		Email: info.Email,
+	}, nil
+}
+func (t *GetSignUpModelArgs) valid() error {
+	err := apperrors.NewClientError()
+	if t.SignUpToken == "" {
+		err.Append(apperrors.RequiredSignUpToken)
+	}
+	if err.HasError() {
+		return err
+	}
+	return nil
+}
+func (t *accounts) SignUp(args *SignUpArgs) (*SignUpResult, error) {
+	if err := args.valid(); err != nil {
+		return nil, err
+	}
+	if err := t.service.ValidPassword(&args.Password); err != nil {
+		return nil, err
+	}
+	info, err := t.query.GetSignUpModelInfo(&args.SignUpToken)
+	if err != nil {
+		return nil, err
+	}
+	if info.Expires.Before(t.clock.Now()) {
+		return nil, apperrors.NewClientError(apperrors.ExpiredURL)
+	}
+
+	result, err := t.service.CreateUser(&services.CreateUserArgs{
+		Email:    info.Email,
+		Password: args.Password,
+		Culture:  args.Culture,
+		UserName: args.UserName,
+	})
+	if err != nil {
+		return nil, err
+	}
+	token, err := t.jwt.CreateToken(&result.JwtClaims)
+	if err != nil {
+		return nil, err
+	}
+	refreshToken, err := t.jwt.CreateRefreshToken(&result.JwtRefreshClaims)
+	if err != nil {
+		return nil, err
+	}
+	return &SignUpResult{
+		Token:        *token,
+		RefreshToken: *refreshToken,
+	}, nil
+}
+func (t *SignUpArgs) valid() error {
+	err := apperrors.NewClientError()
+	if t.SignUpToken == "" {
+		err.Append(apperrors.RequiredSignUpToken)
+	}
+	if t.Password == "" {
+		err.Append(apperrors.RequiredPassword)
+	}
+	if t.UserName == "" {
+		err.Append(apperrors.RequiredName)
+	}
+	if t.Culture != "ja" && t.Culture != "en" {
+		err.Append(apperrors.InValidCulture)
 	}
 	if err.HasError() {
 		return err

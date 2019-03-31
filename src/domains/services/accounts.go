@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"unicode/utf8"
 
+	"github.com/google/uuid"
+
 	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
@@ -29,6 +31,7 @@ type (
 		CreateSignUpToken(
 			args *CreateSignUpTokenArgs) (
 			*CreateSignUpTokenResult, error)
+		CreateUser(args *CreateUserArgs) (*CreateUserResult, error)
 	}
 	// ComparePasswordArgs は 引数です
 	ComparePasswordArgs struct {
@@ -55,6 +58,18 @@ type (
 	// CreateSignUpTokenResult は 結果です
 	CreateSignUpTokenResult struct {
 		SignUpToken string
+	}
+	// CreateUserArgs は 引数です
+	CreateUserArgs struct {
+		Email    string
+		Password string
+		UserName string
+		Culture  string
+	}
+	// CreateUserResult は 引数です
+	CreateUserResult struct {
+		JwtClaims        domains.JwtClaims
+		JwtRefreshClaims domains.JwtRefreshClaims
 	}
 )
 
@@ -130,5 +145,37 @@ func (t *accounts) CreateSignUpToken(
 	go t.repos.CleanUpSignUpToken()
 	return &CreateSignUpTokenResult{
 		SignUpToken: *id,
+	}, nil
+}
+func (t *accounts) CreateUser(args *CreateUserArgs) (*CreateUserResult, error) {
+	hashedPassword := t.crypt.Hash(&args.Password)
+	now := t.clock.Now()
+	token := uuid.New().String()
+	user, account, err := t.repos.CreateUserAndAccount(&models.User{
+		Email:        args.Email,
+		Culture:      args.Culture,
+		UserName:     args.UserName,
+		UseStartDate: now,
+	}, &models.Account{
+		Email:          args.Email,
+		AccountToken:   token,
+		HashedPassword: *hashedPassword,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &CreateUserResult{
+		JwtClaims: domains.JwtClaims{
+			Email:        account.Email,
+			UserID:       account.UserID,
+			UserName:     user.UserName,
+			Culture:      user.Culture,
+			UseStartDate: user.UseStartDate,
+		},
+		JwtRefreshClaims: domains.JwtRefreshClaims{
+			Email:        account.Email,
+			UserID:       account.UserID,
+			AccountToken: account.AccountToken,
+		},
 	}, nil
 }

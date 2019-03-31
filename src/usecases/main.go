@@ -13,6 +13,7 @@ type (
 		GetRefreshInfo(email *string) (*RefreshInfo, error)
 		GetResetPasswordModelInfo(passwordResetToken *string) (*ResetPasswordModelInfo, error)
 		GetResetPasswordInfo(passwordResetToken *string) (*ResetPasswordInfo, error)
+		GetSignUpModelInfo(signUpToken *string) (*SignUpModelInfo, error)
 	}
 	// SignInInfo サインインのために必要な情報です
 	SignInInfo struct {
@@ -28,6 +29,11 @@ type (
 	}
 	// ResetPasswordModelInfo はパスワードリセット画面表示のために必要な情報です
 	ResetPasswordModelInfo struct {
+		Email   string
+		Expires time.Time
+	}
+	// SignUpModelInfo はサインアップ画面表示のために必要な情報です
+	SignUpModelInfo struct {
 		Email   string
 		Expires time.Time
 	}

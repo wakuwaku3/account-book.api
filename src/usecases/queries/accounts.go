@@ -113,3 +113,14 @@ func (t *accounts) GetResetPasswordInfo(passwordResetToken *string) (*usecases.R
 		},
 	}, nil
 }
+
+func (t *accounts) GetSignUpModelInfo(signUpToken *string) (*usecases.SignUpModelInfo, error) {
+	model, err := t.repos.GetSignUpToken(signUpToken)
+	if err != nil {
+		return nil, err
+	}
+	return &usecases.SignUpModelInfo{
+		Email:   model.Email,
+		Expires: model.Expires,
+	}, nil
+}
