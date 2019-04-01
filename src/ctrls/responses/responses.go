@@ -26,6 +26,7 @@ func WriteErrorResponse(c echo.Context, err error) error {
 			Errors: *cErr.GetErrorCodes(),
 		})
 	}
+	c.Logger().Error(err, c.Request())
 	return err
 }
 

@@ -110,12 +110,13 @@ func (t *signInRequest) Convert() *usecases.SignInArgs {
 func (t *accounts) Refresh(c echo.Context) error {
 	request := new(refreshRequest)
 	if err := c.Bind(&request); err != nil {
+		c.Logger().Error(err, c.Request())
 		return responses.WriteUnAuthorizedErrorResponse(c)
 	}
 	res, err := t.useCase.Refresh(request.Convert())
 	if err != nil {
-		if _, ok := err.(apperrors.ClientError); !ok {
-			log.Error(err)
+		if cErr, ok := err.(apperrors.ClientError); !ok {
+			c.Logger().Error(cErr.GetErrorCodes(), request, c.Request())
 			return responses.WriteUnAuthorizedErrorResponse(c)
 		}
 		return responses.WriteUnAuthorizedErrorResponse(c)

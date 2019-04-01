@@ -1,10 +1,7 @@
 package web
 
 import (
-	"errors"
 	"net/http"
-
-	"github.com/labstack/gommon/log"
 
 	"github.com/labstack/echo/middleware"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/auth"
@@ -16,11 +13,6 @@ import (
 func (web *web) setRoute() *web {
 	web.echo.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "hello")
-	})
-	web.echo.GET("/error", func(c echo.Context) error {
-		c.Logger().Error(errors.New("test1"))
-		log.Error(errors.New("test2"))
-		return c.JSON(http.StatusUnauthorized, "error")
 	})
 	web.echo.GET("/_ah/warmup", func(c echo.Context) error {
 		return c.NoContent(http.StatusNoContent)
