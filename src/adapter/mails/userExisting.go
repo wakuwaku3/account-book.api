@@ -1,36 +1,36 @@
 package mails
 
 import (
-	"encoding/json"
 	"net/url"
 	"path"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
+	"github.com/wakuwaku3/account-book.api/src/infrastructures/sendgrid"
 )
 
 type (
 	userExisting struct {
 		env    application.Env
-		helper Helper
+		helper sendgrid.Helper
 	}
 )
 
 // NewUserExisting is create instance
-func NewUserExisting(env application.Env, helper Helper) application.UserExistingMail {
+func NewUserExisting(env application.Env, helper sendgrid.Helper) application.UserExistingMail {
 	return &userExisting{env, helper}
 }
 func (t *userExisting) Send(args *application.UserExistingMailSendArgs) error {
 	u, _ := url.Parse(*t.env.GetFrontEndURL())
 	u.Path = path.Join("reset-password", args.Token)
-	b := &requestBody{
-		From: mailAddress{
+	b := &sendgrid.RequestBody{
+		From: sendgrid.MailAddress{
 			Name:  "Account Book Support",
 			Email: "support@prj-account-book.firebaseapp.com",
 		},
-		Personalizations: []personalization{
-			personalization{
-				To: []mailAddress{
-					mailAddress{
+		Personalizations: []sendgrid.Personalization{
+			sendgrid.Personalization{
+				To: []sendgrid.MailAddress{
+					sendgrid.MailAddress{
 						Email: args.Email,
 					},
 				},
@@ -41,10 +41,5 @@ func (t *userExisting) Send(args *application.UserExistingMailSendArgs) error {
 		},
 		TemplateID: "d-11ea8314916e4ccdb0ac934ce87efb8f",
 	}
-	body, err := json.Marshal(b)
-	if err != nil {
-		return err
-	}
-
-	return t.helper.Send(&body)
+	return t.helper.Send(b)
 }
