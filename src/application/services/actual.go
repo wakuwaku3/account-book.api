@@ -5,13 +5,13 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 )
 
 type (
 	actual struct {
 		dashboardRepos application.DashboardRepository
-		clock          cmn.Clock
+		clock          helpers.Clock
 	}
 	// Actual is ActualService
 	Actual interface {
@@ -33,7 +33,7 @@ type (
 )
 
 // NewActual is create instance
-func NewActual(dashboardRepos application.DashboardRepository, clock cmn.Clock) Actual {
+func NewActual(dashboardRepos application.DashboardRepository, clock helpers.Clock) Actual {
 	return &actual{dashboardRepos, clock}
 }
 func (t *actual) Enter(args *ActualArgs) error {

@@ -6,18 +6,18 @@ import (
 	"cloud.google.com/go/firestore"
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/store"
 	"google.golang.org/api/iterator"
 )
 
 type accounts struct {
 	provider store.Provider
-	clock    cmn.Clock
+	clock    helpers.Clock
 }
 
 // NewAccounts はインスタンスを生成します
-func NewAccounts(provider store.Provider, clock cmn.Clock) application.AccountsRepository {
+func NewAccounts(provider store.Provider, clock helpers.Clock) application.AccountsRepository {
 	return &accounts{provider, clock}
 }
 func (t *accounts) usersRef(client *firestore.Client) *firestore.CollectionRef {

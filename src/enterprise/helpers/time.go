@@ -1,4 +1,4 @@
-package cmn
+package helpers
 
 import (
 	"log"

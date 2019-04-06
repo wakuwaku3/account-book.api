@@ -7,15 +7,15 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
 
 type (
 	accounts struct {
 		crypt application.Crypt
 		repos application.AccountsRepository
-		clock cmn.Clock
+		clock helpers.Clock
 	}
 
 	// Accounts は Accountsのサービスです
@@ -75,7 +75,7 @@ type (
 func NewAccounts(
 	crypt application.Crypt,
 	repos application.AccountsRepository,
-	clock cmn.Clock,
+	clock helpers.Clock,
 ) Accounts {
 	return &accounts{crypt, repos, clock}
 }

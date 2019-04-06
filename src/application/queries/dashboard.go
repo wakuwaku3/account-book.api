@@ -8,7 +8,7 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 )
@@ -17,7 +17,7 @@ type dashboard struct {
 	repos             application.DashboardRepository
 	transactionsRepos application.TransactionsRepository
 	plansRepos        application.PlansRepository
-	clock             cmn.Clock
+	clock             helpers.Clock
 }
 
 // NewDashboard はインスタンスを生成します
@@ -25,7 +25,7 @@ func NewDashboard(
 	repos application.DashboardRepository,
 	transactionsRepos application.TransactionsRepository,
 	plansRepos application.PlansRepository,
-	clock cmn.Clock,
+	clock helpers.Clock,
 ) usecases.DashboardQuery {
 	return &dashboard{
 		repos,

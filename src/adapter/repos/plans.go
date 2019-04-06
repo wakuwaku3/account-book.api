@@ -6,7 +6,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"google.golang.org/api/iterator"
@@ -18,7 +18,7 @@ import (
 type (
 	plans struct {
 		provider       store.Provider
-		clock          cmn.Clock
+		clock          helpers.Clock
 		claimsProvider application.ClaimsProvider
 	}
 )
@@ -26,7 +26,7 @@ type (
 // NewPlans はインスタンスを生成します
 func NewPlans(
 	provider store.Provider,
-	clock cmn.Clock,
+	clock helpers.Clock,
 	claimsProvider application.ClaimsProvider,
 ) application.PlansRepository {
 	return &plans{provider, clock, claimsProvider}

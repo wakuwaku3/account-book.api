@@ -5,7 +5,7 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 )
 
 type (
@@ -16,7 +16,7 @@ type (
 		resetPasswordMail application.ResetPasswordMail
 		userCreationMail  application.UserCreationMail
 		userExistingMail  application.UserExistingMail
-		clock             cmn.Clock
+		clock             helpers.Clock
 	}
 	// Accounts is AccountsController
 	Accounts interface {
@@ -104,7 +104,7 @@ func NewAccounts(
 	resetPasswordMail application.ResetPasswordMail,
 	userCreationMail application.UserCreationMail,
 	userExistingMail application.UserExistingMail,
-	clock cmn.Clock,
+	clock helpers.Clock,
 ) Accounts {
 	return &accounts{
 		query,
