@@ -11,14 +11,14 @@ import (
 
 	"github.com/tampopos/dijct"
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls"
+	"github.com/wakuwaku3/account-book.api/src/adapter/repos"
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
+	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/auth"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/crypt"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/env"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/store"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/store/repos"
-	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 )
 
 // CreateContainer はDIContainerを生成します
