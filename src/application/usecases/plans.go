@@ -3,7 +3,7 @@ package usecases
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
 )
 
@@ -86,15 +86,15 @@ func (t *plans) Create(args *PlanArgs) (*CreatePlanResult, error) {
 	}, nil
 }
 func (t *PlanArgs) valid() error {
-	err := apperrors.NewClientError()
+	err := application.NewClientError()
 	if t.PlanName == "" {
-		err.Append(apperrors.RequiredPlanName)
+		err.Append(application.RequiredPlanName)
 	}
 	if t.Interval <= 0 {
-		err.Append(apperrors.MoreThanZeroInterval)
+		err.Append(application.MoreThanZeroInterval)
 	}
 	if t.Start != nil && t.End != nil && t.Start.After(*t.End) {
-		err.Append(apperrors.InValidDateRange)
+		err.Append(application.InValidDateRange)
 	}
 	if err.HasError() {
 		return err

@@ -3,7 +3,7 @@ package usecases
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
 )
 
@@ -86,12 +86,12 @@ func (t *transactions) Create(args *TransactionArgs) (*CreateTransactionResult, 
 	}, nil
 }
 func (t *TransactionArgs) valid() error {
-	err := apperrors.NewClientError()
+	err := application.NewClientError()
 	if t.Amount == nil {
-		err.Append(apperrors.RequiredAmount)
+		err.Append(application.RequiredAmount)
 	}
 	if t.Category == nil {
-		err.Append(apperrors.RequiredCategory)
+		err.Append(application.RequiredCategory)
 	}
 	if err.HasError() {
 		return err

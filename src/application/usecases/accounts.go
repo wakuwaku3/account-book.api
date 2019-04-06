@@ -5,7 +5,7 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application/services"
 	"github.com/wakuwaku3/account-book.api/src/domains"
-	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
 
@@ -147,12 +147,12 @@ func (t *accounts) SignIn(args *SignInArgs) (*SignInResult, error) {
 	}, nil
 }
 func (t *SignInArgs) valid() error {
-	err := apperrors.NewClientError()
+	err := application.NewClientError()
 	if t.Email == "" {
-		err.Append(apperrors.RequiredMailAddress)
+		err.Append(application.RequiredMailAddress)
 	}
 	if t.Password == "" {
-		err.Append(apperrors.RequiredPassword)
+		err.Append(application.RequiredPassword)
 	}
 	if err.HasError() {
 		return err
@@ -206,9 +206,9 @@ func (t *accounts) PasswordResetRequesting(args *PasswordResetRequestingArgs) er
 	return nil
 }
 func (t *PasswordResetRequestingArgs) valid() error {
-	err := apperrors.NewClientError()
+	err := application.NewClientError()
 	if t.Email == "" {
-		err.Append(apperrors.RequiredMailAddress)
+		err.Append(application.RequiredMailAddress)
 	}
 	if err.HasError() {
 		return err
@@ -231,9 +231,9 @@ func (t *accounts) GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetR
 	}, nil
 }
 func (t *GetResetPasswordModelArgs) valid() error {
-	err := apperrors.NewClientError()
+	err := application.NewClientError()
 	if t.PasswordResetToken == "" {
-		err.Append(apperrors.RequiredPasswordToken)
+		err.Append(application.RequiredPasswordToken)
 	}
 	if err.HasError() {
 		return err
@@ -275,12 +275,12 @@ func (t *accounts) ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult,
 	}, nil
 }
 func (t *ResetPasswordArgs) valid() error {
-	err := apperrors.NewClientError()
+	err := application.NewClientError()
 	if t.PasswordResetToken == "" {
-		err.Append(apperrors.RequiredPasswordToken)
+		err.Append(application.RequiredPasswordToken)
 	}
 	if t.Password == "" {
-		err.Append(apperrors.RequiredPassword)
+		err.Append(application.RequiredPassword)
 	}
 	if err.HasError() {
 		return err
@@ -326,9 +326,9 @@ func (t *accounts) SignUpRequesting(args *SignUpRequestingArgs) error {
 	return nil
 }
 func (t *SignUpRequestingArgs) valid() error {
-	err := apperrors.NewClientError()
+	err := application.NewClientError()
 	if t.Email == "" {
-		err.Append(apperrors.RequiredMailAddress)
+		err.Append(application.RequiredMailAddress)
 	}
 	if err.HasError() {
 		return err
@@ -344,16 +344,16 @@ func (t *accounts) GetSignUpModel(args *GetSignUpModelArgs) (*GetSignUpModelResu
 		return nil, err
 	}
 	if info.Expires.Before(t.clock.Now()) {
-		return nil, apperrors.NewClientError(apperrors.ExpiredURL)
+		return nil, application.NewClientError(application.ExpiredURL)
 	}
 	return &GetSignUpModelResult{
 		Email: info.Email,
 	}, nil
 }
 func (t *GetSignUpModelArgs) valid() error {
-	err := apperrors.NewClientError()
+	err := application.NewClientError()
 	if t.SignUpToken == "" {
-		err.Append(apperrors.RequiredSignUpToken)
+		err.Append(application.RequiredSignUpToken)
 	}
 	if err.HasError() {
 		return err
@@ -372,7 +372,7 @@ func (t *accounts) SignUp(args *SignUpArgs) (*SignUpResult, error) {
 		return nil, err
 	}
 	if info.Expires.Before(t.clock.Now()) {
-		return nil, apperrors.NewClientError(apperrors.ExpiredURL)
+		return nil, application.NewClientError(application.ExpiredURL)
 	}
 
 	result, err := t.service.CreateUser(&services.CreateUserArgs{
@@ -398,18 +398,18 @@ func (t *accounts) SignUp(args *SignUpArgs) (*SignUpResult, error) {
 	}, nil
 }
 func (t *SignUpArgs) valid() error {
-	err := apperrors.NewClientError()
+	err := application.NewClientError()
 	if t.SignUpToken == "" {
-		err.Append(apperrors.RequiredSignUpToken)
+		err.Append(application.RequiredSignUpToken)
 	}
 	if t.Password == "" {
-		err.Append(apperrors.RequiredPassword)
+		err.Append(application.RequiredPassword)
 	}
 	if t.UserName == "" {
-		err.Append(apperrors.RequiredName)
+		err.Append(application.RequiredName)
 	}
 	if t.Culture != "ja" && t.Culture != "en" {
-		err.Append(apperrors.InValidCulture)
+		err.Append(application.InValidCulture)
 	}
 	if err.HasError() {
 		return err

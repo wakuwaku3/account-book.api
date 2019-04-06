@@ -3,7 +3,7 @@ package services
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
+	"github.com/wakuwaku3/account-book.api/src/application"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
@@ -58,7 +58,7 @@ func (t *transactions) Update(id *string, args *TransactionArgs) error {
 		return err
 	}
 	if model.DailyID != nil {
-		return apperrors.NewClientError(apperrors.ClosedTransaction)
+		return application.NewClientError(application.ClosedTransaction)
 	}
 
 	model.Amount = args.Amount
@@ -76,7 +76,7 @@ func (t *transactions) Delete(id *string) error {
 		return err
 	}
 	if model.DailyID != nil {
-		return apperrors.NewClientError(apperrors.ClosedTransaction)
+		return application.NewClientError(application.ClosedTransaction)
 	}
 
 	if err := t.repos.Delete(id); err != nil {

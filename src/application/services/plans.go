@@ -3,7 +3,7 @@ package services
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
+	"github.com/wakuwaku3/account-book.api/src/application"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/domains/models"
@@ -63,7 +63,7 @@ func (t *plans) Update(id *string, args *PlanArgs) error {
 		return err
 	}
 	if model.IsDeleted {
-		return apperrors.NewClientError(apperrors.IsDeleted)
+		return application.NewClientError(application.IsDeleted)
 	}
 
 	model.PlanName = args.PlanName
@@ -84,7 +84,7 @@ func (t *plans) Remove(id *string) error {
 		return err
 	}
 	if model.IsDeleted {
-		return apperrors.NewClientError(apperrors.IsDeleted)
+		return application.NewClientError(application.IsDeleted)
 	}
 	model.IsDeleted = true
 	if err := t.repos.Update(id, model); err != nil {

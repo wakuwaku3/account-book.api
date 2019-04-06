@@ -3,7 +3,7 @@ package ctrls
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls/responses"
@@ -83,7 +83,7 @@ func convertPlan(t usecases.GetPlanResult) getPlanResponse {
 func (t *plans) GetPlan(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
+		return responses.WriteErrorResponse(c, application.NewClientError(application.RequiredID))
 	}
 	res, err := t.useCase.GetPlan(&id)
 	if err != nil {
@@ -118,7 +118,7 @@ func (t *planRequest) convert() *usecases.PlanArgs {
 func (t *plans) Update(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
+		return responses.WriteErrorResponse(c, application.NewClientError(application.RequiredID))
 	}
 	request := new(planRequest)
 	if err := c.Bind(&request); err != nil {
@@ -132,7 +132,7 @@ func (t *plans) Update(c echo.Context) error {
 func (t *plans) Delete(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredID))
+		return responses.WriteErrorResponse(c, application.NewClientError(application.RequiredID))
 	}
 	if err := t.useCase.Remove(&id); err != nil {
 		return responses.WriteErrorResponse(c, err)

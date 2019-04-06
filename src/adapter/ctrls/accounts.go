@@ -3,7 +3,7 @@ package ctrls
 import (
 	"github.com/labstack/gommon/log"
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls/responses"
-	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
+	"github.com/wakuwaku3/account-book.api/src/application"
 
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 
@@ -90,9 +90,9 @@ func (t *accounts) SignIn(c echo.Context) error {
 	}
 	res, err := t.useCase.SignIn(request.Convert())
 	if err != nil {
-		if _, ok := err.(apperrors.ClientError); !ok {
+		if _, ok := err.(application.ClientError); !ok {
 			log.Error(err)
-			return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.FailureSignIn))
+			return responses.WriteErrorResponse(c, application.NewClientError(application.FailureSignIn))
 		}
 		return responses.WriteErrorResponse(c, err)
 	}
@@ -115,7 +115,7 @@ func (t *accounts) Refresh(c echo.Context) error {
 	}
 	res, err := t.useCase.Refresh(request.Convert())
 	if err != nil {
-		if cErr, ok := err.(apperrors.ClientError); !ok {
+		if cErr, ok := err.(application.ClientError); !ok {
 			c.Logger().Error(cErr.GetErrorCodes(), request, c.Request())
 			return responses.WriteUnAuthorizedErrorResponse(c)
 		}
@@ -138,7 +138,7 @@ func (t *accounts) PasswordResetRequesting(c echo.Context) error {
 	}
 	err := t.useCase.PasswordResetRequesting(&usecases.PasswordResetRequestingArgs{Email: request.Email})
 	if err != nil {
-		if _, ok := err.(apperrors.ClientError); !ok {
+		if _, ok := err.(application.ClientError); !ok {
 			log.Error(err)
 			return responses.WriteEmptyResponse(c)
 		}
@@ -171,9 +171,9 @@ func (t *accounts) ResetPassword(c echo.Context) error {
 		Password:           request.Password,
 	})
 	if err != nil {
-		if _, ok := err.(apperrors.ClientError); !ok {
+		if _, ok := err.(application.ClientError); !ok {
 			log.Error(err)
-			return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.FailurePasswordReset))
+			return responses.WriteErrorResponse(c, application.NewClientError(application.FailurePasswordReset))
 		}
 		return responses.WriteErrorResponse(c, err)
 	}
@@ -189,7 +189,7 @@ func (t *accounts) SignUpRequesting(c echo.Context) error {
 	}
 	err := t.useCase.SignUpRequesting(&usecases.SignUpRequestingArgs{Email: request.Email})
 	if err != nil {
-		if _, ok := err.(apperrors.ClientError); !ok {
+		if _, ok := err.(application.ClientError); !ok {
 			log.Error(err)
 			return responses.WriteEmptyResponse(c)
 		}
@@ -218,7 +218,7 @@ func (t *accounts) SignUp(c echo.Context) error {
 		return err
 	}
 	if !request.Agreement {
-		return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.RequiredAgreement))
+		return responses.WriteErrorResponse(c, application.NewClientError(application.RequiredAgreement))
 	}
 	res, err := t.useCase.SignUp(&usecases.SignUpArgs{
 		SignUpToken: request.SignUpToken,
@@ -227,9 +227,9 @@ func (t *accounts) SignUp(c echo.Context) error {
 		Culture:     request.Culture,
 	})
 	if err != nil {
-		if _, ok := err.(apperrors.ClientError); !ok {
+		if _, ok := err.(application.ClientError); !ok {
 			log.Error(err)
-			return responses.WriteErrorResponse(c, apperrors.NewClientError(apperrors.FailureSignUp))
+			return responses.WriteErrorResponse(c, application.NewClientError(application.FailureSignUp))
 		}
 		return responses.WriteErrorResponse(c, err)
 	}
