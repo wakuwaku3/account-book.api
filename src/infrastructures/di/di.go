@@ -7,7 +7,7 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/mails"
 
-	"github.com/wakuwaku3/account-book.api/src/usecases/queries"
+	"github.com/wakuwaku3/account-book.api/src/application/queries"
 
 	"github.com/tampopos/dijct"
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls"
