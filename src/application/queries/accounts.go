@@ -3,7 +3,7 @@ package queries
 import (
 	"github.com/wakuwaku3/account-book.api/src/domains"
 
-	"github.com/wakuwaku3/account-book.api/src/usecases"
+	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 )
 
 type accounts struct {

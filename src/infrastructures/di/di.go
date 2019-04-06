@@ -18,7 +18,7 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/env"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/store"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/store/repos"
-	"github.com/wakuwaku3/account-book.api/src/usecases"
+	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 )
 
 // CreateContainer はDIContainerを生成します
