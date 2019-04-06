@@ -116,7 +116,14 @@ func (t *accounts) Refresh(c echo.Context) error {
 	res, err := t.useCase.Refresh(request.Convert())
 	if err != nil {
 		if cErr, ok := err.(application.ClientError); !ok {
-			c.Logger().Error(cErr.GetErrorCodes(), request, c.Request())
+			req := c.Request()
+			if request == nil {
+				c.Logger().Error(cErr.GetErrorCodes(), c.Request())
+			}
+			if req == nil {
+				c.Logger().Error(cErr.GetErrorCodes(), req)
+			}
+			c.Logger().Error(cErr.GetErrorCodes(), request, req)
 			return responses.WriteUnAuthorizedErrorResponse(c)
 		}
 		return responses.WriteUnAuthorizedErrorResponse(c)
