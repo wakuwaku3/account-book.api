@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/middleware"
-	"github.com/wakuwaku3/account-book.api/src/drivers/auth"
 
 	"github.com/labstack/echo"
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls"
@@ -76,7 +75,7 @@ func (web *web) setRoute() *web {
 
 	// auth aria
 	jwtSecret := web.env.GetJwtSecret()
-	auth := web.echo.Group("", middleware.JWT(*jwtSecret), auth.Authenticate())
+	auth := web.echo.Group("", middleware.JWT(*jwtSecret), Authenticate())
 
 	// transactions
 	// GET

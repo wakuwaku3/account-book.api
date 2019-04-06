@@ -1,7 +1,9 @@
-package auth
+package web
 
 import (
 	"reflect"
+
+	"github.com/wakuwaku3/account-book.api/src/drivers/auth"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
@@ -20,7 +22,7 @@ func Authenticate() echo.MiddlewareFunc {
 			claims := token.Claims.(jwt.MapClaims)
 			email := claims["email"].(string)
 			userID := claims["nonce"].(string)
-			claimsProvider := NewClaimsProvider(email, userID)
+			claimsProvider := auth.NewClaimsProvider(email, userID)
 			ifs := []reflect.Type{reflect.TypeOf((*application.ClaimsProvider)(nil)).Elem()}
 			container.Register(claimsProvider, dijct.RegisterOptions{Interfaces: ifs})
 			return next(c)
