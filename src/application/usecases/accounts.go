@@ -3,9 +3,9 @@ package usecases
 import (
 	"errors"
 
+	"github.com/wakuwaku3/account-book.api/src/application/services"
 	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
-	"github.com/wakuwaku3/account-book.api/src/domains/services"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
 

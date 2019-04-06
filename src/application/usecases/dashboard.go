@@ -3,7 +3,7 @@ package usecases
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains/services"
+	"github.com/wakuwaku3/account-book.api/src/application/services"
 )
 
 type (
