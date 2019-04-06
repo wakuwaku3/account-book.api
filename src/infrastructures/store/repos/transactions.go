@@ -8,7 +8,7 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 
-	"github.com/wakuwaku3/account-book.api/src/domains/models"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"google.golang.org/api/iterator"
 
 	"github.com/wakuwaku3/account-book.api/src/domains"

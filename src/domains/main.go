@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/gommon/log"
 
-	"github.com/wakuwaku3/account-book.api/src/domains/models"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (

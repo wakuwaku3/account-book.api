@@ -2,7 +2,7 @@ package queries
 
 import (
 	"github.com/wakuwaku3/account-book.api/src/domains"
-	"github.com/wakuwaku3/account-book.api/src/domains/models"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 )
