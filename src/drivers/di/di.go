@@ -4,21 +4,22 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/wakuwaku3/account-book.api/src/drivers/sendgrid"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/mails"
 
 	"github.com/wakuwaku3/account-book.api/src/application/queries"
 
 	"github.com/tampopos/dijct"
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls"
+	"github.com/wakuwaku3/account-book.api/src/adapter/mails"
 	"github.com/wakuwaku3/account-book.api/src/adapter/repos"
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/auth"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/crypt"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/env"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/store"
+	"github.com/wakuwaku3/account-book.api/src/drivers/auth"
+	"github.com/wakuwaku3/account-book.api/src/drivers/crypt"
+	"github.com/wakuwaku3/account-book.api/src/drivers/env"
+	"github.com/wakuwaku3/account-book.api/src/drivers/store"
 )
 
 // CreateContainer はDIContainerを生成します
@@ -45,11 +46,11 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(auth.NewAnonymousClaimsProvider(), dijct.RegisterOptions{Interfaces: ifs}); err != nil {
 		return nil, err
 	}
-
-	// mails
-	if err := container.Register(mails.NewHelper, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+	if err := container.Register(sendgrid.NewHelper, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}
+
+	// mails
 	if err := container.Register(mails.NewResetPassword, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}

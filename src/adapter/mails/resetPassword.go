@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/sendgrid"
+	"github.com/wakuwaku3/account-book.api/src/drivers/sendgrid"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 )

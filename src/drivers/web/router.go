@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/middleware"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/auth"
+	"github.com/wakuwaku3/account-book.api/src/drivers/auth"
 
 	"github.com/labstack/echo"
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls"

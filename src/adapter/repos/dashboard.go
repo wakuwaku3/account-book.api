@@ -9,7 +9,7 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
-	"github.com/wakuwaku3/account-book.api/src/infrastructures/store"
+	"github.com/wakuwaku3/account-book.api/src/drivers/store"
 	"google.golang.org/api/iterator"
 )
 
