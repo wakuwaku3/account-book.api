@@ -2,7 +2,7 @@ package ctrls
 
 import (
 	"github.com/labstack/gommon/log"
-	"github.com/wakuwaku3/account-book.api/src/ctrls/responses"
+	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls/responses"
 	"github.com/wakuwaku3/account-book.api/src/domains/apperrors"
 
 	"github.com/wakuwaku3/account-book.api/src/usecases"

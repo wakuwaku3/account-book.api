@@ -8,7 +8,7 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 	"github.com/wakuwaku3/account-book.api/src/usecases"
 
-	"github.com/wakuwaku3/account-book.api/src/ctrls/responses"
+	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls/responses"
 
 	"github.com/labstack/echo"
 )

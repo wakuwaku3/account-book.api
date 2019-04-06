@@ -10,7 +10,7 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/usecases/queries"
 
 	"github.com/tampopos/dijct"
-	"github.com/wakuwaku3/account-book.api/src/ctrls"
+	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls"
 	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/domains/services"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/auth"
