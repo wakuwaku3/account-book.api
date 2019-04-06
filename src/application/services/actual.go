@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
@@ -19,7 +19,7 @@ type (
 	}
 	// ActualArgs は引数です
 	ActualArgs struct {
-		application.ActualKey
+		models.ActualKey
 		ActualAmount  int
 		PlanName      string
 		PlanAmount    int

@@ -84,4 +84,11 @@ type (
 		IsIncome      bool      `firestore:"isIncome"`
 		PlanCreatedAt time.Time `firestore:"planCreatedAt"`
 	}
+	// ActualKey はActualを特定するための要素です
+	ActualKey struct {
+		PlanID        string
+		ActualID      *string
+		DashboardID   *string
+		SelectedMonth *time.Time
+	}
 )

@@ -51,7 +51,7 @@ func convertActual(t *models.Actual, p *models.Plan) *usecases.GetActualResult {
 		PlanName:     p.PlanName,
 	}
 }
-func (t *actual) GetActualInfo(key *application.ActualKey) (*usecases.ActualInfo, error) {
+func (t *actual) GetActualInfo(key *models.ActualKey) (*usecases.ActualInfo, error) {
 	plan, err := t.plansRepos.GetByID(&key.PlanID)
 	if err != nil {
 		return nil, err

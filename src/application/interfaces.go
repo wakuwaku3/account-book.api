@@ -122,11 +122,4 @@ type (
 		CreateActual(dashboardID *string, model *models.Actual) (*string, error)
 		UpdateActual(dashboardID *string, id *string, model *models.Actual) error
 	}
-	// ActualKey はActualを特定するための要素です
-	ActualKey struct {
-		PlanID        string
-		ActualID      *string
-		DashboardID   *string
-		SelectedMonth *time.Time
-	}
 )

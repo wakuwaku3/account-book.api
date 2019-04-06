@@ -3,8 +3,8 @@ package ctrls
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls/responses"
 
@@ -64,8 +64,8 @@ func (t *actual) Get(c echo.Context) error {
 	}
 	return responses.WriteResponse(c, convertActual(*res))
 }
-func (t *getActualRequest) convert() application.ActualKey {
-	return application.ActualKey{
+func (t *getActualRequest) convert() models.ActualKey {
+	return models.ActualKey{
 		ActualID:      t.ActualID,
 		PlanID:        t.PlanID,
 		DashboardID:   t.DashboardID,

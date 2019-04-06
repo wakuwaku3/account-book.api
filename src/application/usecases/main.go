@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
@@ -61,6 +62,6 @@ type (
 	// ActualQuery は実績のクエリです
 	ActualQuery interface {
 		Get(args *GetActualArgs) (*GetActualResult, error)
-		GetActualInfo(key *application.ActualKey) (*ActualInfo, error)
+		GetActualInfo(key *models.ActualKey) (*ActualInfo, error)
 	}
 )
