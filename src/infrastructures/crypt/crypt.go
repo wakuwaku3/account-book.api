@@ -3,18 +3,18 @@ package crypt
 import (
 	"encoding/hex"
 
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"golang.org/x/crypto/scrypt"
 )
 
 type (
 	c struct {
-		env domains.Env
+		env application.Env
 	}
 )
 
 // NewCrypt は インスタンスを生成します
-func NewCrypt(env domains.Env) domains.Crypt {
+func NewCrypt(env application.Env) application.Crypt {
 	return &c{env: env}
 }
 func (c *c) Hash(text *string) *string {

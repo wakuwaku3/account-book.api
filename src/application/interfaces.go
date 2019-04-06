@@ -1,9 +1,7 @@
-package domains
+package application
 
 import (
 	"time"
-
-	"github.com/labstack/gommon/log"
 
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
@@ -132,19 +130,3 @@ type (
 		SelectedMonth *time.Time
 	}
 )
-
-// Try は成功するか上限回数まで処理を繰り返し行います
-func Try(f func() error, limit int) error {
-	count := 0
-	for {
-		err := f()
-		if err == nil {
-			return nil
-		}
-		count++
-		if count >= limit {
-			return err
-		}
-		log.Warn(err)
-	}
-}

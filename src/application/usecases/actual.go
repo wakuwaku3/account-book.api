@@ -3,7 +3,7 @@ package usecases
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
 )
 
@@ -27,7 +27,7 @@ type (
 	}
 	// GetActualArgs は引数です
 	GetActualArgs struct {
-		domains.ActualKey
+		application.ActualKey
 	}
 	// GetActualResult は結果です
 	GetActualResult struct {
@@ -37,7 +37,7 @@ type (
 	}
 	// EnterActualArgs は引数です
 	EnterActualArgs struct {
-		domains.ActualKey
+		application.ActualKey
 		ActualAmount int
 	}
 )
@@ -69,7 +69,7 @@ func (t *EnterActualArgs) convert(info *ActualInfo) *services.ActualArgs {
 		PlanAmount:    info.PlanAmount,
 		PlanName:      info.PlanName,
 		PlanCreatedAt: info.PlanCreatedAt,
-		ActualKey: domains.ActualKey{
+		ActualKey: application.ActualKey{
 			DashboardID:   t.DashboardID,
 			PlanID:        t.PlanID,
 			ActualID:      t.ActualID,

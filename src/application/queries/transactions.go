@@ -1,19 +1,19 @@
 package queries
 
 import (
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 )
 
 type transactions struct {
-	repos domains.TransactionsRepository
+	repos application.TransactionsRepository
 }
 
 // NewTransactions はインスタンスを生成します
 func NewTransactions(
-	repos domains.TransactionsRepository,
+	repos application.TransactionsRepository,
 ) usecases.TransactionsQuery {
 	return &transactions{
 		repos,

@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 )
 
 type (
@@ -19,7 +19,7 @@ type (
 )
 
 // NewEnv は環境変数管理用のインスタンスを生成します
-func NewEnv() domains.Env {
+func NewEnv() application.Env {
 	return &env{}
 }
 func (env *env) Initialize() error {

@@ -1,19 +1,19 @@
 package queries
 
 import (
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 )
 
 type plans struct {
-	repos domains.PlansRepository
+	repos application.PlansRepository
 }
 
 // NewPlans はインスタンスを生成します
 func NewPlans(
-	repos domains.PlansRepository,
+	repos application.PlansRepository,
 ) usecases.PlansQuery {
 	return &plans{
 		repos,

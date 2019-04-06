@@ -1,19 +1,19 @@
 package queries
 
 import (
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 )
 
 type accounts struct {
-	repos      domains.AccountsRepository
-	usersRepos domains.UsersRepository
+	repos      application.AccountsRepository
+	usersRepos application.UsersRepository
 }
 
 // NewAccounts はインスタンスを生成します
-func NewAccounts(repos domains.AccountsRepository,
-	usersRepos domains.UsersRepository) usecases.AccountsQuery {
+func NewAccounts(repos application.AccountsRepository,
+	usersRepos application.UsersRepository) usecases.AccountsQuery {
 	return &accounts{
 		repos:      repos,
 		usersRepos: usersRepos,
@@ -31,14 +31,14 @@ func (t *accounts) GetSignInInfo(email *string) (*usecases.SignInInfo, error) {
 	}
 	return &usecases.SignInInfo{
 		HashedPassword: account.HashedPassword,
-		JwtClaims: domains.JwtClaims{
+		JwtClaims: application.JwtClaims{
 			Email:        *email,
 			UserID:       account.UserID,
 			UserName:     user.UserName,
 			Culture:      user.Culture,
 			UseStartDate: user.UseStartDate,
 		},
-		JwtRefreshClaims: domains.JwtRefreshClaims{
+		JwtRefreshClaims: application.JwtRefreshClaims{
 			Email:        *email,
 			UserID:       account.UserID,
 			AccountToken: account.AccountToken,
@@ -57,14 +57,14 @@ func (t *accounts) GetRefreshInfo(email *string) (*usecases.RefreshInfo, error) 
 	}
 	return &usecases.RefreshInfo{
 		AccountToken: account.AccountToken,
-		JwtClaims: domains.JwtClaims{
+		JwtClaims: application.JwtClaims{
 			Email:        *email,
 			UserID:       account.UserID,
 			UserName:     user.UserName,
 			Culture:      user.Culture,
 			UseStartDate: user.UseStartDate,
 		},
-		JwtRefreshClaims: domains.JwtRefreshClaims{
+		JwtRefreshClaims: application.JwtRefreshClaims{
 			Email:        *email,
 			UserID:       account.UserID,
 			AccountToken: account.AccountToken,
@@ -99,14 +99,14 @@ func (t *accounts) GetResetPasswordInfo(passwordResetToken *string) (*usecases.R
 	return &usecases.ResetPasswordInfo{
 		Email:   model.Email,
 		Expires: model.Expires,
-		JwtClaims: domains.JwtClaims{
+		JwtClaims: application.JwtClaims{
 			Email:        model.Email,
 			UserID:       account.UserID,
 			UserName:     user.UserName,
 			Culture:      user.Culture,
 			UseStartDate: user.UseStartDate,
 		},
-		JwtRefreshClaims: domains.JwtRefreshClaims{
+		JwtRefreshClaims: application.JwtRefreshClaims{
 			Email:        model.Email,
 			UserID:       account.UserID,
 			AccountToken: account.AccountToken,

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"cloud.google.com/go/firestore"
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/store"
@@ -17,7 +17,7 @@ type accounts struct {
 }
 
 // NewAccounts はインスタンスを生成します
-func NewAccounts(provider store.Provider, clock cmn.Clock) domains.AccountsRepository {
+func NewAccounts(provider store.Provider, clock cmn.Clock) application.AccountsRepository {
 	return &accounts{provider, clock}
 }
 func (t *accounts) usersRef(client *firestore.Client) *firestore.CollectionRef {

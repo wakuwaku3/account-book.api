@@ -5,21 +5,21 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 )
 
 type (
 	resetPassword struct {
-		env    domains.Env
+		env    application.Env
 		helper Helper
 	}
 )
 
 // NewResetPassword is create instance
-func NewResetPassword(env domains.Env, helper Helper) domains.ResetPasswordMail {
+func NewResetPassword(env application.Env, helper Helper) application.ResetPasswordMail {
 	return &resetPassword{env, helper}
 }
-func (t *resetPassword) Send(args *domains.ResetPasswordMailSendArgs) error {
+func (t *resetPassword) Send(args *application.ResetPasswordMailSendArgs) error {
 	u, _ := url.Parse(*t.env.GetFrontEndURL())
 	u.Path = path.Join("reset-password", args.Token)
 	b := &requestBody{

@@ -11,7 +11,7 @@ import (
 
 	"github.com/tampopos/dijct"
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls"
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/auth"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/crypt"
@@ -41,7 +41,7 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(cmn.NewClock, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}
-	ifs := []reflect.Type{reflect.TypeOf((*domains.ClaimsProvider)(nil)).Elem()}
+	ifs := []reflect.Type{reflect.TypeOf((*application.ClaimsProvider)(nil)).Elem()}
 	if err := container.Register(auth.NewAnonymousClaimsProvider(), dijct.RegisterOptions{Interfaces: ifs}); err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func CreateContainer() (dijct.Container, error) {
 
 	return container, nil
 }
-func initialize(envService domains.Env, storeProvider store.Provider) {
+func initialize(envService application.Env, storeProvider store.Provider) {
 	err := envService.Initialize()
 	if err != nil {
 		log.Fatalln(err)

@@ -4,13 +4,13 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/di"
 )
 
 type web struct {
 	echo *echo.Echo
-	env  domains.Env
+	env  application.Env
 }
 
 // Web はWebサーバーのインターフェイスです
@@ -26,7 +26,7 @@ func NewWeb() (Web, error) {
 		return nil, err
 	}
 	web := &web{echo, nil}
-	container.Invoke(func(env domains.Env) {
+	container.Invoke(func(env application.Env) {
 		web.env = env
 	})
 	web.echo.Logger.SetLevel(log.INFO)

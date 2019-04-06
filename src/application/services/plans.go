@@ -5,14 +5,13 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 
-	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
 
 type (
 	plans struct {
-		repos domains.PlansRepository
+		repos application.PlansRepository
 		clock cmn.Clock
 	}
 	// Plans is PlansService
@@ -37,7 +36,7 @@ type (
 )
 
 // NewPlans is create instance
-func NewPlans(repos domains.PlansRepository, clock cmn.Clock) Plans {
+func NewPlans(repos application.PlansRepository, clock cmn.Clock) Plans {
 	return &plans{repos, clock}
 }
 func (t *plans) Create(args *PlanArgs) (*CreatePlanResult, error) {

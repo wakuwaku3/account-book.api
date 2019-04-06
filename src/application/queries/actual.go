@@ -1,21 +1,21 @@
 package queries
 
 import (
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 )
 
 type actual struct {
-	dashboardRepos domains.DashboardRepository
-	plansRepos     domains.PlansRepository
+	dashboardRepos application.DashboardRepository
+	plansRepos     application.PlansRepository
 }
 
 // NewActual はインスタンスを生成します
 func NewActual(
-	dashboardRepos domains.DashboardRepository,
-	plansRepos domains.PlansRepository,
+	dashboardRepos application.DashboardRepository,
+	plansRepos application.PlansRepository,
 ) usecases.ActualQuery {
 	return &actual{
 		dashboardRepos,
@@ -51,7 +51,7 @@ func convertActual(t *models.Actual, p *models.Plan) *usecases.GetActualResult {
 		PlanName:     p.PlanName,
 	}
 }
-func (t *actual) GetActualInfo(key *domains.ActualKey) (*usecases.ActualInfo, error) {
+func (t *actual) GetActualInfo(key *application.ActualKey) (*usecases.ActualInfo, error) {
 	plan, err := t.plansRepos.GetByID(&key.PlanID)
 	if err != nil {
 		return nil, err

@@ -5,21 +5,21 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 )
 
 type (
 	userCreation struct {
-		env    domains.Env
+		env    application.Env
 		helper Helper
 	}
 )
 
 // NewUserCreation is create instance
-func NewUserCreation(env domains.Env, helper Helper) domains.UserCreationMail {
+func NewUserCreation(env application.Env, helper Helper) application.UserCreationMail {
 	return &userCreation{env, helper}
 }
-func (t *userCreation) Send(args *domains.UserCreationMailSendArgs) error {
+func (t *userCreation) Send(args *application.UserCreationMailSendArgs) error {
 	u, _ := url.Parse(*t.env.GetFrontEndURL())
 	u.Path = path.Join("sign-up", args.Token)
 	b := &requestBody{

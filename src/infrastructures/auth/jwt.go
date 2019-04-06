@@ -6,13 +6,13 @@ import (
 	"github.com/google/uuid"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
 
 type (
 	j struct {
-		env   domains.Env
+		env   application.Env
 		clock cmn.Clock
 	}
 	customClaims struct {
@@ -33,10 +33,10 @@ type (
 )
 
 // NewJwt is create instance
-func NewJwt(env domains.Env, clock cmn.Clock) domains.Jwt {
+func NewJwt(env application.Env, clock cmn.Clock) application.Jwt {
 	return &j{env, clock}
 }
-func (t *j) CreateToken(claims *domains.JwtClaims) (*string, error) {
+func (t *j) CreateToken(claims *application.JwtClaims) (*string, error) {
 	now := t.clock.Now()
 	url := t.env.GetFrontEndURL()
 	cc := customClaims{
@@ -57,7 +57,7 @@ func (t *j) CreateToken(claims *domains.JwtClaims) (*string, error) {
 	}
 	return t.createToken(cc)
 }
-func (t *j) CreateRefreshToken(claims *domains.JwtRefreshClaims) (*string, error) {
+func (t *j) CreateRefreshToken(claims *application.JwtRefreshClaims) (*string, error) {
 	now := t.clock.Now()
 	url := t.env.GetFrontEndURL()
 	cc := customRefreshClaims{
@@ -77,7 +77,7 @@ func (t *j) CreateRefreshToken(claims *domains.JwtRefreshClaims) (*string, error
 	}
 	return t.createToken(cc)
 }
-func (t *j) ParseRefreshToken(refreshToken *string) (*domains.JwtRefreshClaims, error) {
+func (t *j) ParseRefreshToken(refreshToken *string) (*application.JwtRefreshClaims, error) {
 	var c customRefreshClaims
 	secret := t.env.GetJwtSecret()
 	jwt.ParseWithClaims(*refreshToken, &c, func(token *jwt.Token) (interface{}, error) {
@@ -86,7 +86,7 @@ func (t *j) ParseRefreshToken(refreshToken *string) (*domains.JwtRefreshClaims, 
 		}
 		return secret, nil
 	})
-	return &domains.JwtRefreshClaims{
+	return &application.JwtRefreshClaims{
 		AccountToken: c.AccountToken,
 		Email:        c.Email,
 		UserID:       c.UserID,

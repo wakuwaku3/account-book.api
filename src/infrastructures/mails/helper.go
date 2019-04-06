@@ -2,12 +2,13 @@ package mails
 
 import (
 	sendgrid "github.com/sendgrid/sendgrid-go"
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 )
 
 type (
 	helper struct {
-		env domains.Env
+		env application.Env
 	}
 	// Helper はSendGridのヘルパークラスです
 	Helper interface {
@@ -29,7 +30,7 @@ type (
 )
 
 // NewHelper is create instance
-func NewHelper(env domains.Env) Helper {
+func NewHelper(env application.Env) Helper {
 	return &helper{env}
 }
 func (t *helper) Send(body *[]byte) error {
@@ -37,7 +38,7 @@ func (t *helper) Send(body *[]byte) error {
 	request := sendgrid.GetRequest(*apiKey, "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
 	request.Body = *body
-	err := domains.Try(func() error {
+	err := helpers.Try(func() error {
 		_, err := sendgrid.API(request)
 		return err
 	}, 10)

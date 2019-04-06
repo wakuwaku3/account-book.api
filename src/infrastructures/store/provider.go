@@ -5,13 +5,13 @@ import (
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"google.golang.org/api/option"
 )
 
 type (
 	provider struct {
-		env    domains.Env
+		env    application.Env
 		app    *firebase.App
 		client *firestore.Client
 	}
@@ -23,7 +23,7 @@ type (
 )
 
 // NewProvider はProviderインスタンスを生成します
-func NewProvider(env domains.Env) Provider {
+func NewProvider(env application.Env) Provider {
 	return &provider{env: env}
 }
 func (provider *provider) Initialize() error {

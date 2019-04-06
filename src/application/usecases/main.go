@@ -3,7 +3,7 @@ package usecases
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 )
 
 type (
@@ -18,14 +18,14 @@ type (
 	// SignInInfo サインインのために必要な情報です
 	SignInInfo struct {
 		HashedPassword   string
-		JwtClaims        domains.JwtClaims
-		JwtRefreshClaims domains.JwtRefreshClaims
+		JwtClaims        application.JwtClaims
+		JwtRefreshClaims application.JwtRefreshClaims
 	}
 	// RefreshInfo トークンリフレッシュのために必要な情報です
 	RefreshInfo struct {
 		AccountToken     string
-		JwtClaims        domains.JwtClaims
-		JwtRefreshClaims domains.JwtRefreshClaims
+		JwtClaims        application.JwtClaims
+		JwtRefreshClaims application.JwtRefreshClaims
 	}
 	// ResetPasswordModelInfo はパスワードリセット画面表示のために必要な情報です
 	ResetPasswordModelInfo struct {
@@ -41,8 +41,8 @@ type (
 	ResetPasswordInfo struct {
 		Email            string
 		Expires          time.Time
-		JwtClaims        domains.JwtClaims
-		JwtRefreshClaims domains.JwtRefreshClaims
+		JwtClaims        application.JwtClaims
+		JwtRefreshClaims application.JwtRefreshClaims
 	}
 	// TransactionsQuery はアカウントのクエリです
 	TransactionsQuery interface {
@@ -61,6 +61,6 @@ type (
 	// ActualQuery は実績のクエリです
 	ActualQuery interface {
 		Get(args *GetActualArgs) (*GetActualResult, error)
-		GetActualInfo(key *domains.ActualKey) (*ActualInfo, error)
+		GetActualInfo(key *application.ActualKey) (*ActualInfo, error)
 	}
 )

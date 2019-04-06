@@ -9,14 +9,12 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
-
-	"github.com/wakuwaku3/account-book.api/src/domains"
 )
 
 type (
 	accounts struct {
-		crypt domains.Crypt
-		repos domains.AccountsRepository
+		crypt application.Crypt
+		repos application.AccountsRepository
 		clock cmn.Clock
 	}
 
@@ -68,15 +66,15 @@ type (
 	}
 	// CreateUserResult は 引数です
 	CreateUserResult struct {
-		JwtClaims        domains.JwtClaims
-		JwtRefreshClaims domains.JwtRefreshClaims
+		JwtClaims        application.JwtClaims
+		JwtRefreshClaims application.JwtRefreshClaims
 	}
 )
 
 // NewAccounts is create instance.
 func NewAccounts(
-	crypt domains.Crypt,
-	repos domains.AccountsRepository,
+	crypt application.Crypt,
+	repos application.AccountsRepository,
 	clock cmn.Clock,
 ) Accounts {
 	return &accounts{crypt, repos, clock}
@@ -165,14 +163,14 @@ func (t *accounts) CreateUser(args *CreateUserArgs) (*CreateUserResult, error) {
 		return nil, err
 	}
 	return &CreateUserResult{
-		JwtClaims: domains.JwtClaims{
+		JwtClaims: application.JwtClaims{
 			Email:        account.Email,
 			UserID:       account.UserID,
 			UserName:     user.UserName,
 			Culture:      user.Culture,
 			UseStartDate: user.UseStartDate,
 		},
-		JwtRefreshClaims: domains.JwtRefreshClaims{
+		JwtRefreshClaims: application.JwtRefreshClaims{
 			Email:        account.Email,
 			UserID:       account.UserID,
 			AccountToken: account.AccountToken,

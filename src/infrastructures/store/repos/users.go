@@ -3,7 +3,7 @@ package repos
 import (
 	"context"
 
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/store"
 )
@@ -13,7 +13,7 @@ type users struct {
 }
 
 // NewUsers はインスタンスを生成します
-func NewUsers(provider store.Provider) domains.UsersRepository {
+func NewUsers(provider store.Provider) application.UsersRepository {
 	return &users{provider: provider}
 }
 

@@ -11,7 +11,7 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"google.golang.org/api/iterator"
 
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/store"
 )
 
@@ -19,7 +19,7 @@ type (
 	transactions struct {
 		provider       store.Provider
 		clock          cmn.Clock
-		claimsProvider domains.ClaimsProvider
+		claimsProvider application.ClaimsProvider
 	}
 )
 
@@ -27,8 +27,8 @@ type (
 func NewTransactions(
 	provider store.Provider,
 	clock cmn.Clock,
-	claimsProvider domains.ClaimsProvider,
-) domains.TransactionsRepository {
+	claimsProvider application.ClaimsProvider,
+) application.TransactionsRepository {
 	return &transactions{provider, clock, claimsProvider}
 }
 func (t *transactions) transactionsRef(client *firestore.Client) *firestore.CollectionRef {

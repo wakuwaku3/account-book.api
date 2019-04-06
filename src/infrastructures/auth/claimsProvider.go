@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/wakuwaku3/account-book.api/src/domains"
+import "github.com/wakuwaku3/account-book.api/src/application"
 
 type (
 	claimsProvider struct {
@@ -10,12 +10,12 @@ type (
 )
 
 // NewClaimsProvider is create instance
-func NewClaimsProvider(email string, userID string) domains.ClaimsProvider {
+func NewClaimsProvider(email string, userID string) application.ClaimsProvider {
 	return &claimsProvider{email, userID}
 }
 
 // NewAnonymousClaimsProvider is create instance
-func NewAnonymousClaimsProvider() domains.ClaimsProvider {
+func NewAnonymousClaimsProvider() application.ClaimsProvider {
 	return &claimsProvider{email: "anonymous@example.com", userID: "anonymous"}
 }
 func (t *claimsProvider) GetEmail() *string {

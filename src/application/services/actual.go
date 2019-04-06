@@ -3,14 +3,14 @@ package services
 import (
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
 
 type (
 	actual struct {
-		dashboardRepos domains.DashboardRepository
+		dashboardRepos application.DashboardRepository
 		clock          cmn.Clock
 	}
 	// Actual is ActualService
@@ -19,7 +19,7 @@ type (
 	}
 	// ActualArgs は引数です
 	ActualArgs struct {
-		domains.ActualKey
+		application.ActualKey
 		ActualAmount  int
 		PlanName      string
 		PlanAmount    int
@@ -33,7 +33,7 @@ type (
 )
 
 // NewActual is create instance
-func NewActual(dashboardRepos domains.DashboardRepository, clock cmn.Clock) Actual {
+func NewActual(dashboardRepos application.DashboardRepository, clock cmn.Clock) Actual {
 	return &actual{dashboardRepos, clock}
 }
 func (t *actual) Enter(args *ActualArgs) error {

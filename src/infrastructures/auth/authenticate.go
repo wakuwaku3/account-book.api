@@ -6,7 +6,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/tampopos/dijct"
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 )
 
 const userKey = "user"
@@ -21,7 +21,7 @@ func Authenticate() echo.MiddlewareFunc {
 			email := claims["email"].(string)
 			userID := claims["nonce"].(string)
 			claimsProvider := NewClaimsProvider(email, userID)
-			ifs := []reflect.Type{reflect.TypeOf((*domains.ClaimsProvider)(nil)).Elem()}
+			ifs := []reflect.Type{reflect.TypeOf((*application.ClaimsProvider)(nil)).Elem()}
 			container.Register(claimsProvider, dijct.RegisterOptions{Interfaces: ifs})
 			return next(c)
 		}

@@ -5,16 +5,16 @@ import (
 	"sort"
 	"time"
 
-	"github.com/wakuwaku3/account-book.api/src/domains"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
 
 type (
 	dashboard struct {
-		repos             domains.DashboardRepository
-		transactionsRepos domains.TransactionsRepository
-		plansRepos        domains.PlansRepository
+		repos             application.DashboardRepository
+		transactionsRepos application.TransactionsRepository
+		plansRepos        application.PlansRepository
 		clock             cmn.Clock
 	}
 	// Dashboard is DashboardService
@@ -26,9 +26,9 @@ type (
 
 // NewDashboard is create instance
 func NewDashboard(
-	repos domains.DashboardRepository,
-	transactionsRepos domains.TransactionsRepository,
-	plansRepos domains.PlansRepository,
+	repos application.DashboardRepository,
+	transactionsRepos application.TransactionsRepository,
+	plansRepos application.PlansRepository,
 	clock cmn.Clock,
 ) Dashboard {
 	return &dashboard{

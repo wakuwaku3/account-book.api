@@ -3,20 +3,19 @@ package usecases
 import (
 	"errors"
 
-	"github.com/wakuwaku3/account-book.api/src/application/services"
-	"github.com/wakuwaku3/account-book.api/src/domains"
 	"github.com/wakuwaku3/account-book.api/src/application"
+	"github.com/wakuwaku3/account-book.api/src/application/services"
 	"github.com/wakuwaku3/account-book.api/src/infrastructures/cmn"
 )
 
 type (
 	accounts struct {
 		query             AccountsQuery
-		jwt               domains.Jwt
+		jwt               application.Jwt
 		service           services.Accounts
-		resetPasswordMail domains.ResetPasswordMail
-		userCreationMail  domains.UserCreationMail
-		userExistingMail  domains.UserExistingMail
+		resetPasswordMail application.ResetPasswordMail
+		userCreationMail  application.UserCreationMail
+		userExistingMail  application.UserExistingMail
 		clock             cmn.Clock
 	}
 	// Accounts is AccountsController
@@ -100,11 +99,11 @@ type (
 // NewAccounts is create instance.
 func NewAccounts(
 	query AccountsQuery,
-	jwt domains.Jwt,
+	jwt application.Jwt,
 	service services.Accounts,
-	resetPasswordMail domains.ResetPasswordMail,
-	userCreationMail domains.UserCreationMail,
-	userExistingMail domains.UserExistingMail,
+	resetPasswordMail application.ResetPasswordMail,
+	userCreationMail application.UserCreationMail,
+	userExistingMail application.UserExistingMail,
 	clock cmn.Clock,
 ) Accounts {
 	return &accounts{
@@ -196,7 +195,7 @@ func (t *accounts) PasswordResetRequesting(args *PasswordResetRequestingArgs) er
 	}
 	if token != nil {
 		go func() {
-			args := domains.ResetPasswordMailSendArgs{
+			args := application.ResetPasswordMailSendArgs{
 				Email: args.Email,
 				Token: token.PasswordResetToken,
 			}
@@ -308,7 +307,7 @@ func (t *accounts) SignUpRequesting(args *SignUpRequestingArgs) error {
 			return err
 		}
 		go func() {
-			t.userCreationMail.Send(&domains.UserCreationMailSendArgs{
+			t.userCreationMail.Send(&application.UserCreationMailSendArgs{
 				Email: args.Email,
 				Token: token.SignUpToken,
 			})
@@ -317,7 +316,7 @@ func (t *accounts) SignUpRequesting(args *SignUpRequestingArgs) error {
 	if token != nil {
 		// メールアドレスが使用されていた場合、UserExistingメールを送る
 		go func() {
-			t.userExistingMail.Send(&domains.UserExistingMailSendArgs{
+			t.userExistingMail.Send(&application.UserExistingMailSendArgs{
 				Email: args.Email,
 				Token: token.PasswordResetToken,
 			})
