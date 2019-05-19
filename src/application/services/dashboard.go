@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
@@ -115,8 +115,10 @@ func (t *dashboard) Approve(id *string) error {
 		}
 		if transaction.Category == 5 {
 			val.Income += transaction.Amount
+			income += transaction.Amount
 		} else {
 			val.Expense += transaction.Amount
+			expense += transaction.Amount
 		}
 	}
 	dSlice := make([]models.Daily, 0)
