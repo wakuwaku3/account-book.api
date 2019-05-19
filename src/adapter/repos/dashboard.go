@@ -7,9 +7,9 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 	"github.com/wakuwaku3/account-book.api/src/drivers/store"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"google.golang.org/api/iterator"
 )
 
@@ -219,24 +219,51 @@ func (t *dashboard) GetByMonth(month *time.Time) (*models.Dashboard, error) {
 func (t *dashboard) Create(month *time.Time) (*string, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
-	start := t.clock.GetMonthStartDay(month)
 
-	iter := t.dashboardsRef(client).Where("date", "==", start).Documents(ctx)
+	iter := t.dashboardsRef(client).Where("state", "==", "closed").OrderBy("date", firestore.Desc).Documents(ctx)
 	doc, err := iter.Next()
-	if err == iterator.Done {
-		doc, _, err := t.dashboardsRef(client).Add(ctx, models.Dashboard{
-			Date:  start,
-			State: "open",
-		})
+
+	start := t.clock.GetMonthStartDay(month)
+	closedDate := start.AddDate(0, -1, 0)
+	if err != iterator.Done {
 		if err != nil {
 			return nil, err
 		}
-		return &doc.ID, nil
+		var closed models.Dashboard
+		if err := doc.DataTo(&closed); err != nil {
+			iter.Stop()
+			return nil, err
+		}
+		closedDate = closed.Date.In(t.clock.DefaultLocation())
+		iter.Stop()
 	}
-	if err != nil {
-		return nil, err
+
+	var id *string
+	for date := closedDate.AddDate(0, 1, 0); start.Equal(date) || start.After(date); date = date.AddDate(0, 1, 0) {
+		iter2 := t.dashboardsRef(client).Where("date", "==", start).Documents(ctx)
+		doc, err := iter2.Next()
+		if err == iterator.Done {
+			doc, _, err := t.dashboardsRef(client).Add(ctx, models.Dashboard{
+				Date:  date,
+				State: "open",
+			})
+			if err != nil {
+				return nil, err
+			}
+			id = &doc.ID
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		var model models.Dashboard
+		if err := doc.DataTo(&model); err != nil {
+			iter.Stop()
+			return nil, err
+		}
+		id = &doc.Ref.ID
 	}
-	return &doc.Ref.ID, nil
+	return id, nil
 }
 func (t *dashboard) Approve(model *models.Dashboard) error {
 	client := t.provider.GetClient()
