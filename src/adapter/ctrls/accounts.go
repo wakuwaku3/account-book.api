@@ -114,20 +114,34 @@ func (t *accounts) Refresh(c echo.Context) error {
 		return responses.WriteUnAuthorizedErrorResponse(c)
 	}
 	res, err := t.useCase.Refresh(request.Convert())
+
+	// エラー原因がわからないためエラーを詳しく出してみる
 	if err != nil {
-		if cErr, ok := err.(application.ClientError); !ok {
-			req := c.Request()
+		req := c.Request()
+		if cErr, ok := err.(application.ClientError); ok {
 			if request == nil {
-				c.Logger().Error(cErr.GetErrorCodes(), c.Request())
+				c.Logger().Error(err, cErr.GetErrorCodes(), req)
+				return responses.WriteUnAuthorizedErrorResponse(c)
 			}
 			if req == nil {
-				c.Logger().Error(cErr.GetErrorCodes(), req)
+				c.Logger().Error(err, cErr.GetErrorCodes())
+				return responses.WriteUnAuthorizedErrorResponse(c)
 			}
-			c.Logger().Error(cErr.GetErrorCodes(), request, req)
+			c.Logger().Error(err, cErr.GetErrorCodes(), request, req)
 			return responses.WriteUnAuthorizedErrorResponse(c)
 		}
+		if request == nil {
+			c.Logger().Error(err, req)
+			return responses.WriteUnAuthorizedErrorResponse(c)
+		}
+		if req == nil {
+			c.Logger().Error(err)
+			return responses.WriteUnAuthorizedErrorResponse(c)
+		}
+		c.Logger().Error(err, request, req)
 		return responses.WriteUnAuthorizedErrorResponse(c)
 	}
+
 	return responses.WriteResponse(c, refreshResponse{
 		Token:        res.Token,
 		RefreshToken: res.RefreshToken,
