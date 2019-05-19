@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/labstack/gommon/log"
+
 	"cloud.google.com/go/firestore"
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/drivers/store"
@@ -238,9 +240,12 @@ func (t *dashboard) Create(month *time.Time) (*string, error) {
 		iter.Stop()
 	}
 
+	log.Info(start)
+	log.Info(closedDate)
 	var id *string
 	for date := closedDate.AddDate(0, 1, 0); start.Equal(date) || start.After(date); date = date.AddDate(0, 1, 0) {
-		iter2 := t.dashboardsRef(client).Where("date", "==", start).Documents(ctx)
+		log.Info(date)
+		iter2 := t.dashboardsRef(client).Where("date", "==", date).Documents(ctx)
 		doc, err := iter2.Next()
 		if err == iterator.Done {
 			doc, _, err := t.dashboardsRef(client).Add(ctx, models.Dashboard{
