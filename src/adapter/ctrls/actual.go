@@ -24,7 +24,7 @@ type (
 		PlanID        string     `json:"planId"`
 		ActualID      *string    `json:"actualId"`
 		DashboardID   *string    `json:"dashboardId"`
-		SelectedMonth *time.Time `json:"selectedMonth"`
+		SelectedMonth *time.Time `json:"month"`
 	}
 	getActualResponse struct {
 		PlanName     string `json:"planName"`
