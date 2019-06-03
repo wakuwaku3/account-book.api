@@ -2,7 +2,7 @@ module github.com/wakuwaku3/account-book.api
 
 require (
 	cloud.google.com/go v0.37.0
-	firebase.google.com/go v3.6.0+incompatible
+	firebase.google.com/go v3.8.0+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.1.1
 	github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6 // indirect
