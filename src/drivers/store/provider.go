@@ -2,6 +2,10 @@ package store
 
 import (
 	"context"
+	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
@@ -43,12 +47,17 @@ func (provider *provider) Initialize() error {
 
 func (provider *provider) createApp(ctx context.Context) (*firebase.App, error) {
 	credentialsFilePath := provider.env.GetCredentialsFilePath()
+	keepaliveOption := option.WithGRPCDialOption(grpc.WithKeepaliveParams(keepalive.ClientParameters{
+		Time:                30 * time.Millisecond,
+		Timeout:             20 * time.Millisecond,
+		PermitWithoutStream: true,
+	}))
 	if *credentialsFilePath != "" {
 		sa := option.WithCredentialsFile(*credentialsFilePath)
 
-		return firebase.NewApp(ctx, nil, sa)
+		return firebase.NewApp(ctx, nil, sa, keepaliveOption)
 	}
-	return firebase.NewApp(ctx, nil)
+	return firebase.NewApp(ctx, nil, keepaliveOption)
 }
 func (provider *provider) GetClient() *firestore.Client {
 	return provider.client

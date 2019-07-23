@@ -15,6 +15,7 @@
     "godotenv",
     "gommon",
     "gomock",
+    "grpc",
     "infs",
     "joho",
     "jwtgo",

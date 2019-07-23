@@ -18,4 +18,5 @@ require (
 	golang.org/x/arch v0.0.0-20190312162104-788fe5ffcd8c // indirect
 	golang.org/x/crypto v0.0.0-20190313024323-a1f597ede03a
 	google.golang.org/api v0.2.0
+	google.golang.org/grpc v1.19.0
 )
