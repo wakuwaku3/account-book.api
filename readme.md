@@ -1,5 +1,9 @@
 # account-book.api
 
+## environment
+
+https://github.com/wakuwaku3/dev-account-book
+
 ## Required
 
 go(v1.11 以降)

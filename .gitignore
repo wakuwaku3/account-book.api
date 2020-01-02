@@ -3,3 +3,5 @@ store-account.json
 .user.env
 account-book.api
 debug
+__debug_bin
+.config

@@ -33,7 +33,9 @@
     "**/.hg": true,
     "**/CVS": true,
     "**/.DS_Store": true,
-    "**/dist": true
+    "**/dist": true,
+    "__debug_bin": true,
+    ".config": true
   },
   "cSpell.ignoreRegExpList": ["/.*ー/"],
   "cSpell.ignorePaths": [
