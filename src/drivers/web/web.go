@@ -15,7 +15,7 @@ type web struct {
 
 // Web はWebサーバーのインターフェイスです
 type Web interface {
-	Start()
+	Start(port string)
 }
 
 // NewWeb は Web を生成します
@@ -40,6 +40,6 @@ func NewWeb() (Web, error) {
 	return web, nil
 }
 
-func (web *web) Start() {
-	web.echo.Logger.Fatal(web.echo.Start(":8080"))
+func (web *web) Start(port string) {
+	web.echo.Logger.Fatal(web.echo.Start(":" + port))
 }
