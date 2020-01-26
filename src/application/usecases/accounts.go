@@ -28,6 +28,7 @@ type (
 		SignUpRequesting(args *SignUpRequestingArgs) error
 		GetSignUpModel(args *GetSignUpModelArgs) (*GetSignUpModelResult, error)
 		SignUp(args *SignUpArgs) (*SignUpResult, error)
+		Quit(args *QuitArgs) (*QuitResult, error)
 	}
 	// SignInArgs は 引数です
 	SignInArgs struct {
@@ -93,6 +94,14 @@ type (
 	SignUpResult struct {
 		Token        string
 		RefreshToken string
+	}
+	// QuitArgs は 引数です
+	QuitArgs struct {
+		Password string
+	}
+	// QuitResult は 結果です
+	QuitResult struct {
+		UserName string
 	}
 )
 
@@ -414,4 +423,27 @@ func (t *SignUpArgs) valid() error {
 		return err
 	}
 	return nil
+}
+func (t *accounts) Quit(args *QuitArgs) (*QuitResult, error) {
+	if args.Password == "" {
+		return nil, application.NewClientError(application.InValidCulture)
+	}
+	info, err := t.query.GetQuitInfo()
+	if err != nil {
+		return nil, err
+	}
+	err = t.service.ComparePassword(&services.ComparePasswordArgs{
+		HashedPassword: info.HashedPassword,
+		InputPassword:  args.Password,
+	})
+	if err != nil {
+		return nil, err
+	}
+	err = t.service.DeleteUser()
+	if err != nil {
+		return nil, err
+	}
+	return &QuitResult{
+		UserName: info.UserName,
+	}, nil
 }

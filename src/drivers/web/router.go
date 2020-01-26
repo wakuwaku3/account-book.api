@@ -77,6 +77,15 @@ func (web *web) setRoute() *web {
 	jwtSecret := web.env.GetJwtSecret()
 	auth := web.echo.Group("", middleware.JWT(*jwtSecret), Authenticate())
 
+	// accounts
+	// GET
+	auth.GET("/accounts/quit", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrls.Accounts) error {
+			return controller.Quit(c)
+		})
+	})
+
 	// transactions
 	// GET
 	auth.GET("/transactions", func(c echo.Context) error {

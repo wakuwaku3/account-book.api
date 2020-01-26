@@ -4,19 +4,23 @@ import (
 	"context"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"github.com/wakuwaku3/account-book.api/src/drivers/store"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type users struct {
-	provider store.Provider
+	provider       store.Provider
+	claimsProvider application.ClaimsProvider
 }
 
 // NewUsers はインスタンスを生成します
-func NewUsers(provider store.Provider) application.UsersRepository {
-	return &users{provider: provider}
+func NewUsers(provider store.Provider, claimsProvider application.ClaimsProvider) application.UsersRepository {
+	return &users{provider: provider, claimsProvider: claimsProvider}
 }
 
+func (t *users) GetByAuth() (*models.User, error) {
+	return t.Get(t.claimsProvider.GetUserID())
+}
 func (t *users) Get(userID *string) (*models.User, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()

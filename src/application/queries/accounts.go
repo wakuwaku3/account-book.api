@@ -124,3 +124,18 @@ func (t *accounts) GetSignUpModelInfo(signUpToken *string) (*usecases.SignUpMode
 		Expires: model.Expires,
 	}, nil
 }
+func (t *accounts) GetQuitInfo() (*usecases.QuitInfo, error) {
+	account, err := t.repos.GetByAuth()
+	if err != nil {
+		return nil, err
+	}
+	user, err := t.usersRepos.GetByAuth()
+	if err != nil {
+		return nil, err
+	}
+	return &usecases.QuitInfo{
+		HashedPassword: account.HashedPassword,
+		UserName:       user.UserName,
+	}, nil
+
+}

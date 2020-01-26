@@ -22,7 +22,7 @@ func Authenticate() echo.MiddlewareFunc {
 			claims := token.Claims.(jwt.MapClaims)
 			email := claims["email"].(string)
 			userID := claims["nonce"].(string)
-			claimsProvider := auth.NewClaimsProvider(email, userID)
+			claimsProvider := auth.NewClaimsProvider(email, userID, true)
 			ifs := []reflect.Type{reflect.TypeOf((*application.ClaimsProvider)(nil)).Elem()}
 			container.Register(claimsProvider, dijct.RegisterOptions{Interfaces: ifs})
 			return next(c)

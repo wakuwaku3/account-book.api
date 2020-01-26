@@ -46,10 +46,12 @@ type (
 	ClaimsProvider interface {
 		GetUserID() *string
 		GetEmail() *string
+		Authenticated() bool
 	}
 	// UsersRepository は新ユーザーのリポジトリです
 	UsersRepository interface {
 		Get(userID *string) (*models.User, error)
+		GetByAuth() (*models.User, error)
 	}
 	// AccountsRepository はアカウントのリポジトリです
 	AccountsRepository interface {
@@ -63,6 +65,8 @@ type (
 		CleanUpSignUpToken() error
 		GetSignUpToken(signUpToken *string) (*models.SignUpToken, error)
 		CreateUserAndAccount(user *models.User, account *models.Account) (*models.User, *models.Account, error)
+		GetByAuth() (*models.Account, error)
+		Delete() error
 	}
 	// ResetPasswordMail はパスワード再設定メール送信サービスです
 	ResetPasswordMail interface {

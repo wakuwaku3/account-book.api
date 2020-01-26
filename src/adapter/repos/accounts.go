@@ -5,20 +5,21 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 	"github.com/wakuwaku3/account-book.api/src/drivers/store"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"google.golang.org/api/iterator"
 )
 
 type accounts struct {
-	provider store.Provider
-	clock    helpers.Clock
+	provider       store.Provider
+	clock          helpers.Clock
+	claimsProvider application.ClaimsProvider
 }
 
 // NewAccounts はインスタンスを生成します
-func NewAccounts(provider store.Provider, clock helpers.Clock) application.AccountsRepository {
-	return &accounts{provider, clock}
+func NewAccounts(provider store.Provider, clock helpers.Clock, claimsProvider application.ClaimsProvider) application.AccountsRepository {
+	return &accounts{provider, clock, claimsProvider}
 }
 func (t *accounts) usersRef(client *firestore.Client) *firestore.CollectionRef {
 	return client.Collection("users")
@@ -32,7 +33,9 @@ func (t *accounts) passwordResetTokensRef(client *firestore.Client) *firestore.C
 func (t *accounts) signUpTokensRef(client *firestore.Client) *firestore.CollectionRef {
 	return client.Collection("signUpTokens")
 }
-
+func (t *accounts) GetByAuth() (*models.Account, error) {
+	return t.Get(t.claimsProvider.GetEmail())
+}
 func (t *accounts) Get(email *string) (*models.Account, error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
@@ -200,4 +203,30 @@ func (t *accounts) CreateUserAndAccount(user *models.User, account *models.Accou
 		return nil, nil, err
 	}
 	return user, account, nil
+}
+func (t *accounts) Delete() error {
+	client := t.provider.GetClient()
+	batch := client.Batch()
+	ctx := context.Background()
+	email := t.claimsProvider.GetEmail()
+	userID := t.claimsProvider.GetUserID()
+	passwordResetTokensRef := t.passwordResetTokensRef(client)
+
+	batch.Delete(t.usersRef(client).Doc(*userID))
+	batch.Delete(t.accountsRef(client).Doc(*email))
+	iter := passwordResetTokensRef.Where("email", "==", *email).Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		batch.Delete(doc.Ref)
+	}
+	if _, err := batch.Commit(ctx); err != nil {
+		return err
+	}
+	return nil
 }

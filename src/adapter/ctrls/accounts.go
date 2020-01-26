@@ -24,6 +24,7 @@ type (
 		SignUpRequesting(c echo.Context) error
 		GetSignUpModel(c echo.Context) error
 		SignUp(c echo.Context) error
+		Quit(c echo.Context) error
 	}
 	signInRequest struct {
 		Email    string `json:"email"`
@@ -76,6 +77,12 @@ type (
 	signUpResponse struct {
 		Token        string `json:"token"`
 		RefreshToken string `json:"refreshToken"`
+	}
+	quitRequest struct {
+		Password string `json:"password"`
+	}
+	quitResponse struct {
+		UserName string `json:"userName"`
 	}
 )
 
@@ -257,5 +264,20 @@ func (t *accounts) SignUp(c echo.Context) error {
 	return responses.WriteResponse(c, signUpResponse{
 		Token:        res.Token,
 		RefreshToken: res.RefreshToken,
+	})
+}
+func (t *accounts) Quit(c echo.Context) error {
+	request := new(quitRequest)
+	if err := c.Bind(&request); err != nil {
+		return err
+	}
+	res, err := t.useCase.Quit(&usecases.QuitArgs{
+		Password: request.Password,
+	})
+	if err != nil {
+		return responses.WriteErrorResponse(c, err)
+	}
+	return responses.WriteResponse(c, quitResponse{
+		UserName: res.UserName,
 	})
 }

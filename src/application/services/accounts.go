@@ -30,6 +30,7 @@ type (
 			args *CreateSignUpTokenArgs) (
 			*CreateSignUpTokenResult, error)
 		CreateUser(args *CreateUserArgs) (*CreateUserResult, error)
+		DeleteUser() error
 	}
 	// ComparePasswordArgs は 引数です
 	ComparePasswordArgs struct {
@@ -176,4 +177,7 @@ func (t *accounts) CreateUser(args *CreateUserArgs) (*CreateUserResult, error) {
 			AccountToken: account.AccountToken,
 		},
 	}, nil
+}
+func (t *accounts) DeleteUser() error {
+	return t.repos.Delete()
 }

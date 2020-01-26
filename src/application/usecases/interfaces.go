@@ -15,6 +15,7 @@ type (
 		GetResetPasswordModelInfo(passwordResetToken *string) (*ResetPasswordModelInfo, error)
 		GetResetPasswordInfo(passwordResetToken *string) (*ResetPasswordInfo, error)
 		GetSignUpModelInfo(signUpToken *string) (*SignUpModelInfo, error)
+		GetQuitInfo() (*QuitInfo, error)
 	}
 	// SignInInfo サインインのために必要な情報です
 	SignInInfo struct {
@@ -63,5 +64,10 @@ type (
 	ActualQuery interface {
 		Get(args *GetActualArgs) (*GetActualResult, error)
 		GetActualInfo(key *models.ActualKey) (*ActualInfo, error)
+	}
+	// QuitInfo サインインのために必要な情報です
+	QuitInfo struct {
+		HashedPassword string
+		UserName       string
 	}
 )
