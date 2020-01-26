@@ -125,5 +125,6 @@ type (
 		ExistsActual(dashboardID *string, planID *string) (*string, error)
 		CreateActual(dashboardID *string, model *models.Actual) (*string, error)
 		UpdateActual(dashboardID *string, id *string, model *models.Actual) error
+		AdjustBalance(id *string, balance int) error
 	}
 )

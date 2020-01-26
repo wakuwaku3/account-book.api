@@ -16,6 +16,7 @@ type (
 		GetDashboard(args *GetDashboardArgs) (*GetDashboardResult, error)
 		Approve(id *string) error
 		CancelApprove(id *string) error
+		AdjustBalance(args *AdjustBalanceArgs) error
 	}
 	// GetDashboardArgs は引数です
 	GetDashboardArgs struct {
@@ -27,6 +28,7 @@ type (
 		SelectedMonth    time.Time
 		Income           int
 		Expense          int
+		Balance          *int
 		PreviousBalance  *int
 		Plans            []PlanResult
 		Daily            []DailyResult
@@ -50,6 +52,11 @@ type (
 		Income  int
 		Expense int
 		Balance int
+	}
+	// AdjustBalanceArgs は引数です
+	AdjustBalanceArgs struct {
+		DashboardID string
+		Balance     int
 	}
 )
 
@@ -75,4 +82,10 @@ func (t *dashboard) Approve(id *string) error {
 }
 func (t *dashboard) CancelApprove(id *string) error {
 	return t.service.CancelApprove(id)
+}
+func (t *dashboard) AdjustBalance(args *AdjustBalanceArgs) error {
+	return t.service.AdjustBalance(&services.AdjustBalanceArgs{
+		DashboardID: args.DashboardID,
+		Balance:     args.Balance,
+	})
 }

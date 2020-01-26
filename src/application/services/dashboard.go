@@ -21,6 +21,12 @@ type (
 	Dashboard interface {
 		Approve(id *string) error
 		CancelApprove(id *string) error
+		AdjustBalance(args *AdjustBalanceArgs) error
+	}
+	// AdjustBalanceArgs は引数です
+	AdjustBalanceArgs struct {
+		DashboardID string
+		Balance     int
 	}
 )
 
@@ -188,4 +194,21 @@ func (t *dashboard) CancelApprove(id *string) error {
 	current.PreviousDashboardID = nil
 	current.State = "open"
 	return t.repos.CancelApprove(current)
+}
+func (t *dashboard) AdjustBalance(args *AdjustBalanceArgs) error {
+	id := &args.DashboardID
+	current, err := t.repos.GetByID(id)
+	if err != nil {
+		return err
+	}
+	if current == nil {
+		return errors.New("dashboard is not found")
+	}
+	if current.State != "closed" {
+		return errors.New("this dashboard is not closed")
+	}
+	if err := t.repos.ExistsClosedNext(id); err != nil {
+		return err
+	}
+	return t.repos.AdjustBalance(id, args.Balance)
 }

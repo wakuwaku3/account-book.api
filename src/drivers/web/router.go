@@ -182,6 +182,13 @@ func (web *web) setRoute() *web {
 			return controller.CancelApprove(c)
 		})
 	})
+	// AdjustBalance
+	auth.DELETE("/dashboard/:id", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrls.Dashboard) error {
+			return controller.AdjustBalance(c)
+		})
+	})
 
 	// Actual
 	// GET

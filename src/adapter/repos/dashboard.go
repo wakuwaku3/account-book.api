@@ -353,3 +353,10 @@ func (t *dashboard) UpdateActual(dashboardID *string, id *string, model *models.
 	}
 	return nil
 }
+func (t *dashboard) AdjustBalance(id *string, balance int) error {
+	client := t.provider.GetClient()
+	ctx := context.Background()
+
+	_, err := t.dashboardsRef(client).Doc(*id).Set(ctx, map[string]interface{}{"balance": balance})
+	return err
+}

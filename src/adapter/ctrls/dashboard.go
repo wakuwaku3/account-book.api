@@ -21,6 +21,7 @@ type (
 		GetDashboard(c echo.Context) error
 		Approve(c echo.Context) error
 		CancelApprove(c echo.Context) error
+		AdjustBalance(c echo.Context) error
 	}
 	getDashboardResponse struct {
 		DashboardID      string                      `json:"id"`
@@ -35,6 +36,7 @@ type (
 	getDashboardSummaryResponse struct {
 		Income          int  `json:"income"`
 		Expense         int  `json:"expense"`
+		Balance         *int `json:"balance"`
 		PreviousBalance *int `json:"previousBalance,omitempty"`
 	}
 	getDashboardPlanResponse struct {
@@ -50,6 +52,9 @@ type (
 		Income  int       `json:"income"`
 		Expense int       `json:"expense"`
 		Balance int       `json:"balance"`
+	}
+	adjustBalanceRequest struct {
+		Balance int `json:"balance"`
 	}
 )
 
@@ -114,6 +119,7 @@ func convertDashboard(t *usecases.GetDashboardResult) getDashboardResponse {
 		Summary: getDashboardSummaryResponse{
 			Expense:         t.Expense,
 			Income:          t.Income,
+			Balance:         t.Balance,
 			PreviousBalance: t.PreviousBalance,
 		},
 	}
@@ -136,6 +142,23 @@ func (t *dashboard) CancelApprove(c echo.Context) error {
 	}
 	if err := t.useCase.CancelApprove(&id); err != nil {
 		return responses.WriteErrorResponse(c, err)
+	}
+	return responses.WriteEmptyResponse(c)
+}
+func (t *dashboard) AdjustBalance(c echo.Context) error {
+	id := c.Param("id")
+	if id == "" {
+		return responses.WriteErrorResponse(c, application.NewClientError(application.RequiredID))
+	}
+	request := new(adjustBalanceRequest)
+	if err := c.Bind(&request); err != nil {
+		return err
+	}
+	if err := t.useCase.AdjustBalance(&usecases.AdjustBalanceArgs{
+		DashboardID: id,
+		Balance:     request.Balance,
+	}); err != nil {
+		return err
 	}
 	return responses.WriteEmptyResponse(c)
 }
