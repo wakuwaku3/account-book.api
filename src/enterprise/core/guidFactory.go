@@ -1,7 +1,5 @@
 package core
 
-type (
-	GuidFactory interface {
-		Create() (*string, error)
-	}
-)
+type GuidFactory interface {
+	Create() (*string, error)
+}

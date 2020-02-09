@@ -36,7 +36,7 @@ func (t *alerts) GetAlert(id *string) (*usecases.GetAlertResult, core.Error) {
 func convertAlert(t *notifications.Alert) *usecases.GetAlertResult {
 	alert := *t
 	return &usecases.GetAlertResult{
-		AlertID:   alert.GetID(),
+		AlertID:   *alert.GetID(),
 		Metrics:   alert.GetMetrics().Get(),
 		Threshold: alert.GetThreshold().Get(),
 	}

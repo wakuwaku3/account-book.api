@@ -12,8 +12,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/adapter/store"
+	"github.com/wakuwaku3/account-book.api/src/application"
 )
 
 type (
@@ -40,7 +40,7 @@ func (t *alerts) alertsRef(client *firestore.Client) *firestore.CollectionRef {
 	userID := t.claimsProvider.GetUserID()
 	return client.Collection("users").Doc(*userID).Collection("alerts")
 }
-func (t *alerts) GetByID(id *string) (notifications.Alert, core.Error) {
+func (t *alerts) GetByID(id notifications.AlertID) (notifications.Alert, core.Error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
 	doc, err := t.alertsRef(client).Doc(*id).Get(ctx)
@@ -54,9 +54,9 @@ func (t *alerts) GetByID(id *string) (notifications.Alert, core.Error) {
 	if err := doc.DataTo(&entity); err != nil {
 		panic(err)
 	}
-	return entity.newAlert(*id), nil
+	return entity.newAlert(id), nil
 }
-func (t alertEntity) newAlert(id string) notifications.Alert {
+func (t alertEntity) newAlert(id notifications.AlertID) notifications.Alert {
 	metrics, err := notifications.NewMetrics(t.Metrics)
 	if err != nil {
 		panic(err)
@@ -81,7 +81,7 @@ func (t *alerts) Get() *[]notifications.Alert {
 		if err := doc.DataTo(&entity); err != nil {
 			panic(err)
 		}
-		alerts = append(alerts, entity.newAlert(doc.Ref.ID))
+		alerts = append(alerts, entity.newAlert(notifications.AlertID(&doc.Ref.ID)))
 	}
 	return &alerts
 }
@@ -93,13 +93,13 @@ func (t *alerts) New(metrics notifications.Metrics, threshold notifications.Thre
 	if err != nil {
 		panic(err)
 	}
-	return notifications.NewAlert(ref.ID, metrics, threshold)
+	return notifications.NewAlert(notifications.AlertID(&ref.ID), metrics, threshold)
 }
 func (t *alerts) Save(alert notifications.Alert) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
 	entity := newAlertEntity(alert.GetMetrics(), alert.GetThreshold())
-	_, err := t.alertsRef(client).Doc(alert.GetID()).Set(ctx, entity)
+	_, err := t.alertsRef(client).Doc(*alert.GetID()).Set(ctx, entity)
 	if err != nil {
 		panic(err)
 	}
@@ -110,7 +110,7 @@ func newAlertEntity(metrics notifications.Metrics, threshold notifications.Thres
 		Threshold: threshold.Get(),
 	}
 }
-func (t *alerts) Delete(id *string) core.Error {
+func (t *alerts) Delete(id notifications.AlertID) core.Error {
 	client := t.provider.GetClient()
 	ctx := context.Background()
 	_, err := t.alertsRef(client).Doc(*id).Delete(ctx)

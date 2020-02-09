@@ -64,11 +64,11 @@ func (t *alerts) Create(args *AlertArgs) (*CreateAlertResult, core.Error) {
 	threshold := notifications.NewThreshold(args.Threshold)
 	res := t.repository.New(metrics, threshold)
 	return &CreateAlertResult{
-		AlertID: res.GetID(),
+		AlertID: *res.GetID(),
 	}, nil
 }
 func (t *alerts) Update(id *string, args *AlertArgs) core.Error {
-	alert, err := t.repository.GetByID(id)
+	alert, err := t.repository.GetByID(notifications.AlertID(id))
 	metrics, err := notifications.NewMetrics(args.Metrics)
 	if err != nil {
 		return err
@@ -79,5 +79,5 @@ func (t *alerts) Update(id *string, args *AlertArgs) core.Error {
 	return nil
 }
 func (t *alerts) Delete(id *string) core.Error {
-	return t.repository.Delete(id)
+	return t.repository.Delete(notifications.AlertID(id))
 }
