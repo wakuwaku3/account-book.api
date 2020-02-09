@@ -3,6 +3,7 @@ package application
 import (
 	"time"
 
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
@@ -17,6 +18,9 @@ type (
 		GetFrontEndURL() *string
 		IsProduction() bool
 		GetAllowOrigins() *[]string
+		GetAwsAccessKey() *string
+		GetAwsSecretAccessKey() *string
+		GetAwsTopics() *map[core.EventName]string
 	}
 	// Crypt はハッシュ化のサービスです
 	Crypt interface {
@@ -41,12 +45,6 @@ type (
 		UserID       string
 		Email        string
 		AccountToken string
-	}
-	// ClaimsProvider は Claimsを取得します
-	ClaimsProvider interface {
-		GetUserID() *string
-		GetEmail() *string
-		Authenticated() bool
 	}
 	// UsersRepository は新ユーザーのリポジトリです
 	UsersRepository interface {

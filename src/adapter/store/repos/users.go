@@ -3,18 +3,19 @@ package repos
 import (
 	"context"
 
-	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/adapter/store"
+	"github.com/wakuwaku3/account-book.api/src/application"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type users struct {
 	provider       store.Provider
-	claimsProvider application.ClaimsProvider
+	claimsProvider core.ClaimsProvider
 }
 
 // NewUsers はインスタンスを生成します
-func NewUsers(provider store.Provider, claimsProvider application.ClaimsProvider) application.UsersRepository {
+func NewUsers(provider store.Provider, claimsProvider core.ClaimsProvider) application.UsersRepository {
 	return &users{provider: provider, claimsProvider: claimsProvider}
 }
 

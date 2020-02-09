@@ -19,7 +19,7 @@ type (
 	transactions struct {
 		provider       store.Provider
 		clock          core.Clock
-		claimsProvider application.ClaimsProvider
+		claimsProvider core.ClaimsProvider
 	}
 )
 
@@ -27,7 +27,7 @@ type (
 func NewTransactions(
 	provider store.Provider,
 	clock core.Clock,
-	claimsProvider application.ClaimsProvider,
+	claimsProvider core.ClaimsProvider,
 ) application.TransactionsRepository {
 	return &transactions{provider, clock, claimsProvider}
 }

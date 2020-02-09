@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/wakuwaku3/account-book.api/src/adapter/crypt"
+	"github.com/wakuwaku3/account-book.api/src/adapter/event"
 	"github.com/wakuwaku3/account-book.api/src/adapter/mails/sendgrid"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 
@@ -20,6 +21,7 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
+	accountbook "github.com/wakuwaku3/account-book.api/src/enterprise/domains/accountBook"
 )
 
 // CreateContainer はDIContainerを生成します
@@ -42,11 +44,17 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(core.NewClock, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}
-	ifs := []reflect.Type{reflect.TypeOf((*application.ClaimsProvider)(nil)).Elem()}
+	ifs := []reflect.Type{reflect.TypeOf((*core.ClaimsProvider)(nil)).Elem()}
 	if err := container.Register(auth.NewAnonymousClaimsProvider(), dijct.RegisterOptions{Interfaces: ifs}); err != nil {
 		return nil, err
 	}
 	if err := container.Register(sendgrid.NewHelper, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+		return nil, err
+	}
+	if err := container.Register(event.NewProvider, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+		return nil, err
+	}
+	if err := container.Register(event.NewPublisher, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}
 
@@ -158,6 +166,11 @@ func CreateContainer() (dijct.Container, error) {
 		return nil, err
 	}
 
+	//events
+	if err := container.Register(accountbook.NewAssetsChangedEvent); err != nil {
+		return nil, err
+	}
+
 	// initialize
 	if err := container.Invoke(initialize); err != nil {
 		return nil, err
@@ -165,13 +178,18 @@ func CreateContainer() (dijct.Container, error) {
 
 	return container, nil
 }
-func initialize(envService application.Env, storeProvider store.Provider) {
-	err := envService.Initialize()
-	if err != nil {
+func initialize(
+	envService application.Env,
+	storeProvider store.Provider,
+	eventProvider event.Provider,
+) {
+	if err := envService.Initialize(); err != nil {
 		log.Fatalln(err)
 	}
-	err = storeProvider.Initialize()
-	if err != nil {
+	if err := storeProvider.Initialize(); err != nil {
+		log.Fatalln(err)
+	}
+	if err := eventProvider.Initialize(); err != nil {
 		log.Fatalln(err)
 	}
 }

@@ -5,13 +5,15 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
+	accountbook "github.com/wakuwaku3/account-book.api/src/enterprise/domains/accountBook"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
 	actual struct {
-		dashboardRepos application.DashboardRepository
-		clock          core.Clock
+		dashboardRepos     application.DashboardRepository
+		clock              core.Clock
+		assetsChangedEvent accountbook.AssetsChangedEvent
 	}
 	// Actual is ActualService
 	Actual interface {
@@ -33,8 +35,12 @@ type (
 )
 
 // NewActual is create instance
-func NewActual(dashboardRepos application.DashboardRepository, clock core.Clock) Actual {
-	return &actual{dashboardRepos, clock}
+func NewActual(
+	dashboardRepos application.DashboardRepository,
+	clock core.Clock,
+	assetsChangedEvent accountbook.AssetsChangedEvent,
+) Actual {
+	return &actual{dashboardRepos, clock, assetsChangedEvent}
 }
 func (t *actual) Enter(args *ActualArgs) error {
 	if args.DashboardID == nil {
@@ -55,6 +61,7 @@ func (t *actual) Enter(args *ActualArgs) error {
 			if err != nil {
 				return err
 			}
+			t.assetsChangedEvent.Trigger()
 			return nil
 		}
 	}
@@ -73,6 +80,7 @@ func (t *actual) Enter(args *ActualArgs) error {
 	if err := t.dashboardRepos.UpdateActual(args.DashboardID, args.ActualID, model); err != nil {
 		return err
 	}
+	t.assetsChangedEvent.Trigger()
 	return nil
 }
 func (t *ActualArgs) convert() (*string, *models.Actual) {

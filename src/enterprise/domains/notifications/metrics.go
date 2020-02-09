@@ -19,8 +19,10 @@ type (
 const (
 	// ExpenseBase は支払い基準で計算します
 	ExpenseBase = "ExpenseBase"
-	// BalanceBase は残高基準で計算します
-	BalanceBase = "BalanceBase"
+	// MonthlyBalanceBase は当月残高基準で計算します
+	MonthlyBalanceBase = "MonthlyBalanceBase"
+	// TotalBalanceBase は残高基準で計算します
+	TotalBalanceBase = "TotalBalanceBase"
 	// NotSupportedMetricsFormat :メトリクスとしてサポートしていない形式です
 	NotSupportedMetricsFormat core.ErrorCode = "notifications-00001"
 )
@@ -40,7 +42,7 @@ func (t *metrics) Set(value string) core.Error {
 }
 func (t *metrics) Equal(o Metrics) bool { return t.value == o.Get() }
 func (t *metrics) Valid() core.Error {
-	if t.value == ExpenseBase || t.value == BalanceBase {
+	if t.value == ExpenseBase || t.value == MonthlyBalanceBase || t.value == TotalBalanceBase {
 		return nil
 	}
 	return core.NewError(NotSupportedMetricsFormat)

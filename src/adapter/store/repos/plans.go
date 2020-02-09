@@ -19,7 +19,7 @@ type (
 	plans struct {
 		provider       store.Provider
 		clock          core.Clock
-		claimsProvider application.ClaimsProvider
+		claimsProvider core.ClaimsProvider
 	}
 )
 
@@ -27,7 +27,7 @@ type (
 func NewPlans(
 	provider store.Provider,
 	clock core.Clock,
-	claimsProvider application.ClaimsProvider,
+	claimsProvider core.ClaimsProvider,
 ) application.PlansRepository {
 	return &plans{provider, clock, claimsProvider}
 }

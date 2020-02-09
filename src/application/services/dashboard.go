@@ -7,15 +7,17 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
+	accountbook "github.com/wakuwaku3/account-book.api/src/enterprise/domains/accountBook"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
 	dashboard struct {
-		repos             application.DashboardRepository
-		transactionsRepos application.TransactionsRepository
-		plansRepos        application.PlansRepository
-		clock             core.Clock
+		repos              application.DashboardRepository
+		transactionsRepos  application.TransactionsRepository
+		plansRepos         application.PlansRepository
+		clock              core.Clock
+		assetsChangedEvent accountbook.AssetsChangedEvent
 	}
 	// Dashboard is DashboardService
 	Dashboard interface {
@@ -36,12 +38,14 @@ func NewDashboard(
 	transactionsRepos application.TransactionsRepository,
 	plansRepos application.PlansRepository,
 	clock core.Clock,
+	assetsChangedEvent accountbook.AssetsChangedEvent,
 ) Dashboard {
 	return &dashboard{
 		repos,
 		transactionsRepos,
 		plansRepos,
 		clock,
+		assetsChangedEvent,
 	}
 }
 func (t *dashboard) Approve(id *string) error {
@@ -145,7 +149,12 @@ func (t *dashboard) Approve(id *string) error {
 	current.Balance = &balance
 	current.State = "closed"
 	current.Daily = dSlice
-	return t.repos.Approve(current)
+	if err := t.repos.Approve(current); err != nil {
+		return err
+	}
+
+	t.assetsChangedEvent.Trigger()
+	return nil
 }
 func (t *dashboard) getTransactionsWorker(selectedMonth *time.Time, chError chan error) <-chan *[]models.Transaction {
 	ch := make(chan *[]models.Transaction)
@@ -193,7 +202,13 @@ func (t *dashboard) CancelApprove(id *string) error {
 	current.PreviousBalance = nil
 	current.PreviousDashboardID = nil
 	current.State = "open"
-	return t.repos.CancelApprove(current)
+
+	if err := t.repos.CancelApprove(current); err != nil {
+		return err
+	}
+
+	t.assetsChangedEvent.Trigger()
+	return nil
 }
 func (t *dashboard) AdjustBalance(args *AdjustBalanceArgs) error {
 	id := &args.DashboardID
@@ -210,5 +225,11 @@ func (t *dashboard) AdjustBalance(args *AdjustBalanceArgs) error {
 	if err := t.repos.ExistsClosedNext(id); err != nil {
 		return err
 	}
-	return t.repos.AdjustBalance(id, args.Balance)
+
+	if err := t.repos.AdjustBalance(id, args.Balance); err != nil {
+		return err
+	}
+
+	t.assetsChangedEvent.Trigger()
+	return nil
 }

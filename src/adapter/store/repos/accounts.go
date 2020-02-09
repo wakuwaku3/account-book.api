@@ -14,11 +14,11 @@ import (
 type accounts struct {
 	provider       store.Provider
 	clock          core.Clock
-	claimsProvider application.ClaimsProvider
+	claimsProvider core.ClaimsProvider
 }
 
 // NewAccounts はインスタンスを生成します
-func NewAccounts(provider store.Provider, clock core.Clock, claimsProvider application.ClaimsProvider) application.AccountsRepository {
+func NewAccounts(provider store.Provider, clock core.Clock, claimsProvider core.ClaimsProvider) application.AccountsRepository {
 	return &accounts{provider, clock, claimsProvider}
 }
 func (t *accounts) usersRef(client *firestore.Client) *firestore.CollectionRef {

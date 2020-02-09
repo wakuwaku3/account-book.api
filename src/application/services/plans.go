@@ -6,13 +6,15 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/application"
 
 	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
+	accountbook "github.com/wakuwaku3/account-book.api/src/enterprise/domains/accountBook"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
 	plans struct {
-		repos application.PlansRepository
-		clock core.Clock
+		repos              application.PlansRepository
+		clock              core.Clock
+		assetsChangedEvent accountbook.AssetsChangedEvent
 	}
 	// Plans is PlansService
 	Plans interface {
@@ -36,14 +38,19 @@ type (
 )
 
 // NewPlans is create instance
-func NewPlans(repos application.PlansRepository, clock core.Clock) Plans {
-	return &plans{repos, clock}
+func NewPlans(
+	repos application.PlansRepository,
+	clock core.Clock,
+	assetsChangedEvent accountbook.AssetsChangedEvent,
+) Plans {
+	return &plans{repos, clock, assetsChangedEvent}
 }
 func (t *plans) Create(args *PlanArgs) (*CreatePlanResult, error) {
 	id, err := t.repos.Create(args.convert(t.clock.Now()))
 	if err != nil {
 		return nil, err
 	}
+	t.assetsChangedEvent.Trigger()
 	return &CreatePlanResult{PlanID: *id}, nil
 }
 func (t *PlanArgs) convert(now time.Time) *models.Plan {
@@ -75,6 +82,7 @@ func (t *plans) Update(id *string, args *PlanArgs) error {
 	if err := t.repos.Update(id, model); err != nil {
 		return err
 	}
+	t.assetsChangedEvent.Trigger()
 	return nil
 }
 func (t *plans) Remove(id *string) error {
@@ -89,5 +97,6 @@ func (t *plans) Remove(id *string) error {
 	if err := t.repos.Update(id, model); err != nil {
 		return err
 	}
+	t.assetsChangedEvent.Trigger()
 	return nil
 }

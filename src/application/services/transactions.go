@@ -6,13 +6,15 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/application"
 
 	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
+	accountbook "github.com/wakuwaku3/account-book.api/src/enterprise/domains/accountBook"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
 	transactions struct {
-		repos application.TransactionsRepository
-		clock core.Clock
+		repos              application.TransactionsRepository
+		clock              core.Clock
+		assetsChangedEvent accountbook.AssetsChangedEvent
 	}
 	// Transactions is TransactionsService
 	Transactions interface {
@@ -33,14 +35,19 @@ type (
 )
 
 // NewTransactions is create instance
-func NewTransactions(repos application.TransactionsRepository, clock core.Clock) Transactions {
-	return &transactions{repos, clock}
+func NewTransactions(
+	repos application.TransactionsRepository,
+	clock core.Clock,
+	assetsChangedEvent accountbook.AssetsChangedEvent,
+) Transactions {
+	return &transactions{repos, clock, assetsChangedEvent}
 }
 func (t *transactions) Create(args *TransactionArgs) (*CreateTransactionResult, error) {
 	id, err := t.repos.Create(args.convert(t.clock.Now()))
 	if err != nil {
 		return nil, err
 	}
+	t.assetsChangedEvent.Trigger()
 	return &CreateTransactionResult{TransactionID: *id}, nil
 }
 func (t *TransactionArgs) convert(now time.Time) *models.Transaction {
@@ -67,6 +74,7 @@ func (t *transactions) Update(id *string, args *TransactionArgs) error {
 	if err := t.repos.Update(id, model); err != nil {
 		return err
 	}
+	t.assetsChangedEvent.Trigger()
 	return nil
 }
 func (t *transactions) Delete(id *string) error {
@@ -81,5 +89,6 @@ func (t *transactions) Delete(id *string) error {
 	if err := t.repos.Delete(id); err != nil {
 		return err
 	}
+	t.assetsChangedEvent.Trigger()
 	return nil
 }

@@ -8,8 +8,8 @@ import (
 	"github.com/labstack/gommon/log"
 
 	"cloud.google.com/go/firestore"
-	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/adapter/store"
+	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"google.golang.org/api/iterator"
@@ -17,14 +17,14 @@ import (
 
 type dashboard struct {
 	provider       store.Provider
-	claimsProvider application.ClaimsProvider
+	claimsProvider core.ClaimsProvider
 	clock          core.Clock
 }
 
 // NewDashboard はインスタンスを生成します
 func NewDashboard(
 	provider store.Provider,
-	claimsProvider application.ClaimsProvider,
+	claimsProvider core.ClaimsProvider,
 	clock core.Clock,
 ) application.DashboardRepository {
 	return &dashboard{provider, claimsProvider, clock}

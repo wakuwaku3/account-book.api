@@ -13,14 +13,13 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/wakuwaku3/account-book.api/src/adapter/store"
-	"github.com/wakuwaku3/account-book.api/src/application"
 )
 
 type (
 	notificationRules struct {
 		provider       store.Provider
 		clock          core.Clock
-		claimsProvider application.ClaimsProvider
+		claimsProvider core.ClaimsProvider
 	}
 	notificationRuleEntity struct {
 		Metrics   string `firestore:"metrics"`
@@ -32,7 +31,7 @@ type (
 func NewNotificationRules(
 	provider store.Provider,
 	clock core.Clock,
-	claimsProvider application.ClaimsProvider,
+	claimsProvider core.ClaimsProvider,
 ) notifications.NotificationRulesRepository {
 	return &notificationRules{provider, clock, claimsProvider}
 }
