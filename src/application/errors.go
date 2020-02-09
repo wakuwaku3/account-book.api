@@ -1,6 +1,6 @@
 package application
 
-import "github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
+import "github.com/wakuwaku3/account-book.api/src/enterprise/core"
 
 const (
 	// RequiredMailAddress :メールアドレスは必須です

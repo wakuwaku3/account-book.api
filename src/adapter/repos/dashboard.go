@@ -10,7 +10,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/drivers/store"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 	"google.golang.org/api/iterator"
 )
@@ -18,14 +18,14 @@ import (
 type dashboard struct {
 	provider       store.Provider
 	claimsProvider application.ClaimsProvider
-	clock          helpers.Clock
+	clock          core.Clock
 }
 
 // NewDashboard はインスタンスを生成します
 func NewDashboard(
 	provider store.Provider,
 	claimsProvider application.ClaimsProvider,
-	clock helpers.Clock,
+	clock core.Clock,
 ) application.DashboardRepository {
 	return &dashboard{provider, claimsProvider, clock}
 }

@@ -5,15 +5,14 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 
-	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
 	plans struct {
 		repos application.PlansRepository
-		clock helpers.Clock
+		clock core.Clock
 	}
 	// Plans is PlansService
 	Plans interface {
@@ -37,7 +36,7 @@ type (
 )
 
 // NewPlans is create instance
-func NewPlans(repos application.PlansRepository, clock helpers.Clock) Plans {
+func NewPlans(repos application.PlansRepository, clock core.Clock) Plans {
 	return &plans{repos, clock}
 }
 func (t *plans) Create(args *PlanArgs) (*CreatePlanResult, error) {

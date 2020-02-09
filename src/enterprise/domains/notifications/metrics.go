@@ -1,7 +1,7 @@
 package notifications
 
 import (
-	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 )
 
 type (

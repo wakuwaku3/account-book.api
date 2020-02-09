@@ -6,7 +6,7 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls/responses"
 

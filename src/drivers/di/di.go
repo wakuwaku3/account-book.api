@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/wakuwaku3/account-book.api/src/drivers/sendgrid"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 
 	"github.com/wakuwaku3/account-book.api/src/application/queries"
 
@@ -39,7 +39,7 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(auth.NewJwt, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}
-	if err := container.Register(helpers.NewClock, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+	if err := container.Register(core.NewClock, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}
 	ifs := []reflect.Type{reflect.TypeOf((*application.ClaimsProvider)(nil)).Elem()}
@@ -77,6 +77,9 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(ctrls.NewActual); err != nil {
 		return nil, err
 	}
+	if err := container.Register(ctrls.NewAlerts); err != nil {
+		return nil, err
+	}
 
 	// usecases
 	if err := container.Register(usecases.NewAccounts); err != nil {
@@ -94,6 +97,9 @@ func CreateContainer() (dijct.Container, error) {
 	if err := container.Register(usecases.NewActual); err != nil {
 		return nil, err
 	}
+	if err := container.Register(usecases.NewAlerts); err != nil {
+		return nil, err
+	}
 
 	// queries
 	if err := container.Register(queries.NewAccounts); err != nil {
@@ -109,6 +115,9 @@ func CreateContainer() (dijct.Container, error) {
 		return nil, err
 	}
 	if err := container.Register(queries.NewActual); err != nil {
+		return nil, err
+	}
+	if err := container.Register(queries.NewAlerts); err != nil {
 		return nil, err
 	}
 
@@ -143,6 +152,9 @@ func CreateContainer() (dijct.Container, error) {
 		return nil, err
 	}
 	if err := container.Register(repos.NewDashboard); err != nil {
+		return nil, err
+	}
+	if err := container.Register(repos.NewAlerts); err != nil {
 		return nil, err
 	}
 

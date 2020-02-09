@@ -1,6 +1,6 @@
 package notifications
 
-import "github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
+import "github.com/wakuwaku3/account-book.api/src/enterprise/core"
 
 type ( // AlertsRepository は計画のリポジトリです
 	AlertsRepository interface {

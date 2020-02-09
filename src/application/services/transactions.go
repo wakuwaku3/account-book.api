@@ -5,15 +5,14 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 
-	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
 	transactions struct {
 		repos application.TransactionsRepository
-		clock helpers.Clock
+		clock core.Clock
 	}
 	// Transactions is TransactionsService
 	Transactions interface {
@@ -34,7 +33,7 @@ type (
 )
 
 // NewTransactions is create instance
-func NewTransactions(repos application.TransactionsRepository, clock helpers.Clock) Transactions {
+func NewTransactions(repos application.TransactionsRepository, clock core.Clock) Transactions {
 	return &transactions{repos, clock}
 }
 func (t *transactions) Create(args *TransactionArgs) (*CreateTransactionResult, error) {

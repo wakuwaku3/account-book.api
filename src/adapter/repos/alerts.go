@@ -5,9 +5,8 @@ import (
 
 	"cloud.google.com/go/firestore"
 
-	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/notifications"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 
 	"google.golang.org/api/iterator"
 	"google.golang.org/grpc/codes"
@@ -20,7 +19,7 @@ import (
 type (
 	alerts struct {
 		provider       store.Provider
-		clock          helpers.Clock
+		clock          core.Clock
 		claimsProvider application.ClaimsProvider
 	}
 	alertEntity struct {
@@ -32,7 +31,7 @@ type (
 // NewAlerts はインスタンスを生成します
 func NewAlerts(
 	provider store.Provider,
-	clock helpers.Clock,
+	clock core.Clock,
 	claimsProvider application.ClaimsProvider,
 ) notifications.AlertsRepository {
 	return &alerts{provider, clock, claimsProvider}

@@ -3,7 +3,7 @@ package responses
 import (
 	"net/http"
 
-	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 
 	"github.com/labstack/echo"
 )

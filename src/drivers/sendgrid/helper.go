@@ -5,7 +5,7 @@ import (
 
 	sg "github.com/sendgrid/sendgrid-go"
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 )
 
 type (
@@ -48,7 +48,7 @@ func (t *helper) Send(body *RequestBody) error {
 	request := sg.GetRequest(*apiKey, "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
 	request.Body = b
-	err = helpers.Try(func() error {
+	err = core.Try(func() error {
 		_, err := sg.API(request)
 		return err
 	}, 10)

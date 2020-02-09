@@ -7,13 +7,13 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 )
 
 type (
 	j struct {
 		env   application.Env
-		clock helpers.Clock
+		clock core.Clock
 	}
 	customClaims struct {
 		UserID        string `json:"nonce"`
@@ -33,7 +33,7 @@ type (
 )
 
 // NewJwt is create instance
-func NewJwt(env application.Env, clock helpers.Clock) application.Jwt {
+func NewJwt(env application.Env, clock core.Clock) application.Jwt {
 	return &j{env, clock}
 }
 func (t *j) CreateToken(claims *application.JwtClaims) (*string, error) {

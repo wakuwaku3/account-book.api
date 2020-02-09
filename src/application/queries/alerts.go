@@ -1,7 +1,7 @@
 package queries
 
 import (
-	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/notifications"
 
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"

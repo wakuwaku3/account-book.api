@@ -5,10 +5,9 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls/responses"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
 
 	"github.com/labstack/echo"
 )
@@ -16,7 +15,7 @@ import (
 type (
 	transactions struct {
 		useCase usecases.Transactions
-		clock   helpers.Clock
+		clock   core.Clock
 	}
 	// Transactions is TransactionsController
 	Transactions interface {
@@ -48,7 +47,7 @@ type (
 )
 
 // NewTransactions is create instance
-func NewTransactions(useCase usecases.Transactions, clock helpers.Clock) Transactions {
+func NewTransactions(useCase usecases.Transactions, clock core.Clock) Transactions {
 	return &transactions{useCase, clock}
 }
 

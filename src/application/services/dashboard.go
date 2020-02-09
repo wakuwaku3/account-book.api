@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
@@ -15,7 +15,7 @@ type (
 		repos             application.DashboardRepository
 		transactionsRepos application.TransactionsRepository
 		plansRepos        application.PlansRepository
-		clock             helpers.Clock
+		clock             core.Clock
 	}
 	// Dashboard is DashboardService
 	Dashboard interface {
@@ -35,7 +35,7 @@ func NewDashboard(
 	repos application.DashboardRepository,
 	transactionsRepos application.TransactionsRepository,
 	plansRepos application.PlansRepository,
-	clock helpers.Clock,
+	clock core.Clock,
 ) Dashboard {
 	return &dashboard{
 		repos,

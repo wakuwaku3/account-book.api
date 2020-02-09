@@ -16,7 +16,7 @@ require (
 	github.com/tampopos/dijct v0.0.0-20190304155008-393e619c3a6e
 	github.com/valyala/fasttemplate v1.0.1 // indirect
 	golang.org/x/arch v0.0.0-20190312162104-788fe5ffcd8c // indirect
-	golang.org/x/crypto v0.0.0-20190313024323-a1f597ede03a
+	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	google.golang.org/api v0.2.0
 	google.golang.org/grpc v1.19.0
 )
