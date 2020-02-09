@@ -6,6 +6,7 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
 
 	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls/responses"
 
@@ -128,7 +129,7 @@ func convertDashboard(t *usecases.GetDashboardResult) getDashboardResponse {
 func (t *dashboard) Approve(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return responses.WriteErrorResponse(c, application.NewClientError(application.RequiredID))
+		return responses.WriteErrorResponse(c, core.NewError(application.RequiredID))
 	}
 	if err := t.useCase.Approve(&id); err != nil {
 		return responses.WriteErrorResponse(c, err)
@@ -138,7 +139,7 @@ func (t *dashboard) Approve(c echo.Context) error {
 func (t *dashboard) CancelApprove(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return responses.WriteErrorResponse(c, application.NewClientError(application.RequiredID))
+		return responses.WriteErrorResponse(c, core.NewError(application.RequiredID))
 	}
 	if err := t.useCase.CancelApprove(&id); err != nil {
 		return responses.WriteErrorResponse(c, err)
@@ -148,7 +149,7 @@ func (t *dashboard) CancelApprove(c echo.Context) error {
 func (t *dashboard) AdjustBalance(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
-		return responses.WriteErrorResponse(c, application.NewClientError(application.RequiredID))
+		return responses.WriteErrorResponse(c, core.NewError(application.RequiredID))
 	}
 	request := new(adjustBalanceRequest)
 	if err := c.Bind(&request); err != nil {

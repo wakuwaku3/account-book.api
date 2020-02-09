@@ -5,6 +5,7 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
 )
 
 type (
@@ -86,7 +87,7 @@ func (t *plans) Create(args *PlanArgs) (*CreatePlanResult, error) {
 	}, nil
 }
 func (t *PlanArgs) valid() error {
-	err := application.NewClientError()
+	err := core.NewError()
 	if t.PlanName == "" {
 		err.Append(application.RequiredPlanName)
 	}

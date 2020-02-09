@@ -6,6 +6,7 @@ import (
 	"github.com/wakuwaku3/account-book.api/src/application"
 
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
 
 	"github.com/labstack/echo"
 )
@@ -97,9 +98,9 @@ func (t *accounts) SignIn(c echo.Context) error {
 	}
 	res, err := t.useCase.SignIn(request.Convert())
 	if err != nil {
-		if _, ok := err.(application.ClientError); !ok {
+		if _, ok := err.(core.Error); !ok {
 			log.Error(err)
-			return responses.WriteErrorResponse(c, application.NewClientError(application.FailureSignIn))
+			return responses.WriteErrorResponse(c, core.NewError(application.FailureSignIn))
 		}
 		return responses.WriteErrorResponse(c, err)
 	}
@@ -125,7 +126,7 @@ func (t *accounts) Refresh(c echo.Context) error {
 	// エラー原因がわからないためエラーを詳しく出してみる
 	if err != nil {
 		req := c.Request()
-		if cErr, ok := err.(application.ClientError); ok {
+		if cErr, ok := err.(core.Error); ok {
 			if request == nil {
 				c.Logger().Error(err, cErr.GetErrorCodes(), req)
 				return responses.WriteUnAuthorizedErrorResponse(c)
@@ -166,7 +167,7 @@ func (t *accounts) PasswordResetRequesting(c echo.Context) error {
 	}
 	err := t.useCase.PasswordResetRequesting(&usecases.PasswordResetRequestingArgs{Email: request.Email})
 	if err != nil {
-		if _, ok := err.(application.ClientError); !ok {
+		if _, ok := err.(core.Error); !ok {
 			log.Error(err)
 			return responses.WriteEmptyResponse(c)
 		}
@@ -199,9 +200,9 @@ func (t *accounts) ResetPassword(c echo.Context) error {
 		Password:           request.Password,
 	})
 	if err != nil {
-		if _, ok := err.(application.ClientError); !ok {
+		if _, ok := err.(core.Error); !ok {
 			log.Error(err)
-			return responses.WriteErrorResponse(c, application.NewClientError(application.FailurePasswordReset))
+			return responses.WriteErrorResponse(c, core.NewError(application.FailurePasswordReset))
 		}
 		return responses.WriteErrorResponse(c, err)
 	}
@@ -217,7 +218,7 @@ func (t *accounts) SignUpRequesting(c echo.Context) error {
 	}
 	err := t.useCase.SignUpRequesting(&usecases.SignUpRequestingArgs{Email: request.Email})
 	if err != nil {
-		if _, ok := err.(application.ClientError); !ok {
+		if _, ok := err.(core.Error); !ok {
 			log.Error(err)
 			return responses.WriteEmptyResponse(c)
 		}
@@ -246,7 +247,7 @@ func (t *accounts) SignUp(c echo.Context) error {
 		return err
 	}
 	if !request.Agreement {
-		return responses.WriteErrorResponse(c, application.NewClientError(application.RequiredAgreement))
+		return responses.WriteErrorResponse(c, core.NewError(application.RequiredAgreement))
 	}
 	res, err := t.useCase.SignUp(&usecases.SignUpArgs{
 		SignUpToken: request.SignUpToken,
@@ -255,9 +256,9 @@ func (t *accounts) SignUp(c echo.Context) error {
 		Culture:     request.Culture,
 	})
 	if err != nil {
-		if _, ok := err.(application.ClientError); !ok {
+		if _, ok := err.(core.Error); !ok {
 			log.Error(err)
-			return responses.WriteErrorResponse(c, application.NewClientError(application.FailureSignUp))
+			return responses.WriteErrorResponse(c, core.NewError(application.FailureSignUp))
 		}
 		return responses.WriteErrorResponse(c, err)
 	}

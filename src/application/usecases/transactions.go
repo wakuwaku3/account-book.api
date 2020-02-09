@@ -5,6 +5,7 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
 )
 
 type (
@@ -86,7 +87,7 @@ func (t *transactions) Create(args *TransactionArgs) (*CreateTransactionResult, 
 	}, nil
 }
 func (t *TransactionArgs) valid() error {
-	err := application.NewClientError()
+	err := core.NewError()
 	if t.Amount == nil {
 		err.Append(application.RequiredAmount)
 	}

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
@@ -55,6 +56,11 @@ type (
 	PlansQuery interface {
 		GetPlans() (*GetPlansResult, error)
 		GetPlan(id *string) (*GetPlanResult, error)
+	}
+	// AlertsQuery は通知設定のクエリです
+	AlertsQuery interface {
+		GetAlerts() *GetAlertsResult
+		GetAlert(id *string) (*GetAlertResult, core.Error)
 	}
 	// DashboardQuery はダッシュボードのクエリです
 	DashboardQuery interface {

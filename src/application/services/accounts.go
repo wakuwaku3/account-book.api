@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
@@ -84,7 +85,7 @@ func NewAccounts(
 var passwordRegex = regexp.MustCompile(`^.*[0-9].*[a-z].*[A-Z]$|^.*[0-9].*[A-Z].*[a-z]$|^.*[a-z].*[0-9].*[A-Z]$|^.*[a-z].*[A-Z].*[0-9]$|^.*[A-Z].*[0-9].*[a-z]$|^.*[A-Z].*[a-z].*[0-9]$`)
 
 func (t *accounts) ValidPassword(password *string) error {
-	err := application.NewClientError()
+	err := core.NewError()
 	if utf8.RuneCountInString(*password) < 8 {
 		err.Append(application.LessLengthPathword)
 	}
@@ -99,7 +100,7 @@ func (t *accounts) ValidPassword(password *string) error {
 func (t *accounts) ComparePassword(args *ComparePasswordArgs) error {
 	hashedPassword := *t.crypt.Hash(&args.InputPassword)
 	if hashedPassword != args.HashedPassword {
-		return application.NewClientError(application.FailureSignIn)
+		return core.NewError(application.FailureSignIn)
 	}
 	return nil
 }

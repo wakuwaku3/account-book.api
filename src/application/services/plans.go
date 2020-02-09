@@ -5,8 +5,9 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 
-	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
@@ -62,7 +63,7 @@ func (t *plans) Update(id *string, args *PlanArgs) error {
 		return err
 	}
 	if model.IsDeleted {
-		return application.NewClientError(application.IsDeleted)
+		return core.NewError(application.IsDeleted)
 	}
 
 	model.PlanName = args.PlanName
@@ -83,7 +84,7 @@ func (t *plans) Remove(id *string) error {
 		return err
 	}
 	if model.IsDeleted {
-		return application.NewClientError(application.IsDeleted)
+		return core.NewError(application.IsDeleted)
 	}
 	model.IsDeleted = true
 	if err := t.repos.Update(id, model); err != nil {

@@ -5,8 +5,9 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 
-	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 
 type (
@@ -57,7 +58,7 @@ func (t *transactions) Update(id *string, args *TransactionArgs) error {
 		return err
 	}
 	if model.DailyID != nil {
-		return application.NewClientError(application.ClosedTransaction)
+		return core.NewError(application.ClosedTransaction)
 	}
 
 	model.Amount = args.Amount
@@ -75,7 +76,7 @@ func (t *transactions) Delete(id *string) error {
 		return err
 	}
 	if model.DailyID != nil {
-		return application.NewClientError(application.ClosedTransaction)
+		return core.NewError(application.ClosedTransaction)
 	}
 
 	if err := t.repos.Delete(id); err != nil {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
+	"github.com/wakuwaku3/account-book.api/src/enterprise/domains/core"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/helpers"
 )
 
@@ -155,7 +156,7 @@ func (t *accounts) SignIn(args *SignInArgs) (*SignInResult, error) {
 	}, nil
 }
 func (t *SignInArgs) valid() error {
-	err := application.NewClientError()
+	err := core.NewError()
 	if t.Email == "" {
 		err.Append(application.RequiredMailAddress)
 	}
@@ -214,7 +215,7 @@ func (t *accounts) PasswordResetRequesting(args *PasswordResetRequestingArgs) er
 	return nil
 }
 func (t *PasswordResetRequestingArgs) valid() error {
-	err := application.NewClientError()
+	err := core.NewError()
 	if t.Email == "" {
 		err.Append(application.RequiredMailAddress)
 	}
@@ -239,7 +240,7 @@ func (t *accounts) GetResetPasswordModel(args *GetResetPasswordModelArgs) (*GetR
 	}, nil
 }
 func (t *GetResetPasswordModelArgs) valid() error {
-	err := application.NewClientError()
+	err := core.NewError()
 	if t.PasswordResetToken == "" {
 		err.Append(application.RequiredPasswordToken)
 	}
@@ -283,7 +284,7 @@ func (t *accounts) ResetPassword(args *ResetPasswordArgs) (*ResetPasswordResult,
 	}, nil
 }
 func (t *ResetPasswordArgs) valid() error {
-	err := application.NewClientError()
+	err := core.NewError()
 	if t.PasswordResetToken == "" {
 		err.Append(application.RequiredPasswordToken)
 	}
@@ -334,7 +335,7 @@ func (t *accounts) SignUpRequesting(args *SignUpRequestingArgs) error {
 	return nil
 }
 func (t *SignUpRequestingArgs) valid() error {
-	err := application.NewClientError()
+	err := core.NewError()
 	if t.Email == "" {
 		err.Append(application.RequiredMailAddress)
 	}
@@ -352,14 +353,14 @@ func (t *accounts) GetSignUpModel(args *GetSignUpModelArgs) (*GetSignUpModelResu
 		return nil, err
 	}
 	if info.Expires.Before(t.clock.Now()) {
-		return nil, application.NewClientError(application.ExpiredURL)
+		return nil, core.NewError(application.ExpiredURL)
 	}
 	return &GetSignUpModelResult{
 		Email: info.Email,
 	}, nil
 }
 func (t *GetSignUpModelArgs) valid() error {
-	err := application.NewClientError()
+	err := core.NewError()
 	if t.SignUpToken == "" {
 		err.Append(application.RequiredSignUpToken)
 	}
@@ -380,7 +381,7 @@ func (t *accounts) SignUp(args *SignUpArgs) (*SignUpResult, error) {
 		return nil, err
 	}
 	if info.Expires.Before(t.clock.Now()) {
-		return nil, application.NewClientError(application.ExpiredURL)
+		return nil, core.NewError(application.ExpiredURL)
 	}
 
 	result, err := t.service.CreateUser(&services.CreateUserArgs{
@@ -406,7 +407,7 @@ func (t *accounts) SignUp(args *SignUpArgs) (*SignUpResult, error) {
 	}, nil
 }
 func (t *SignUpArgs) valid() error {
-	err := application.NewClientError()
+	err := core.NewError()
 	if t.SignUpToken == "" {
 		err.Append(application.RequiredSignUpToken)
 	}
@@ -426,7 +427,7 @@ func (t *SignUpArgs) valid() error {
 }
 func (t *accounts) Quit(args *QuitArgs) (*QuitResult, error) {
 	if args.Password == "" {
-		return nil, application.NewClientError(application.InValidCulture)
+		return nil, core.NewError(application.InValidCulture)
 	}
 	info, err := t.query.GetQuitInfo()
 	if err != nil {
