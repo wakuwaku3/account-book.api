@@ -57,10 +57,10 @@ type (
 		GetPlans() (*GetPlansResult, error)
 		GetPlan(id *string) (*GetPlanResult, error)
 	}
-	// AlertsQuery は通知設定のクエリです
-	AlertsQuery interface {
-		GetAlerts() *GetAlertsResult
-		GetAlert(id *string) (*GetAlertResult, core.Error)
+	// NotificationRulesQuery は通知設定のクエリです
+	NotificationRulesQuery interface {
+		GetNotificationRules() *GetNotificationRulesResult
+		GetNotificationRule(id *string) (*GetNotificationRuleResult, core.Error)
 	}
 	// DashboardQuery はダッシュボードのクエリです
 	DashboardQuery interface {

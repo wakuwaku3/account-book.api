@@ -17,58 +17,58 @@ import (
 )
 
 type (
-	alerts struct {
+	notificationRules struct {
 		provider       store.Provider
 		clock          core.Clock
 		claimsProvider application.ClaimsProvider
 	}
-	alertEntity struct {
+	notificationRuleEntity struct {
 		Metrics   string `firestore:"metrics"`
 		Threshold int    `firestore:"threshold"`
 	}
 )
 
-// NewAlerts はインスタンスを生成します
-func NewAlerts(
+// NewNotificationRules はインスタンスを生成します
+func NewNotificationRules(
 	provider store.Provider,
 	clock core.Clock,
 	claimsProvider application.ClaimsProvider,
-) notifications.AlertsRepository {
-	return &alerts{provider, clock, claimsProvider}
+) notifications.NotificationRulesRepository {
+	return &notificationRules{provider, clock, claimsProvider}
 }
-func (t *alerts) alertsRef(client *firestore.Client) *firestore.CollectionRef {
+func (t *notificationRules) notificationRulesRef(client *firestore.Client) *firestore.CollectionRef {
 	userID := t.claimsProvider.GetUserID()
-	return client.Collection("users").Doc(*userID).Collection("alerts")
+	return client.Collection("users").Doc(*userID).Collection("notificationRules")
 }
-func (t *alerts) GetByID(id notifications.AlertID) (notifications.Alert, core.Error) {
+func (t *notificationRules) GetByID(id notifications.NotificationRuleID) (notifications.NotificationRule, core.Error) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
-	doc, err := t.alertsRef(client).Doc(*id).Get(ctx)
+	doc, err := t.notificationRulesRef(client).Doc(*id).Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			return nil, core.NewError(core.NotFound)
 		}
 		panic(err)
 	}
-	var entity alertEntity
+	var entity notificationRuleEntity
 	if err := doc.DataTo(&entity); err != nil {
 		panic(err)
 	}
-	return entity.newAlert(id), nil
+	return entity.newNotificationRule(id), nil
 }
-func (t alertEntity) newAlert(id notifications.AlertID) notifications.Alert {
+func (t notificationRuleEntity) newNotificationRule(id notifications.NotificationRuleID) notifications.NotificationRule {
 	metrics, err := notifications.NewMetrics(t.Metrics)
 	if err != nil {
 		panic(err)
 	}
-	return notifications.NewAlert(id, metrics, notifications.NewThreshold(t.Threshold))
+	return notifications.NewNotificationRule(id, metrics, notifications.NewThreshold(t.Threshold))
 }
-func (t *alerts) Get() *[]notifications.Alert {
+func (t *notificationRules) Get() *[]notifications.NotificationRule {
 	client := t.provider.GetClient()
 	ctx := context.Background()
 
-	alerts := make([]notifications.Alert, 0)
-	iter := t.alertsRef(client).Where("isDeleted", "==", false).Documents(ctx)
+	notificationRules := make([]notifications.NotificationRule, 0)
+	iter := t.notificationRulesRef(client).Where("isDeleted", "==", false).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -77,43 +77,43 @@ func (t *alerts) Get() *[]notifications.Alert {
 		if err != nil {
 			panic(err)
 		}
-		var entity alertEntity
+		var entity notificationRuleEntity
 		if err := doc.DataTo(&entity); err != nil {
 			panic(err)
 		}
-		alerts = append(alerts, entity.newAlert(notifications.AlertID(&doc.Ref.ID)))
+		notificationRules = append(notificationRules, entity.newNotificationRule(notifications.NotificationRuleID(&doc.Ref.ID)))
 	}
-	return &alerts
+	return &notificationRules
 }
-func (t *alerts) New(metrics notifications.Metrics, threshold notifications.Threshold) notifications.Alert {
+func (t *notificationRules) New(metrics notifications.Metrics, threshold notifications.Threshold) notifications.NotificationRule {
 	client := t.provider.GetClient()
 	ctx := context.Background()
-	entity := newAlertEntity(metrics, threshold)
-	ref, _, err := t.alertsRef(client).Add(ctx, entity)
+	entity := newNotificationRuleEntity(metrics, threshold)
+	ref, _, err := t.notificationRulesRef(client).Add(ctx, entity)
 	if err != nil {
 		panic(err)
 	}
-	return notifications.NewAlert(notifications.AlertID(&ref.ID), metrics, threshold)
+	return notifications.NewNotificationRule(notifications.NotificationRuleID(&ref.ID), metrics, threshold)
 }
-func (t *alerts) Save(alert notifications.Alert) {
+func (t *notificationRules) Save(notificationRule notifications.NotificationRule) {
 	client := t.provider.GetClient()
 	ctx := context.Background()
-	entity := newAlertEntity(alert.GetMetrics(), alert.GetThreshold())
-	_, err := t.alertsRef(client).Doc(*alert.GetID()).Set(ctx, entity)
+	entity := newNotificationRuleEntity(notificationRule.GetMetrics(), notificationRule.GetThreshold())
+	_, err := t.notificationRulesRef(client).Doc(*notificationRule.GetID()).Set(ctx, entity)
 	if err != nil {
 		panic(err)
 	}
 }
-func newAlertEntity(metrics notifications.Metrics, threshold notifications.Threshold) *alertEntity {
-	return &alertEntity{
+func newNotificationRuleEntity(metrics notifications.Metrics, threshold notifications.Threshold) *notificationRuleEntity {
+	return &notificationRuleEntity{
 		Metrics:   metrics.Get(),
 		Threshold: threshold.Get(),
 	}
 }
-func (t *alerts) Delete(id notifications.AlertID) core.Error {
+func (t *notificationRules) Delete(id notifications.NotificationRuleID) core.Error {
 	client := t.provider.GetClient()
 	ctx := context.Background()
-	_, err := t.alertsRef(client).Doc(*id).Delete(ctx)
+	_, err := t.notificationRulesRef(client).Doc(*id).Delete(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			return core.NewError(core.NotFound)

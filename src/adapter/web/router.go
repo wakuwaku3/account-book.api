@@ -206,5 +206,13 @@ func (web *web) setRoute() *web {
 		})
 	})
 
+	// Notification Rules
+	auth.GET("/notification/rules", func(c echo.Context) error {
+		container := GetContainer(c)
+		return container.Invoke(func(controller ctrls.Actual) error {
+			return controller.Get(c)
+		})
+	})
+
 	return web
 }

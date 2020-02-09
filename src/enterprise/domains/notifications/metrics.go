@@ -8,6 +8,7 @@ type (
 	metrics struct {
 		value string
 	}
+	// Metrics は計算方法を表す VO です
 	Metrics interface {
 		Get() string
 		Set(string) core.Error
@@ -16,12 +17,15 @@ type (
 )
 
 const (
+	// ExpenseBase は支払い基準で計算します
 	ExpenseBase = "ExpenseBase"
+	// BalanceBase は残高基準で計算します
 	BalanceBase = "BalanceBase"
 	// NotSupportedMetricsFormat :メトリクスとしてサポートしていない形式です
 	NotSupportedMetricsFormat core.ErrorCode = "notifications-00001"
 )
 
+// NewMetrics は Metrics を生成します
 func NewMetrics(value string) (Metrics, core.Error) {
 	ins := &metrics{value}
 	if err := ins.Valid(); err != nil {
