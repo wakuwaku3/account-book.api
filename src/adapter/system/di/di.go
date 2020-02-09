@@ -4,22 +4,22 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/wakuwaku3/account-book.api/src/drivers/sendgrid"
+	"github.com/wakuwaku3/account-book.api/src/adapter/mails/sendgrid"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 
 	"github.com/wakuwaku3/account-book.api/src/application/queries"
 
 	"github.com/tampopos/dijct"
-	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls"
+	"github.com/wakuwaku3/account-book.api/src/adapter/web/ctrls"
 	"github.com/wakuwaku3/account-book.api/src/adapter/mails"
-	"github.com/wakuwaku3/account-book.api/src/adapter/repos"
+	"github.com/wakuwaku3/account-book.api/src/adapter/store/repos"
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/services"
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
-	"github.com/wakuwaku3/account-book.api/src/drivers/auth"
-	"github.com/wakuwaku3/account-book.api/src/drivers/crypt"
-	"github.com/wakuwaku3/account-book.api/src/drivers/env"
-	"github.com/wakuwaku3/account-book.api/src/drivers/store"
+	"github.com/wakuwaku3/account-book.api/src/adapter/auth"
+	"github.com/wakuwaku3/account-book.api/src/adapter/crypt"
+	"github.com/wakuwaku3/account-book.api/src/adapter/env"
+	"github.com/wakuwaku3/account-book.api/src/adapter/store"
 )
 
 // CreateContainer はDIContainerを生成します

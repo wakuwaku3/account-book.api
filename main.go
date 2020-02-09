@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	infweb "github.com/wakuwaku3/account-book.api/src/drivers/web"
+	infweb "github.com/wakuwaku3/account-book.api/src/adapter/web"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"path"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/drivers/sendgrid"
+	"github.com/wakuwaku3/account-book.api/src/adapter/mails/sendgrid"
 )
 
 type (

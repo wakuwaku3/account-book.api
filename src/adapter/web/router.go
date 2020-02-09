@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/middleware"
 
 	"github.com/labstack/echo"
-	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls"
+	"github.com/wakuwaku3/account-book.api/src/adapter/web/ctrls"
 )
 
 func (web *web) setRoute() *web {

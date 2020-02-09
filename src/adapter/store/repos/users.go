@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/drivers/store"
+	"github.com/wakuwaku3/account-book.api/src/adapter/store"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/models"
 )
 

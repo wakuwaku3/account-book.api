@@ -2,7 +2,7 @@ package ctrls
 
 import (
 	"github.com/labstack/echo"
-	"github.com/wakuwaku3/account-book.api/src/adapter/ctrls/responses"
+	"github.com/wakuwaku3/account-book.api/src/adapter/web/ctrls/responses"
 	"github.com/wakuwaku3/account-book.api/src/application"
 	"github.com/wakuwaku3/account-book.api/src/application/usecases"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/core"

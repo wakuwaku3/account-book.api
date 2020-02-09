@@ -3,7 +3,7 @@ package web
 import (
 	"reflect"
 
-	"github.com/wakuwaku3/account-book.api/src/drivers/auth"
+	"github.com/wakuwaku3/account-book.api/src/adapter/auth"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"

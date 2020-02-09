@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/drivers/di"
+	"github.com/wakuwaku3/account-book.api/src/adapter/system/di"
 )
 
 type web struct {
