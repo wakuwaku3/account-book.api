@@ -20,8 +20,13 @@ type (
 		GetAllowOrigins() *[]string
 		GetAwsAccessKey() *string
 		GetAwsSecretAccessKey() *string
-		GetAwsTopics() *map[core.EventName]string
+		GetAwsTopics() *map[core.EventName]AwsTopicArn
+		GetAwsQueues() *map[core.QueueName]AwsQueueURL
 	}
+	// AwsTopicArn は Topic の Arn です
+	AwsTopicArn string
+	// AwsQueueURL は Queue の URL です
+	AwsQueueURL string
 	// Crypt はハッシュ化のサービスです
 	Crypt interface {
 		Hash(text *string) *string

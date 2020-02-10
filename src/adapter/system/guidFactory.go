@@ -9,7 +9,8 @@ type (
 	guidFactory struct{}
 )
 
-func newGuidFactory() core.GuidFactory { return &guidFactory{} }
+// NewGuidFactory はインスタンスを生成します
+func NewGuidFactory() core.GuidFactory { return &guidFactory{} }
 func (t *guidFactory) Create() (*string, error) {
 	u, err := uuid.NewRandom()
 	if err != nil {

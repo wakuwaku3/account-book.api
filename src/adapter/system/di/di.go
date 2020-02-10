@@ -6,7 +6,9 @@ import (
 
 	"github.com/wakuwaku3/account-book.api/src/adapter/crypt"
 	"github.com/wakuwaku3/account-book.api/src/adapter/event"
+	handler "github.com/wakuwaku3/account-book.api/src/adapter/event/handlers"
 	"github.com/wakuwaku3/account-book.api/src/adapter/mails/sendgrid"
+	"github.com/wakuwaku3/account-book.api/src/adapter/system"
 	"github.com/wakuwaku3/account-book.api/src/enterprise/core"
 
 	"github.com/wakuwaku3/account-book.api/src/application/queries"
@@ -55,6 +57,15 @@ func CreateContainer() (dijct.Container, error) {
 		return nil, err
 	}
 	if err := container.Register(event.NewPublisher, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+		return nil, err
+	}
+	if err := container.Register(system.NewGuidFactory, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+		return nil, err
+	}
+	if err := container.Register(event.NewRouter, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
+		return nil, err
+	}
+	if err := container.Register(event.NewSubscriber, dijct.RegisterOptions{LifetimeScope: dijct.ContainerManaged}); err != nil {
 		return nil, err
 	}
 
@@ -168,6 +179,11 @@ func CreateContainer() (dijct.Container, error) {
 
 	//events
 	if err := container.Register(accountbook.NewAssetsChangedEvent); err != nil {
+		return nil, err
+	}
+
+	// handler
+	if err := container.Register(handler.NewAlert); err != nil {
 		return nil, err
 	}
 

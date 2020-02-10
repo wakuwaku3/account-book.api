@@ -37,10 +37,15 @@ func (t *publisher) Publish(name core.EventName, jsonMessage core.JSONMessage) e
 		return fmt.Errorf("指定されたイベント(%s)は見つかりません(message:%s)", name, message)
 	}
 
-	client := t.provider.GetClient()
+	client := t.provider.GetSNSClient()
 	input := &sns.PublishInput{
 		Message:  aws.String(message),
-		TopicArn: aws.String(arn),
+		TopicArn: aws.String(string(arn)),
+	}
+
+	result, _ := client.ListTopics(nil)
+	for _, t := range result.Topics {
+		fmt.Println(*t.TopicArn)
 	}
 
 	_, err = client.Publish(input)

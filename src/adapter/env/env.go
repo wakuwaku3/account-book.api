@@ -19,11 +19,16 @@ type (
 		frontEndURL         *string
 		awsAccessKey        *string
 		awsSecretAccessKey  *string
-		awsTopics           *map[core.EventName]string
+		awsTopics           *map[core.EventName]application.AwsTopicArn
+		awsQueues           *map[core.QueueName]application.AwsQueueURL
 	}
-	awsTopics struct {
+	awsTopic struct {
 		Name string `json:"name"`
 		Arn  string `json:"arn"`
+	}
+	awsQueue struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
 	}
 )
 
@@ -57,51 +62,70 @@ func (t *env) Initialize() error {
 	t.awsAccessKey = &awsAccessKey
 	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 	t.awsSecretAccessKey = &awsSecretAccessKey
-	return t.setAwsTopics()
+	if err := t.setAwsTopics(); err != nil {
+		return err
+	}
+	return t.setAwsQueues()
 }
-func (env *env) setAwsTopics() error {
+func (t *env) setAwsTopics() error {
 	awsTopicsByte := []byte(os.Getenv("AWS_TOPICS"))
-	var awsTopics []awsTopics
+	var awsTopics []awsTopic
 	if err := json.Unmarshal(awsTopicsByte, &awsTopics); err != nil {
 		return err
 	}
-	awsTopicsMap := map[core.EventName]string{}
+	awsTopicsMap := map[core.EventName]application.AwsTopicArn{}
 	for _, awsTopic := range awsTopics {
-		awsTopicsMap[core.EventName(awsTopic.Name)] = awsTopic.Arn
+		awsTopicsMap[core.EventName(awsTopic.Name)] = application.AwsTopicArn(awsTopic.Arn)
 	}
-	env.awsTopics = &awsTopicsMap
+	t.awsTopics = &awsTopicsMap
 	return nil
 }
-func (env *env) GetCredentialsFilePath() *string {
-	return env.credentialsFilePath
+func (t *env) setAwsQueues() error {
+	awsTopicsByte := []byte(os.Getenv("AWS_QUEUES"))
+	var awsQueues []awsQueue
+	if err := json.Unmarshal(awsTopicsByte, &awsQueues); err != nil {
+		return err
+	}
+	awsQueuesMap := map[core.QueueName]application.AwsQueueURL{}
+	for _, awsQueue := range awsQueues {
+		awsQueuesMap[core.QueueName(awsQueue.Name)] = application.AwsQueueURL(awsQueue.URL)
+	}
+	t.awsQueues = &awsQueuesMap
+	return nil
 }
-func (env *env) GetSendGridAPIKey() *string {
-	return env.sendGridAPIKey
+func (t *env) GetCredentialsFilePath() *string {
+	return t.credentialsFilePath
 }
-func (env *env) GetFrontEndURL() *string {
-	return env.frontEndURL
+func (t *env) GetSendGridAPIKey() *string {
+	return t.sendGridAPIKey
 }
-func (env *env) GetPasswordHashedKey() *[]byte {
-	return env.passwordHashedKey
+func (t *env) GetFrontEndURL() *string {
+	return t.frontEndURL
 }
-func (env *env) GetJwtSecret() *[]byte {
-	return env.jwtSecret
+func (t *env) GetPasswordHashedKey() *[]byte {
+	return t.passwordHashedKey
 }
-func (env *env) IsProduction() bool {
-	return env.isProduction
+func (t *env) GetJwtSecret() *[]byte {
+	return t.jwtSecret
 }
-func (env *env) GetAwsAccessKey() *string {
-	return env.awsAccessKey
+func (t *env) IsProduction() bool {
+	return t.isProduction
 }
-func (env *env) GetAwsSecretAccessKey() *string {
-	return env.awsSecretAccessKey
+func (t *env) GetAwsAccessKey() *string {
+	return t.awsAccessKey
 }
-func (env *env) GetAwsTopics() *map[core.EventName]string {
-	return env.awsTopics
+func (t *env) GetAwsSecretAccessKey() *string {
+	return t.awsSecretAccessKey
 }
-func (env *env) GetAllowOrigins() *[]string {
-	if env.isProduction {
-		return &[]string{*env.frontEndURL}
+func (t *env) GetAwsTopics() *map[core.EventName]application.AwsTopicArn {
+	return t.awsTopics
+}
+func (t *env) GetAwsQueues() *map[core.QueueName]application.AwsQueueURL {
+	return t.awsQueues
+}
+func (t *env) GetAllowOrigins() *[]string {
+	if t.isProduction {
+		return &[]string{*t.frontEndURL}
 	}
 	return &[]string{"*"}
 }

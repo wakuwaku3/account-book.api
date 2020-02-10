@@ -4,13 +4,14 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/tampopos/dijct"
 	"github.com/wakuwaku3/account-book.api/src/application"
-	"github.com/wakuwaku3/account-book.api/src/adapter/system/di"
 )
 
 type web struct {
-	echo *echo.Echo
-	env  application.Env
+	echo      *echo.Echo
+	env       application.Env
+	container dijct.Container
 }
 
 // Web はWebサーバーのインターフェイスです
@@ -19,13 +20,9 @@ type Web interface {
 }
 
 // NewWeb は Web を生成します
-func NewWeb() (Web, error) {
+func NewWeb(container dijct.Container) (Web, error) {
 	echo := echo.New()
-	container, err := di.CreateContainer()
-	if err != nil {
-		return nil, err
-	}
-	web := &web{echo, nil}
+	web := &web{echo, nil, container}
 	container.Invoke(func(env application.Env) {
 		web.env = env
 	})

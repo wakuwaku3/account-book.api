@@ -14,7 +14,6 @@ type (
 	}
 	// assetsChangedEventMessage はイベントに付属するメッセージです
 	assetsChangedEventMessage struct {
-		core.JSONMessage
 		ID     string `json:"id"`
 		UserID string `json:"userID"`
 	}
